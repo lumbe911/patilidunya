@@ -94,9 +94,13 @@ def allowed_file(filename):
 
 
 def save_upload(file):
-    if file and allowed_file(file.filename):
-        result = cloudinary.uploader.upload(file, folder="patilidunya")
-        return result['secure_url']
+    if file and file.filename and allowed_file(file.filename):
+        try:
+            result = cloudinary.uploader.upload(file, folder="patilidunya")
+            return result['secure_url']
+        except Exception as e:
+            print(f"CLOUDINARY ERROR: {e}")
+            return None
     return None
 
 
@@ -225,7 +229,9 @@ def new_cat():
 
         photos = request.files.getlist('photos')
         for photo in photos:
+            print(f"UPLOADING: {photo.filename}")
             filename = save_upload(photo)
+            print(f"CLOUDINARY RESULT: {filename}")
             if filename:
                 db.session.add(CatPhoto(filename=filename, cat_id=cat.id))
         db.session.commit()
