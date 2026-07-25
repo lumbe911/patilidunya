@@ -2,13 +2,14 @@ import os
 import secrets
 from datetime import datetime
 
+import cloudinary
+import cloudinary.uploader
 from flask import (Flask, render_template, redirect, url_for, request,
                    flash, jsonify, abort)
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (LoginManager, UserMixin, login_user, logout_user,
                          current_user, login_required)
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
@@ -21,12 +22,12 @@ elif database_url.startswith('postgres://'):
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
+    api_key=os.environ.get('CLOUDINARY_API_KEY', ''),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET', ''),
+    secure=True
+)
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -89,16 +90,13 @@ def load_user(user_id):
 
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 
 def save_upload(file):
     if file and allowed_file(file.filename):
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        filename = f"{secrets.token_hex(16)}.{ext}"
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        return filename
+        result = cloudinary.uploader.upload(file, folder="patilidunya")
+        return result['secure_url']
     return None
 
 
@@ -295,9 +293,6 @@ def delete_photo(cat_id, photo_id):
     photo = CatPhoto.query.get_or_404(photo_id)
     if photo.cat_id != cat_id:
         abort(404)
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], photo.filename)
-    if os.path.exists(filepath):
-        os.remove(filepath)
     db.session.delete(photo)
     db.session.commit()
     flash('Fotograf silindi.', 'info')
