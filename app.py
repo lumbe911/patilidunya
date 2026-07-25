@@ -84,6 +84,16 @@ class Like(db.Model):
     __table_args__ = (db.UniqueConstraint('user_id', 'cat_id'),)
 
 
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    cat_id = db.Column(db.Integer, db.ForeignKey('cat.id'), nullable=False)
+    user = db.relationship('User', backref='comments')
+    cat = db.relationship('Cat', backref=db.backref('comments', lazy=True, cascade='all, delete-orphan'))
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))
@@ -248,7 +258,8 @@ def cat_detail(cat_id):
     liked = False
     if current_user.is_authenticated:
         liked = Like.query.filter_by(user_id=current_user.id, cat_id=cat_id).first() is not None
-    return render_template('cat_detail.html', cat=cat, liked=liked)
+    comments = Comment.query.filter_by(cat_id=cat_id).order_by(Comment.created_at.desc()).all()
+    return render_template('cat_detail.html', cat=cat, liked=liked, comments=comments)
 
 
 @app.route('/cat/<int:cat_id>/edit', methods=['GET', 'POST'])
@@ -318,6 +329,31 @@ def toggle_like(cat_id):
         db.session.add(like)
         db.session.commit()
         return jsonify({'liked': True, 'count': Cat.query.get(cat_id).like_count})
+
+
+@app.route('/cat/<int:cat_id>/comment', methods=['POST'])
+@login_required
+def add_comment(cat_id):
+    cat = Cat.query.get_or_404(cat_id)
+    text = request.form.get('text', '').strip()
+    if text:
+        comment = Comment(text=text, user_id=current_user.id, cat_id=cat_id)
+        db.session.add(comment)
+        db.session.commit()
+        flash('Yorum eklendi!', 'success')
+    return redirect(url_for('cat_detail', cat_id=cat_id))
+
+
+@app.route('/cat/<int:cat_id>/comment/<int:comment_id>/delete', methods=['POST'])
+@login_required
+def delete_comment(cat_id, comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    if comment.user_id != current_user.id:
+        abort(403)
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Yorum silindi.', 'info')
+    return redirect(url_for('cat_detail', cat_id=cat_id))
 
 
 with app.app_context():
