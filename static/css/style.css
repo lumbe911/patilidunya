@@ -511,10 +511,18 @@ select.form-control { appearance: none; cursor: pointer; }
 @media (max-width: 768px) {
     .landing h1 { font-size: 2rem; }
     .landing-hero { font-size: 5rem; }
-    .detail-hero { grid-template-columns: 1fr; }
+    .cat-detail-top { grid-template-columns: 1fr !important; }
     .cat-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
     .navbar .container { flex-wrap: wrap; gap: 0.5rem; }
     .profile-header { padding: 2rem 1rem 1rem; }
+    .auth-card { margin: 1.5rem auto; padding: 1.5rem; }
+}
+
+.cat-detail-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
 }
 
 /* PAGE TITLE */
