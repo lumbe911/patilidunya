@@ -21,7 +21,7 @@ elif database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 cloudinary.config(
     cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
@@ -279,14 +279,17 @@ def edit_cat(cat_id):
         cat.found_date = request.form.get('found_date', '').strip()
 
         photos = request.files.getlist('photos')
+        uploaded = 0
         for photo in photos:
-            print(f"EDIT UPLOADING: {photo.filename}")
-            filename = save_upload(photo)
-            print(f"EDIT CLOUDINARY RESULT: {filename}")
-            if filename:
-                db.session.add(CatPhoto(filename=filename, cat_id=cat.id))
+            if photo and photo.filename:
+                print(f"EDIT UPLOADING: {photo.filename}")
+                filename = save_upload(photo)
+                print(f"EDIT CLOUDINARY RESULT: {filename}")
+                if filename:
+                    db.session.add(CatPhoto(filename=filename, cat_id=cat.id))
+                    uploaded += 1
         db.session.commit()
-        flash('Kedi profili guncellendi!', 'success')
+        flash(f'Kedi profili guncellendi! {uploaded} yeni fotograf yuklendi.', 'success')
         return redirect(url_for('cat_detail', cat_id=cat.id))
     return render_template('edit_cat.html', cat=cat)
 
