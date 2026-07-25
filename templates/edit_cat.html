@@ -5,7 +5,7 @@
     <div class="auth-card" style="max-width: 600px;">
         <h2>Kediyi Duzenle ✏️</h2>
         <p class="subtitle">{{ cat.name }} profilini guncelle</p>
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data" id="editForm">
             <div class="form-group">
                 <label class="form-label">Kedinin Adi *</label>
                 <input type="text" name="name" class="form-control" value="{{ cat.name }}" required>
@@ -46,7 +46,7 @@
 
             {% if cat.photos %}
             <div class="form-group">
-                <label class="form-label">Mevcut Fotograflar</label>
+                <label class="form-label">Mevcut Fotograflar ({{ cat.photos|length }})</label>
                 <div class="photo-grid">
                     {% for photo in cat.photos %}
                     <div class="photo-grid-item">
@@ -62,13 +62,14 @@
 
             <div class="form-group">
                 <label class="form-label">Yeni Fotograf Ekle</label>
-                <div class="upload-zone" onclick="this.querySelector('input').click()">
-                    <input type="file" name="photos" accept="image/*" multiple onchange="previewPhotos(this)">
-                    <p id="photo-label">📷 Yeni fotograflar yukle</p>
-                    <div id="photo-preview" class="photo-grid"></div>
+                <div style="border: 2px dashed var(--pink-300); border-radius: var(--radius); padding: 2rem; text-align: center; background: var(--pink-50); cursor: pointer;" onclick="document.getElementById('photoInput').click()">
+                    <input type="file" id="photoInput" name="photos" accept="image/*" multiple style="display:none;" onchange="previewPhotos(this)">
+                    <p id="photo-label" style="margin:0; color: var(--gray-500);">📷 Tikla ve fotograflari sec</p>
+                    <div id="photo-preview" class="photo-grid" style="margin-top: 0.75rem;"></div>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Kaydet</button>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top: 0.5rem;">Kaydet</button>
         </form>
     </div>
 </div>
@@ -78,13 +79,13 @@
 function previewPhotos(input) {
     const container = document.getElementById('photo-preview');
     container.innerHTML = '';
-    document.getElementById('photo-label').textContent = `${input.files.length} yeni fotograf secildi`;
+    document.getElementById('photo-label').textContent = input.files.length + ' fotograf secildi!';
     Array.from(input.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = function(e) {
             const div = document.createElement('div');
             div.className = 'photo-grid-item';
-            div.innerHTML = `<img src="${e.target.result}">`;
+            div.innerHTML = '<img src="' + e.target.result + '">';
             container.appendChild(div);
         }
         reader.readAsDataURL(file);
