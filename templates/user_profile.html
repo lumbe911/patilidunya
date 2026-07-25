@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.display_name or profile_user.username }} - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="profile-header">
+        {% if profile_user.avatar %}
+        <img src="{{ url_for('static', filename='uploads/' + profile_user.avatar) }}" alt="" class="profile-avatar-large">
+        {% else %}
+        <div class="profile-avatar-large" style="background: linear-gradient(135deg, var(--pink-300), var(--purple-400)); display:flex; align-items:center; justify-content:center; font-size:3rem; color:white; margin: 0 auto 1rem;">{{ profile_user.username[0]|upper }}</div>
+        {% endif %}
+        <h1 class="profile-name">{{ profile_user.display_name or profile_user.username }}</h1>
+        <p class="profile-bio">{{ profile_user.bio or 'Henuz bio eklenmemis...' }}</p>
+        <div class="profile-stats">
+            <div class="stat">
+                <div class="stat-number">{{ cats|length }}</div>
+                <div class="stat-label">Kedi</div>
+            </div>
+        </div>
+        {% if current_user.id == profile_user.id %}
+        <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center;">
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary btn-sm">Profili Duzenle</a>
+            <a href="{{ url_for('new_cat') }}" class="btn btn-primary btn-sm">+ Kedi Ekle</a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if cats %}
+    <h2 style="text-align:center; font-weight:800; margin-bottom:1.5rem;">{{ profile_user.display_name or profile_user.username }}'in Kedileri</h2>
+    <div class="cat-grid">
+        {% for cat in cats %}
+        <div class="card">
+            <a href="{{ url_for('cat_detail', cat_id=cat.id) }}">
+                <div class="cat-photo-container">
+                    {% if cat.photos %}
+                    <img src="{{ url_for('static', filename='uploads/' + cat.photos[0].filename) }}" alt="{{ cat.name }}">
+                    {% else %}
+                    <div style="width:100%; height:100%; background: var(--pink-100); display:flex; align-items:center; justify-content:center; font-size:4rem;">🐱</div>
+                    {% endif %}
+                </div>
+            </a>
+            <div class="cat-card-footer">
+                <div>
+                    <a href="{{ url_for('cat_detail', cat_id=cat.id) }}" class="card-title">{{ cat.name }}</a>
+                    {% if cat.gender %}
+                    <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
+                    {% endif %}
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <span class="like-count">💖 {{ cat.like_count }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">🐾</div>
+        <h3>Henuz kedi eklenmemis</h3>
+        {% if current_user.id == profile_user.id %}
+        <a href="{{ url_for('new_cat') }}" class="btn btn-primary" style="margin-top:1rem;">+ Kedi Ekle</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

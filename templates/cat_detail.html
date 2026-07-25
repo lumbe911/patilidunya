@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}{{ cat.name }} - PatiliDunya{% endblock %}
+{% block content %}
+<div class="detail-hero">
+    <div>
+        {% if cat.photos %}
+        <div class="detail-photos">
+            {% for photo in cat.photos %}
+            <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" alt="{{ cat.name }}" class="{% if loop.first %}main-photo{% endif %}">
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="width:100%; height:400px; background: var(--pink-100); border-radius: var(--radius); display:flex; align-items:center; justify-content:center; font-size:6rem;">🐱</div>
+        {% endif %}
+    </div>
+    <div class="detail-info">
+        <div>
+            <h1>{{ cat.name }}</h1>
+            {% if cat.gender %}
+            <span class="gender-badge {{ cat.gender|lower }}" style="font-size:0.9rem; padding:0.3rem 0.8rem;">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
+            {% endif %}
+        </div>
+
+        {% if cat.age %}
+        <div class="info-row">
+            <span class="info-label">🎂 Yasi</span>
+            <span class="info-value">{{ cat.age }}</span>
+        </div>
+        {% endif %}
+
+        {% if cat.color %}
+        <div class="info-row">
+            <span class="info-label">🎨 Rengi</span>
+            <span class="info-value">{{ cat.color }}</span>
+        </div>
+        {% endif %}
+
+        {% if cat.location %}
+        <div class="info-row">
+            <span class="info-label">📍 Konum</span>
+            <span class="info-value">{{ cat.location }}</span>
+        </div>
+        {% endif %}
+
+        {% if cat.found_date %}
+        <div class="info-row">
+            <span class="info-label">📅 Bulma Tarihi</span>
+            <span class="info-value">{{ cat.found_date }}</span>
+        </div>
+        {% endif %}
+
+        <div class="info-row">
+            <span class="info-label">👤 Sahibi</span>
+            <a href="{{ url_for('user_profile', username=cat.owner.username) }}" class="info-value">{{ cat.owner.display_name or cat.owner.username }}</a>
+        </div>
+
+        {% if cat.description %}
+        <div class="detail-description">
+            {{ cat.description }}
+        </div>
+        {% endif %}
+
+        <div style="display:flex; align-items:center; gap:1rem; margin-top:0.5rem;">
+            <button class="like-btn {% if liked %}liked{% endif %}" onclick="toggleLike({{ cat.id }}, this)" style="font-size:1.8rem;">
+                {% if liked %}❤️{% else %}🤍{% endif %}
+            </button>
+            <span class="like-count" id="like-count-{{ cat.id }}" style="font-size:1.1rem;">{{ cat.like_count }} kisi begendi</span>
+        </div>
+
+        {% if current_user.id == cat.owner_id %}
+        <div class="detail-actions">
+            <a href="{{ url_for('edit_cat', cat_id=cat.id) }}" class="btn btn-secondary">Duzenle ✏️</a>
+            <form method="POST" action="{{ url_for('delete_cat', cat_id=cat.id) }}" onsubmit="return confirm('Emin misin?');">
+                <button type="submit" class="btn btn-danger btn-sm">Sil 🗑️</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function toggleLike(catId, btn) {
+    const resp = await fetch(`/api/like/${catId}`, { method: 'POST' });
+    const data = await resp.json();
+    btn.innerHTML = data.liked ? '❤️' : '🤍';
+    btn.classList.toggle('liked', data.liked);
+    document.getElementById(`like-count-${catId}`).textContent = `${data.count} kisi begendi`;
+}
+</script>
+{% endblock %}

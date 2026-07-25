@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PatiliDunya{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('index') }}" class="navbar-brand">
+                <span>🐱</span> PatiliDunya
+            </a>
+            {% if current_user.is_authenticated %}
+            <ul class="navbar-nav">
+                <li><a href="{{ url_for('explore') }}" class="nav-link">Keşfet</a></li>
+                <li><a href="{{ url_for('new_cat') }}" class="nav-link">+ Kedi Ekle</a></li>
+                <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="nav-link">Profilim</a></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-link">Çıkış</a></li>
+            </ul>
+            {% else %}
+            <ul class="navbar-nav">
+                <li><a href="{{ url_for('login') }}" class="nav-link">Giriş</a></li>
+                <li><a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Kayıt Ol</a></li>
+            </ul>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>🐱 PatiliDunya &copy; 2026 &mdash; Her kedinin bir hikayesi var</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

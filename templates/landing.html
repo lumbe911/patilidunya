@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}PatiliDunya - Kedilerin Dunyasi{% endblock %}
+{% block content %}
+<div class="landing">
+    <div class="landing-hero">🐱</div>
+    <h1>Patili Dunya'ya Hos Geldin!</h1>
+    <p>Yolda buldugun kedilerin fotograflarini yukle, onlara profil olustur ve diger hayvanseverlerle paylas.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Hemen Basla 🐾</a>
+        <a href="{{ url_for('login') }}" class="btn btn-secondary btn-lg">Giris Yap</a>
+    </div>
+
+    <div class="landing-features">
+        <div class="feature-card">
+            <div class="icon">📸</div>
+            <h3>Fotograf Yukle</h3>
+            <p>Yolda, parkta, bahcede buldugun kedilerin guzel fotograflarini cek ve yukle.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">💖</div>
+            <h3>Profil Olustur</h3>
+            <p>Her kedi icin ayri bir profil olustur. Adi, yasi, rengi ve hikayesini ekle.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🌍</div>
+            <h3>Paylas & Kesfet</h3>
+            <p>Diger hayvanseverlerin buldugu kedileri kesfet ve begeni birak.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

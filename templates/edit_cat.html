@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ cat.name }} Duzenle - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="auth-card" style="max-width: 600px;">
+        <h2>Kediyi Duzenle ✏️</h2>
+        <p class="subtitle">{{ cat.name }} profilini guncelle</p>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label class="form-label">Kedinin Adi *</label>
+                <input type="text" name="name" class="form-control" value="{{ cat.name }}" required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Yasi</label>
+                    <input type="text" name="age" class="form-control" value="{{ cat.age or '' }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Cinsiyet</label>
+                    <select name="gender" class="form-control">
+                        <option value="" {% if not cat.gender %}selected{% endif %}>Sec...</option>
+                        <option value="Female" {% if cat.gender == 'Female' %}selected{% endif %}>Kiz</option>
+                        <option value="Male" {% if cat.gender == 'Male' %}selected{% endif %}>Erkek</option>
+                        <option value="Unknown" {% if cat.gender == 'Unknown' %}selected{% endif %}>Bilinmiyor</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Rengi</label>
+                    <input type="text" name="color" class="form-control" value="{{ cat.color or '' }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bulma Tarihi</label>
+                    <input type="text" name="found_date" class="form-control" value="{{ cat.found_date or '' }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Nerede Bulundu?</label>
+                <input type="text" name="location" class="form-control" value="{{ cat.location or '' }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Hikaye / Aciklama</label>
+                <textarea name="description" class="form-control" rows="4">{{ cat.description or '' }}</textarea>
+            </div>
+
+            {% if cat.photos %}
+            <div class="form-group">
+                <label class="form-label">Mevcut Fotograflar</label>
+                <div class="photo-grid">
+                    {% for photo in cat.photos %}
+                    <div class="photo-grid-item">
+                        <img src="{{ url_for('static', filename='uploads/' + photo.filename) }}" alt="">
+                        <form method="POST" action="{{ url_for('delete_photo', cat_id=cat.id, photo_id=photo.id) }}" style="position:absolute; top:0; right:0;">
+                            <button type="submit" class="delete-btn" onclick="return confirm('Bu fotograf silinecek. Emin misin?');">✕</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label class="form-label">Yeni Fotograf Ekle</label>
+                <div class="upload-zone" onclick="this.querySelector('input').click()">
+                    <input type="file" name="photos" accept="image/*" multiple onchange="previewPhotos(this)">
+                    <p id="photo-label">📷 Yeni fotograflar yukle</p>
+                    <div id="photo-preview" class="photo-grid"></div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Kaydet</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function previewPhotos(input) {
+    const container = document.getElementById('photo-preview');
+    container.innerHTML = '';
+    document.getElementById('photo-label').textContent = `${input.files.length} yeni fotograf secildi`;
+    Array.from(input.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const div = document.createElement('div');
+            div.className = 'photo-grid-item';
+            div.innerHTML = `<img src="${e.target.result}">`;
+            container.appendChild(div);
+        }
+        reader.readAsDataURL(file);
+    });
+}
+</script>
+{% endblock %}

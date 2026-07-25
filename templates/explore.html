@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Kedileri Kesfet - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="page-title">Kedileri Kesfet 🐱</h1>
+
+    {% if cats.items %}
+    <div class="cat-grid">
+        {% for cat in cats.items %}
+        <div class="card">
+            <div class="cat-card-header">
+                {% if cat.owner.avatar %}
+                <img src="{{ url_for('static', filename='uploads/' + cat.owner.avatar) }}" alt="" class="cat-avatar">
+                {% else %}
+                <div class="cat-avatar" style="background: var(--pink-200); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">{{ cat.owner.username[0]|upper }}</div>
+                {% endif %}
+                <div>
+                    <div style="font-weight:700; font-size:0.95rem;">
+                        <a href="{{ url_for('user_profile', username=cat.owner.username) }}">{{ cat.owner.display_name or cat.owner.username }}</a>
+                    </div>
+                    <div class="cat-meta">{{ cat.created_at.strftime('%d %b %Y') }}</div>
+                </div>
+            </div>
+            <a href="{{ url_for('cat_detail', cat_id=cat.id) }}">
+                <div class="cat-photo-container">
+                    {% if cat.photos %}
+                    <img src="{{ url_for('static', filename='uploads/' + cat.photos[0].filename) }}" alt="{{ cat.name }}">
+                    {% else %}
+                    <div style="width:100%; height:100%; background: var(--pink-100); display:flex; align-items:center; justify-content:center; font-size:4rem;">🐱</div>
+                    {% endif %}
+                </div>
+            </a>
+            <div class="cat-card-footer">
+                <div>
+                    <a href="{{ url_for('cat_detail', cat_id=cat.id) }}" class="card-title">{{ cat.name }}</a>
+                    {% if cat.gender %}
+                    <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
+                    {% endif %}
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <button class="like-btn {% if cat.id in current_user.likes|map(attribute='cat_id')|list %}liked{% endif %}"
+                            onclick="toggleLike({{ cat.id }}, this)" data-cat-id="{{ cat.id }}">
+                        {% if cat.id in current_user.likes|map(attribute='cat_id')|list %}❤️{% else %}🤍{% endif %}
+                    </button>
+                    <span class="like-count" id="like-count-{{ cat.id }}">{{ cat.like_count }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if cats.pages > 1 %}
+    <div class="pagination">
+        {% if cats.has_prev %}
+        <a href="{{ url_for('explore', page=cats.prev_num) }}">&#8592; Onceki</a>
+        {% endif %}
+        {% for p in cats.iter_pages() %}
+            {% if p %}
+                {% if p == cats.page %}
+                    <span class="current">{{ p }}</span>
+                {% else %}
+                    <a href="{{ url_for('explore', page=p) }}">{{ p }}</a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if cats.has_next %}
+        <a href="{{ url_for('explore', page=cats.next_num) }}">Sonraki &#8594;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">🐱</div>
+        <h3>Henuz kedi eklenmemis</h3>
+        <p>Ilk kediyi sen ekle!</p>
+        <a href="{{ url_for('new_cat') }}" class="btn btn-primary" style="margin-top:1rem;">+ Kedi Ekle</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function toggleLike(catId, btn) {
+    const resp = await fetch(`/api/like/${catId}`, { method: 'POST' });
+    const data = await resp.json();
+    btn.innerHTML = data.liked ? '❤️' : '🤍';
+    btn.classList.toggle('liked', data.liked);
+    document.getElementById(`like-count-${catId}`).textContent = data.count;
+}
+</script>
+{% endblock %}
