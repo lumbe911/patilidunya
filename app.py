@@ -279,7 +279,9 @@ def edit_cat(cat_id):
 
         photos = request.files.getlist('photos')
         for photo in photos:
+            print(f"EDIT UPLOADING: {photo.filename}")
             filename = save_upload(photo)
+            print(f"EDIT CLOUDINARY RESULT: {filename}")
             if filename:
                 db.session.add(CatPhoto(filename=filename, cat_id=cat.id))
         db.session.commit()
