@@ -6,16 +6,10 @@
     <h1>Patili Dunya'ya Hos Geldin!</h1>
     <p>Yolda buldugun kedilerin fotograflarini yukle, onlara profil olustur ve diger hayvanseverlerle paylas.</p>
 
-    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; align-items: center;">
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
         <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Hemen Basla 🐾</a>
         <a href="{{ url_for('login') }}" class="btn btn-secondary btn-lg">Giris Yap</a>
-        <button id="musicBtn" onclick="toggleMusic()" style="width:48px; height:48px; border-radius:50%; border:2px solid var(--pink-300); background:white; cursor:pointer; font-size:1.3rem; display:flex; align-items:center; justify-content:center; transition: all 0.3s;">
-            🔇
-        </button>
     </div>
-    <audio id="bgMusic" loop preload="auto">
-        <source src="{{ url_for('static', filename='muzik.mp3') }}" type="audio/mpeg">
-    </audio>
 
     <div class="landing-features">
         <div class="feature-card">
@@ -35,27 +29,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-{% block scripts %}
-<script>
-var musicPlaying = false;
-function toggleMusic() {
-    var audio = document.getElementById('bgMusic');
-    var btn = document.getElementById('musicBtn');
-    if (musicPlaying) {
-        audio.pause();
-        btn.textContent = '🔇';
-        btn.style.borderColor = 'var(--pink-300)';
-    } else {
-        audio.play().then(function() {
-            btn.textContent = '🔊';
-            btn.style.borderColor = 'var(--pink-500)';
-            btn.style.background = 'var(--pink-100)';
-        }).catch(function() {
-            btn.textContent = '🔇';
-        });
-    }
-    musicPlaying = !musicPlaying;
-}
-</script>
 {% endblock %}

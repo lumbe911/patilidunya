@@ -48,6 +48,37 @@
         <p>🐱 PatiliDunya &copy; 2026 &mdash; Her kedinin bir hikayesi var</p>
     </footer>
 
+    {% if current_user.is_authenticated %}
+    <audio id="bgMusic" loop preload="auto">
+        <source src="{{ url_for('static', filename='muzik.mp3') }}" type="audio/mpeg">
+    </audio>
+    <button id="musicBtn" onclick="toggleMusic()" style="position:fixed; bottom:20px; right:20px; width:50px; height:50px; border-radius:50%; border:2px solid var(--pink-300); background:white; cursor:pointer; font-size:1.3rem; display:flex; align-items:center; justify-content:center; z-index:100; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.3s;">
+        🔇
+    </button>
+    <script>
+    var musicPlaying = false;
+    function toggleMusic() {
+        var audio = document.getElementById('bgMusic');
+        var btn = document.getElementById('musicBtn');
+        if (musicPlaying) {
+            audio.pause();
+            btn.textContent = '🔇';
+            btn.style.borderColor = 'var(--pink-300)';
+            btn.style.background = 'white';
+        } else {
+            audio.play().then(function() {
+                btn.textContent = '🔊';
+                btn.style.borderColor = 'var(--pink-500)';
+                btn.style.background = 'var(--pink-100)';
+            }).catch(function() {
+                btn.textContent = '🔇';
+            });
+        }
+        musicPlaying = !musicPlaying;
+    }
+    </script>
+    {% endif %}
+
     {% block scripts %}{% endblock %}
 </body>
 </html>
