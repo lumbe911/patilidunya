@@ -124,6 +124,7 @@ def check_private_mode():
 <div><h1 style="font-size:5rem;">🔒</h1>
 <h2 style="font-weight:800;margin:1rem 0;">Site Simdilik Kapali</h2>
 <p style="color:var(--gray-500);">Yakinda geri donucez!</p>
+<p style="color:var(--gray-700);margin-top:0.5rem;font-weight:700;">Owner: Lumbe 🐱</p>
 <a href="/login" style="color:var(--pink-600);font-weight:700;margin-top:1rem;display:inline-block;">Yonetici Giris</a></div>
 </body></html>''', 503))
 
