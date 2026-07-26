@@ -27,19 +27,52 @@
             min-height: 100dvh;
             scroll-snap-align: start;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             background: #000;
+            overflow: hidden;
         }
 
-        .reel-photo {
+        .reel-photos {
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            display: flex;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .reel-photos::-webkit-scrollbar { display: none; }
+
+        .reel-photos img {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            flex-shrink: 0;
+            scroll-snap-align: start;
+        }
+
+        .reel-dots {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 6px;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .reel-dots .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+        }
+
+        .reel-dots .dot.active {
+            background: white;
+            width: 18px;
+            border-radius: 3px;
         }
 
         .reel-gradient {
@@ -142,11 +175,7 @@
             text-decoration: none;
         }
 
-        .reel-action-btn .icon {
-            font-size: 1.5rem;
-            transition: transform 0.2s;
-        }
-
+        .reel-action-btn .icon { font-size: 1.5rem; transition: transform 0.2s; }
         .reel-action-btn:active .icon { transform: scale(1.3); }
         .reel-action-btn .count { font-size: 0.65rem; font-weight: 700; }
         .reel-action-btn.liked .icon { color: #ef4444; }
@@ -183,38 +212,6 @@
             color: white;
             font-size: 1.1rem;
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-        }
-
-        .reel-counter {
-            position: absolute;
-            top: max(12px, env(safe-area-inset-top));
-            right: 60px;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 0.25rem 0.7rem;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            z-index: 3;
-        }
-
-        .scroll-hint {
-            position: absolute;
-            bottom: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            opacity: 0.5;
-            font-size: 0.7rem;
-            font-weight: 600;
-            z-index: 2;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-5px); }
         }
 
         .reel-comment-box {
@@ -271,57 +268,17 @@
             cursor: pointer;
         }
 
-        .comment-item {
-            display: flex;
-            gap: 8px;
-            padding: 8px 0;
-        }
-        .comment-item .c-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-        .comment-item .c-avatar-ph {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #fce7f3;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
+        .comment-item { display: flex; gap: 8px; padding: 8px 0; }
+        .comment-item .c-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .comment-item .c-avatar-ph { width: 30px; height: 30px; border-radius: 50%; background: #fce7f3; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
         .comment-item .c-name { font-weight: 700; font-size: 0.8rem; }
         .comment-item .c-text { font-size: 0.8rem; color: #374151; }
         .comment-item .c-time { font-size: 0.65rem; color: #9ca3af; }
 
-        .reel-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 9;
-        }
+        .reel-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9; }
         .reel-overlay.open { display: block; }
 
-        .no-reels {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-            gap: 1rem;
-            padding: 2rem;
-        }
+        .no-reels { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; gap: 1rem; padding: 2rem; }
         .no-reels .icon { font-size: 5rem; }
         .no-reels h2 { font-weight: 800; }
         .no-reels p { opacity: 0.7; }
@@ -332,7 +289,20 @@
     <div class="reels-container" id="reelsContainer">
         {% for cat in cats %}
         <div class="reel-card" id="reel-{{ cat.id }}">
-            <img class="reel-photo" src="{{ cat.photos[0].filename }}" alt="{{ cat.name }}" loading="lazy">
+            <div class="reel-photos" id="photos-{{ cat.id }}">
+                {% for photo in cat.photos %}
+                <img src="{{ photo.filename }}" alt="{{ cat.name }}" loading="lazy">
+                {% endfor %}
+            </div>
+
+            {% if cat.photos|length > 1 %}
+            <div class="reel-dots" id="dots-{{ cat.id }}">
+                {% for photo in cat.photos %}
+                <div class="dot {% if loop.first %}active{% endif %}"></div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="reel-gradient"></div>
             <div class="reel-gradient-top"></div>
 
@@ -357,12 +327,10 @@
                     <span class="icon">{% if cat.id in liked_ids %}❤️{% else %}🤍{% endif %}</span>
                     <span class="count" id="rlc-{{ cat.id }}">{{ cat.like_count }}</span>
                 </button>
-
                 <button class="reel-action-btn" onclick="openComments({{ cat.id }})">
                     <span class="icon">💬</span>
                     <span class="count">{{ comment_counts.get(cat.id, 0) }}</span>
                 </button>
-
                 <a href="{{ url_for('cat_detail', cat_id=cat.id) }}" class="reel-action-btn">
                     <span class="icon">📝</span>
                     <span class="count">Detay</span>
@@ -376,7 +344,7 @@
             </div>
 
             {% if loop.first %}
-            <div class="scroll-hint">▲ Kaydır ▲</div>
+            <div style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); color:white; opacity:0.5; font-size:0.7rem; font-weight:600; z-index:2; animation:bounce 2s infinite;">▲ Kaydır ▲</div>
             {% endif %}
         </div>
         {% endfor %}
@@ -405,16 +373,13 @@
 
     <script>
     async function toggleLike(catId, btn) {
-        const resp = await fetch('/api/like/' + catId, { method: 'POST' });
-        const data = await resp.json();
+        var resp = await fetch('/api/like/' + catId, { method: 'POST' });
+        var data = await resp.json();
         btn.innerHTML = '<span class="icon">' + (data.liked ? '❤️' : '🤍') + '</span><span class="count" id="rlc-' + catId + '">' + data.count + '</span>';
         btn.classList.toggle('liked', data.liked);
     }
 
-    var currentCommentCatId = null;
-
     function openComments(catId) {
-        currentCommentCatId = catId;
         document.getElementById('commentForm').action = '/cat/' + catId + '/comment';
         document.getElementById('commentTitle').textContent = 'Yorumlar';
         document.getElementById('commentInput').value = '';
@@ -423,11 +388,11 @@
         document.getElementById('commentOverlay').classList.add('open');
 
         fetch('/api/comments/' + catId)
-            .then(r => r.json())
-            .then(data => {
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
                 var html = '';
                 if (data.comments.length === 0) {
-                    html = '<p style="text-align:center; color:#9ca3af; padding:1rem;">Henuz yorum yok 🐱</p>';
+                    html = '<p style="text-align:center; color:#9ca3af; padding:1rem;">Henuz yorum yok</p>';
                 } else {
                     data.comments.forEach(function(c) {
                         html += '<div class="comment-item">';
@@ -451,10 +416,19 @@
         document.getElementById('commentOverlay').classList.remove('open');
     }
 
-    var touchStartY = 0;
-    document.getElementById('reelsContainer').addEventListener('touchstart', function(e) {
-        touchStartY = e.touches[0].clientY;
-    }, { passive: true });
+    document.querySelectorAll('.reel-photos').forEach(function(container) {
+        var card = container.closest('.reel-card');
+        var dots = card.querySelector('.reel-dots');
+        if (!dots) return;
+        var dotEls = dots.querySelectorAll('.dot');
+        var imgs = container.querySelectorAll('img');
+        if (imgs.length <= 1) return;
+
+        container.addEventListener('scroll', function() {
+            var idx = Math.round(container.scrollLeft / container.clientWidth);
+            dotEls.forEach(function(d, i) { d.classList.toggle('active', i === idx); });
+        });
+    });
     </script>
 </body>
 </html>
