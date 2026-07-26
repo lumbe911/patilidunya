@@ -1,11 +1,14 @@
 import os
 import secrets
+import base64
 from datetime import datetime
+from urllib.parse import urlencode
 
 import cloudinary
 import cloudinary.uploader
+import requests as http_requests
 from flask import (Flask, render_template, redirect, url_for, request,
-                   flash, jsonify, abort)
+                   flash, jsonify, abort, session)
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (LoginManager, UserMixin, login_user, logout_user,
                          current_user, login_required)
@@ -30,6 +33,10 @@ cloudinary.config(
     secure=True
 )
 
+SPOTIFY_CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID', '')
+SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET', '')
+SPOTIFY_REDIRECT_URI = os.environ.get('SPOTIFY_REDIRECT_URI', 'https://patilidunya.onrender.com/callback/spotify')
+
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -46,6 +53,9 @@ class User(UserMixin, db.Model):
     bio = db.Column(db.Text, default='')
     avatar = db.Column(db.String(256), default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    spotify_token = db.Column(db.Text, default='')
+    spotify_refresh = db.Column(db.Text, default='')
+    spotify_connected = db.Column(db.Boolean, default=False)
     cats = db.relationship('Cat', backref='owner', lazy=True, cascade='all, delete-orphan')
     likes = db.relationship('Like', backref='user', lazy=True, cascade='all, delete-orphan')
 
@@ -394,8 +404,119 @@ def delete_comment(cat_id, comment_id):
     return redirect(url_for('cat_detail', cat_id=cat_id))
 
 
+@app.route('/login/spotify')
+@login_required
+def spotify_login():
+    if not SPOTIFY_CLIENT_ID or not SPOTIFY_CLIENT_SECRET:
+        flash('Spotify ayarlari yapilmamis!', 'danger')
+        return redirect(url_for('user_profile', username=current_user.username))
+    scope = 'streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state'
+    params = {
+        'client_id': SPOTIFY_CLIENT_ID,
+        'response_type': 'code',
+        'redirect_uri': SPOTIFY_REDIRECT_URI,
+        'scope': scope,
+        'show_dialog': 'true'
+    }
+    return redirect('https://accounts.spotify.com/authorize?' + urlencode(params))
+
+
+@app.route('/callback/spotify')
+@login_required
+def spotify_callback():
+    code = request.args.get('code')
+    error = request.args.get('error')
+    if error or not code:
+        flash('Spotify baglantisi basarisiz!', 'danger')
+        return redirect(url_for('user_profile', username=current_user.username))
+    auth_str = f'{SPOTIFY_CLIENT_ID}:{SPOTIFY_CLIENT_SECRET}'
+    auth_b64 = base64.b64encode(auth_str.encode()).decode()
+    resp = http_requests.post('https://accounts.spotify.com/api/token', data={
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': SPOTIFY_REDIRECT_URI
+    }, headers={'Authorization': f'Basic {auth_b64}'})
+    if resp.status_code != 200:
+        flash('Spotify token alinamadi!', 'danger')
+        return redirect(url_for('user_profile', username=current_user.username))
+    data = resp.json()
+    current_user.spotify_token = data.get('access_token', '')
+    current_user.spotify_refresh = data.get('refresh_token', '')
+    current_user.spotify_connected = True
+    db.session.commit()
+    flash('Spotify basariyla baglandi!', 'success')
+    return redirect(url_for('user_profile', username=current_user.username))
+
+
+@app.route('/api/spotify/search')
+@login_required
+def spotify_search():
+    q = request.args.get('q', '').strip()
+    if not q or not current_user.spotify_token:
+        return jsonify({'tracks': []})
+    resp = http_requests.get('https://api.spotify.com/v1/search', params={
+        'q': q, 'type': 'track', 'limit': 10
+    }, headers={'Authorization': f'Bearer {current_user.spotify_token}'})
+    if resp.status_code == 401:
+        refreshed = refresh_spotify_token()
+        if refreshed:
+            resp = http_requests.get('https://api.spotify.com/v1/search', params={
+                'q': q, 'type': 'track', 'limit': 10
+            }, headers={'Authorization': f'Bearer {current_user.spotify_token}'})
+    if resp.status_code != 200:
+        return jsonify({'tracks': []})
+    items = resp.json().get('tracks', {}).get('items', [])
+    tracks = [{
+        'id': t['id'],
+        'name': t['name'],
+        'artist': ', '.join(a['name'] for a in t['artists']),
+        'album_image': t['album']['images'][0]['url'] if t['album']['images'] else '',
+        'preview_url': t.get('preview_url'),
+        'uri': t['uri']
+    } for t in items]
+    return jsonify({'tracks': tracks})
+
+
+@app.route('/api/spotify/disconnect', methods=['POST'])
+@login_required
+def spotify_disconnect():
+    current_user.spotify_token = ''
+    current_user.spotify_refresh = ''
+    current_user.spotify_connected = False
+    db.session.commit()
+    return jsonify({'ok': True})
+
+
+def refresh_spotify_token():
+    if not current_user.spotify_refresh or not SPOTIFY_CLIENT_ID:
+        return False
+    auth_str = f'{SPOTIFY_CLIENT_ID}:{SPOTIFY_CLIENT_SECRET}'
+    auth_b64 = base64.b64encode(auth_str.encode()).decode()
+    resp = http_requests.post('https://accounts.spotify.com/api/token', data={
+        'grant_type': 'refresh_token',
+        'refresh_token': current_user.spotify_refresh
+    }, headers={'Authorization': f'Basic {auth_b64}'})
+    if resp.status_code == 200:
+        data = resp.json()
+        current_user.spotify_token = data.get('access_token', current_user.spotify_token)
+        if 'refresh_token' in data:
+            current_user.spotify_refresh = data['refresh_token']
+        db.session.commit()
+        return True
+    current_user.spotify_connected = False
+    db.session.commit()
+    return False
+
+
 with app.app_context():
     db.create_all()
+    try:
+        db.session.execute(db.text('ALTER TABLE user ADD COLUMN spotify_token TEXT DEFAULT ""'))
+        db.session.execute(db.text('ALTER TABLE user ADD COLUMN spotify_refresh TEXT DEFAULT ""'))
+        db.session.execute(db.text('ALTER TABLE user ADD COLUMN spotify_connected BOOLEAN DEFAULT FALSE'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

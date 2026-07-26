@@ -77,6 +77,32 @@
         musicPlaying = !musicPlaying;
     }
     </script>
+
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <script>
+    window._spotifyAccessToken = '{{ current_user.spotify_token if current_user.spotify_connected else "" }}';
+    window._spotifyActiveDevice = false;
+    window._spotifyPlayer = null;
+    if (window._spotifyAccessToken) {
+        window.onSpotifyWebPlaybackSDKReady = function() {
+            var player = new Spotify.Player({
+                name: 'PatiliDunya Player',
+                getOAuthToken: function(cb) { cb(window._spotifyAccessToken); },
+                volume: 0.7
+            });
+            window._spotifyPlayer = player;
+            player.addListener('ready', function() {
+                window._spotifyActiveDevice = true;
+            });
+            player.addListener('player_state_changed', function(state) {
+                if (!state) return;
+                var btn = document.getElementById('spotifyPlayBtn');
+                if (btn) btn.textContent = state.paused ? '▶' : '⏸';
+            });
+            player.connect();
+        };
+    }
+    </script>
     {% endif %}
 
     {% block scripts %}{% endblock %}
