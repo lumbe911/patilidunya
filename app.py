@@ -107,26 +107,29 @@ def load_user(user_id):
 def check_private_mode():
     if not SITE_PRIVATE:
         return
-    if request.endpoint in ('static',):
+    ep = request.endpoint or ''
+    if ep == 'static':
         return
     if current_user.is_authenticated:
         if ADMIN_USERNAME and current_user.username == ADMIN_USERNAME:
             return
         if not ADMIN_USERNAME:
             return
-    if request.endpoint in ('index', 'login', 'register', 'logout'):
+    if ep in ('index', 'login', 'register', 'logout'):
         return
-    from flask import render_template_string
-    abort(render_template_string('''<!DOCTYPE html>
+    from flask import make_response
+    html = '''<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>PatiliDunya</title>
 <link rel="stylesheet" href="/static/css/style.css"></head>
 <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem;">
-<div><h1 style="font-size:5rem;">🔒</h1>
+<div><h1 style="font-size:5rem;">&#128274;</h1>
 <h2 style="font-weight:800;margin:1rem 0;">Site Simdilik Kapali</h2>
 <p style="color:var(--gray-500);">Yakinda geri donucez!</p>
-<p style="color:var(--gray-700);margin-top:0.5rem;font-weight:700;">Owner: Lumbe 🐱</p>
+<p style="color:var(--gray-700);margin-top:0.5rem;font-weight:700;">Owner: Lumbe</p>
 <a href="/login" style="color:var(--pink-600);font-weight:700;margin-top:1rem;display:inline-block;">Yonetici Giris</a></div>
-</body></html>''', 503))
+</body></html>'''
+    resp = make_response(html, 503)
+    abort(resp)
 
 
 def allowed_file(filename):
