@@ -511,9 +511,9 @@ def refresh_spotify_token():
 with app.app_context():
     db.create_all()
     try:
-        db.session.execute(db.text('ALTER TABLE user ADD COLUMN spotify_token TEXT DEFAULT ""'))
-        db.session.execute(db.text('ALTER TABLE user ADD COLUMN spotify_refresh TEXT DEFAULT ""'))
-        db.session.execute(db.text('ALTER TABLE user ADD COLUMN spotify_connected BOOLEAN DEFAULT FALSE'))
+        db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN spotify_token TEXT DEFAULT ""'))
+        db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN spotify_refresh TEXT DEFAULT ""'))
+        db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN spotify_connected BOOLEAN DEFAULT FALSE'))
         db.session.commit()
     except Exception:
         db.session.rollback()
