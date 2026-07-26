@@ -16,6 +16,7 @@
             {% if current_user.is_authenticated %}
             <ul class="navbar-nav">
                 <li><a href="{{ url_for('explore') }}" class="nav-link">Keşfet</a></li>
+                <li><a href="{{ url_for('reels') }}" class="nav-link">Reels</a></li>
                 <li><a href="{{ url_for('new_cat') }}" class="nav-link">+ Kedi Ekle</a></li>
                 <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="nav-link">Profilim</a></li>
                 <li><a href="{{ url_for('logout') }}" class="nav-link">Çıkış</a></li>

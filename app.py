@@ -130,6 +130,43 @@ def explore():
     return render_template('explore.html', cats=cats)
 
 
+@app.route('/reels')
+@login_required
+def reels():
+    cat_id = request.args.get('cat_id', None, type=int)
+    if cat_id:
+        current_cat = Cat.query.get(cat_id)
+    else:
+        current_cat = None
+    
+    all_cats = Cat.query.order_by(Cat.created_at.desc()).all()
+    cats_with_photo = [c for c in all_cats if c.photos]
+    
+    if not current_cat and cats_with_photo:
+        current_cat = cats_with_photo[0]
+    
+    current_index = 0
+    next_cat = None
+    prev_cat = None
+    if current_cat and current_cat in cats_with_photo:
+        current_index = cats_with_photo.index(current_cat)
+        if current_index < len(cats_with_photo) - 1:
+            next_cat = cats_with_photo[current_index + 1]
+        if current_index > 0:
+            prev_cat = cats_with_photo[current_index - 1]
+    
+    liked = False
+    if current_cat:
+        liked = Like.query.filter_by(user_id=current_user.id, cat_id=current_cat.id).first() is not None
+    
+    comments = []
+    if current_cat:
+        comments = Comment.query.filter_by(cat_id=current_cat.id).order_by(Comment.created_at.desc()).limit(20).all()
+    
+    return render_template('reels.html', cat=current_cat, next_cat=next_cat, prev_cat=prev_cat,
+                           liked=liked, comments=comments, total=len(cats_with_photo), index=current_index)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
