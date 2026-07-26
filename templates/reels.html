@@ -23,8 +23,8 @@
 
         .reel-card {
             width: 100%;
-            height: 100vh;
-            height: 100dvh;
+            min-height: 100vh;
+            min-height: 100dvh;
             scroll-snap-align: start;
             position: relative;
             display: flex;
@@ -33,10 +33,13 @@
             background: #000;
         }
 
-        .reel-card img.reel-photo {
+        .reel-photo {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .reel-gradient {
@@ -44,38 +47,73 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 50%;
-            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            height: 45%;
+            background: linear-gradient(transparent, rgba(0,0,0,0.75));
             pointer-events: none;
+            z-index: 1;
+        }
+
+        .reel-gradient-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 15%;
+            background: linear-gradient(rgba(0,0,0,0.4), transparent);
+            pointer-events: none;
+            z-index: 1;
         }
 
         .reel-info {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 70px;
-            padding: 1.5rem;
-            padding-bottom: 2rem;
+            bottom: 24px;
+            left: 16px;
+            right: 72px;
             color: white;
             z-index: 2;
         }
 
-        .reel-info h3 {
-            font-size: 1.1rem;
+        .reel-info .reel-user {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .reel-info .reel-user img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid white;
+            object-fit: cover;
+        }
+
+        .reel-info .reel-user .reel-username {
             font-weight: 800;
-            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+        }
+
+        .reel-info h3 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
             text-shadow: 0 1px 4px rgba(0,0,0,0.5);
         }
 
-        .reel-info p {
-            font-size: 0.85rem;
+        .reel-info .reel-desc {
+            font-size: 0.82rem;
             opacity: 0.85;
             line-height: 1.4;
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .reel-info .reel-location {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             opacity: 0.7;
             margin-top: 0.3rem;
         }
@@ -83,11 +121,11 @@
         .reel-actions {
             position: absolute;
             right: 12px;
-            bottom: 80px;
+            bottom: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1.25rem;
+            gap: 1.1rem;
             z-index: 2;
         }
 
@@ -95,22 +133,22 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.2rem;
+            gap: 0.15rem;
             background: none;
             border: none;
             color: white;
             cursor: pointer;
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            text-decoration: none;
         }
 
         .reel-action-btn .icon {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             transition: transform 0.2s;
         }
 
         .reel-action-btn:active .icon { transform: scale(1.3); }
-        .reel-action-btn .count { font-size: 0.7rem; font-weight: 700; }
-
+        .reel-action-btn .count { font-size: 0.65rem; font-weight: 700; }
         .reel-action-btn.liked .icon { color: #ef4444; }
 
         .reel-top-bar {
@@ -118,54 +156,75 @@
             top: 0;
             left: 0;
             right: 0;
-            padding: 1rem 1rem;
-            padding-top: max(1rem, env(safe-area-inset-top));
+            padding: 12px 16px;
+            padding-top: max(12px, env(safe-area-inset-top));
             display: flex;
             align-items: center;
             justify-content: space-between;
             z-index: 3;
-            background: linear-gradient(rgba(0,0,0,0.4), transparent);
         }
 
-        .reel-top-bar a, .reel-top-bar button {
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
+        .reel-top-bar a.reel-back {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1rem;
             text-decoration: none;
-            cursor: pointer;
+        }
+
+        .reel-top-bar .reel-title {
+            font-weight: 800;
+            color: white;
+            font-size: 1.1rem;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
 
         .reel-counter {
             position: absolute;
-            top: max(1rem, env(safe-area-inset-top));
+            top: max(12px, env(safe-area-inset-top));
             right: 60px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3);
             backdrop-filter: blur(10px);
             color: white;
-            padding: 0.3rem 0.8rem;
+            padding: 0.25rem 0.7rem;
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
             z-index: 3;
         }
 
-        .reel-comment-box {
+        .scroll-hint {
             position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            opacity: 0.5;
+            font-size: 0.7rem;
+            font-weight: 600;
+            z-index: 2;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        .reel-comment-box {
+            position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px 20px 0 0;
-            padding: 1rem;
+            background: white;
+            border-radius: 16px 16px 0 0;
+            padding: 12px 16px;
             max-height: 60vh;
             overflow-y: auto;
             z-index: 10;
@@ -177,67 +236,68 @@
         .reel-comment-box .handle {
             width: 40px;
             height: 4px;
-            background: var(--gray-300);
+            background: #d1d5db;
             border-radius: 2px;
-            margin: 0 auto 0.75rem;
+            margin: 0 auto 10px;
         }
 
-        .reel-comment-box h4 { font-weight: 800; margin-bottom: 0.75rem; text-align: center; }
+        .reel-comment-box h4 { font-weight: 800; margin-bottom: 10px; text-align: center; font-size: 0.95rem; }
 
         .comment-input-bar {
             display: flex;
-            gap: 0.5rem;
-            padding: 0.75rem 0;
-            border-top: 1px solid var(--gray-200);
-            margin-top: 0.5rem;
+            gap: 8px;
+            padding: 10px 0 0;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 8px;
         }
         .comment-input-bar input {
             flex: 1;
-            padding: 0.6rem 1rem;
-            border: 1px solid var(--gray-200);
+            padding: 8px 14px;
+            border: 1px solid #e5e7eb;
             border-radius: 20px;
             font-family: 'Nunito', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
-        .comment-input-bar input:focus { outline: none; border-color: var(--pink-400); }
+        .comment-input-bar input:focus { outline: none; border-color: #f472b6; }
         .comment-input-bar button {
-            background: var(--pink-500);
+            background: #ec4899;
             color: white;
             border: none;
             border-radius: 20px;
-            padding: 0.6rem 1rem;
+            padding: 8px 14px;
             font-weight: 700;
             font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem;
             cursor: pointer;
         }
 
         .comment-item {
             display: flex;
-            gap: 0.5rem;
-            padding: 0.5rem 0;
+            gap: 8px;
+            padding: 8px 0;
         }
-        .comment-item .avatar {
-            width: 32px;
-            height: 32px;
+        .comment-item .c-avatar {
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             object-fit: cover;
             flex-shrink: 0;
         }
-        .comment-item .avatar-placeholder {
-            width: 32px;
-            height: 32px;
+        .comment-item .c-avatar-ph {
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            background: var(--pink-200);
+            background: #fce7f3;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
             flex-shrink: 0;
         }
-        .comment-item .name { font-weight: 700; font-size: 0.85rem; }
-        .comment-item .text { font-size: 0.85rem; color: var(--gray-700); }
-        .comment-item .time { font-size: 0.7rem; color: var(--gray-500); }
+        .comment-item .c-name { font-weight: 700; font-size: 0.8rem; }
+        .comment-item .c-text { font-size: 0.8rem; color: #374151; }
+        .comment-item .c-time { font-size: 0.65rem; color: #9ca3af; }
 
         .reel-overlay {
             display: none;
@@ -260,6 +320,7 @@
             color: white;
             text-align: center;
             gap: 1rem;
+            padding: 2rem;
         }
         .no-reels .icon { font-size: 5rem; }
         .no-reels h2 { font-weight: 800; }
@@ -267,19 +328,24 @@
     </style>
 </head>
 <body>
-    {% if cat %}
+    {% if cats %}
     <div class="reels-container" id="reelsContainer">
-
-        {% for c in [cat] %}
-        <div class="reel-card" data-cat-id="{{ cat.id }}">
+        {% for cat in cats %}
+        <div class="reel-card" id="reel-{{ cat.id }}">
             <img class="reel-photo" src="{{ cat.photos[0].filename }}" alt="{{ cat.name }}" loading="lazy">
-
             <div class="reel-gradient"></div>
+            <div class="reel-gradient-top"></div>
 
             <div class="reel-info">
+                <div class="reel-user">
+                    {% if cat.owner.avatar %}
+                    <img src="{{ cat.owner.avatar }}" alt="">
+                    {% endif %}
+                    <span class="reel-username">{{ cat.owner.display_name or cat.owner.username }}</span>
+                </div>
                 <h3>{{ cat.name }}{% if cat.gender %} {{ '🎀' if cat.gender == 'Female' else '💙' }}{% endif %}</h3>
                 {% if cat.description %}
-                <p>{{ cat.description[:120] }}{% if cat.description|length > 120 %}...{% endif %}</p>
+                <div class="reel-desc">{{ cat.description }}</div>
                 {% endif %}
                 {% if cat.location %}
                 <div class="reel-location">📍 {{ cat.location }}</div>
@@ -287,33 +353,31 @@
             </div>
 
             <div class="reel-actions">
-                <button class="reel-action-btn {% if liked %}liked{% endif %}" onclick="toggleLike({{ cat.id }}, this)">
-                    <span class="icon">{% if liked %}❤️{% else %}🤍{% endif %}</span>
-                    <span class="count" id="reel-like-count-{{ cat.id }}">{{ cat.like_count }}</span>
+                <button class="reel-action-btn {% if cat.id in liked_ids %}liked{% endif %}" onclick="toggleLike({{ cat.id }}, this)">
+                    <span class="icon">{% if cat.id in liked_ids %}❤️{% else %}🤍{% endif %}</span>
+                    <span class="count" id="rlc-{{ cat.id }}">{{ cat.like_count }}</span>
                 </button>
 
-                <button class="reel-action-btn" onclick="openComments()">
+                <button class="reel-action-btn" onclick="openComments({{ cat.id }})">
                     <span class="icon">💬</span>
-                    <span class="count">{{ comments|length }}</span>
+                    <span class="count">{{ comment_counts.get(cat.id, 0) }}</span>
                 </button>
 
-                <a href="{{ url_for('cat_detail', cat_id=cat.id) }}" class="reel-action-btn" style="text-decoration:none;">
+                <a href="{{ url_for('cat_detail', cat_id=cat.id) }}" class="reel-action-btn">
                     <span class="icon">📝</span>
                     <span class="count">Detay</span>
                 </a>
             </div>
 
             <div class="reel-top-bar">
-                <a href="{{ url_for('explore') }}">✕</a>
-                <span style="font-weight:800; color:white; font-size:1.1rem; text-shadow:0 1px 3px rgba(0,0,0,0.5);">🐱 Reels</span>
-                {% if next_cat %}
-                <a href="{{ url_for('reels', cat_id=next_cat.id) }}">▶</a>
-                {% else %}
-                <span></span>
-                {% endif %}
+                <a href="{{ url_for('explore') }}" class="reel-back">✕</a>
+                <span class="reel-title">🐱 Reels</span>
+                <span class="reel-counter">{{ loop.index }}/{{ cats|length }}</span>
             </div>
 
-            <div class="reel-counter">{{ index + 1 }} / {{ total }}</div>
+            {% if loop.first %}
+            <div class="scroll-hint">▲ Kaydır ▲</div>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
@@ -321,31 +385,11 @@
     <div class="reel-overlay" id="commentOverlay" onclick="closeComments()"></div>
     <div class="reel-comment-box" id="commentBox">
         <div class="handle"></div>
-        <h4>Yorumlar ({{ comments|length }})</h4>
-
-        {% if comments %}
-        <div id="commentList">
-            {% for comment in comments %}
-            <div class="comment-item">
-                {% if comment.user.avatar %}
-                <img class="avatar" src="{{ comment.user.avatar }}" alt="">
-                {% else %}
-                <div class="avatar-placeholder">{{ comment.user.username[0]|upper }}</div>
-                {% endif %}
-                <div>
-                    <span class="name">{{ comment.user.display_name or comment.user.username }}</span>
-                    <span class="time">{{ comment.created_at.strftime('%d %b') }}</span>
-                    <div class="text">{{ comment.text }}</div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <p style="text-align:center; color: var(--gray-500); padding: 1rem;">Henuz yorum yok 🐱</p>
-        {% endif %}
-
-        <form class="comment-input-bar" method="POST" action="{{ url_for('add_comment', cat_id=cat.id) }}">
-            <input type="text" name="text" placeholder="Yorum yaz..." required>
+        <h4 id="commentTitle">Yorumlar</h4>
+        <div id="commentList"></div>
+        <form class="comment-input-bar" id="commentForm" method="POST" action="">
+            <input type="hidden" name="next" value="reels">
+            <input type="text" name="text" id="commentInput" placeholder="Yorum yaz..." required>
             <button type="submit">Gonder</button>
         </form>
     </div>
@@ -361,15 +405,45 @@
 
     <script>
     async function toggleLike(catId, btn) {
-        const resp = await fetch(`/api/like/${catId}`, { method: 'POST' });
+        const resp = await fetch('/api/like/' + catId, { method: 'POST' });
         const data = await resp.json();
-        btn.innerHTML = `<span class="icon">${data.liked ? '❤️' : '🤍'}</span><span class="count" id="reel-like-count-${catId}">${data.count}</span>`;
+        btn.innerHTML = '<span class="icon">' + (data.liked ? '❤️' : '🤍') + '</span><span class="count" id="rlc-' + catId + '">' + data.count + '</span>';
         btn.classList.toggle('liked', data.liked);
     }
 
-    function openComments() {
+    var currentCommentCatId = null;
+
+    function openComments(catId) {
+        currentCommentCatId = catId;
+        document.getElementById('commentForm').action = '/cat/' + catId + '/comment';
+        document.getElementById('commentTitle').textContent = 'Yorumlar';
+        document.getElementById('commentInput').value = '';
+        document.getElementById('commentList').innerHTML = '<p style="text-align:center; color:#9ca3af; padding:1rem;">Yukleniyor...</p>';
         document.getElementById('commentBox').classList.add('open');
         document.getElementById('commentOverlay').classList.add('open');
+
+        fetch('/api/comments/' + catId)
+            .then(r => r.json())
+            .then(data => {
+                var html = '';
+                if (data.comments.length === 0) {
+                    html = '<p style="text-align:center; color:#9ca3af; padding:1rem;">Henuz yorum yok 🐱</p>';
+                } else {
+                    data.comments.forEach(function(c) {
+                        html += '<div class="comment-item">';
+                        if (c.avatar) {
+                            html += '<img class="c-avatar" src="' + c.avatar + '">';
+                        } else {
+                            html += '<div class="c-avatar-ph">' + c.username[0].toUpperCase() + '</div>';
+                        }
+                        html += '<div><span class="c-name">' + c.display_name + '</span> <span class="c-time">' + c.time + '</span><div class="c-text">' + c.text + '</div></div></div>';
+                    });
+                }
+                document.getElementById('commentList').innerHTML = html;
+            })
+            .catch(function() {
+                document.getElementById('commentList').innerHTML = '<p style="text-align:center; color:#ef4444; padding:1rem;">Yorumlar yuklenemedi</p>';
+            });
     }
 
     function closeComments() {
@@ -377,19 +451,10 @@
         document.getElementById('commentOverlay').classList.remove('open');
     }
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-            e.preventDefault();
-            var container = document.getElementById('reelsContainer');
-            if (!container) return;
-            var card = container.querySelector('.reel-card');
-            if (e.key === 'ArrowDown' && {{ 'true' if next_cat else 'false' }}) {
-                window.location.href = "{{ url_for('reels', cat_id=next_cat.id) if next_cat else '#' }}";
-            } else if (e.key === 'ArrowUp' && {{ 'true' if prev_cat else 'false' }}) {
-                window.location.href = "{{ url_for('reels', cat_id=prev_cat.id) if prev_cat else '#' }}";
-            }
-        }
-    });
+    var touchStartY = 0;
+    document.getElementById('reelsContainer').addEventListener('touchstart', function(e) {
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
     </script>
 </body>
 </html>

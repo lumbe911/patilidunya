@@ -133,38 +133,18 @@ def explore():
 @app.route('/reels')
 @login_required
 def reels():
-    cat_id = request.args.get('cat_id', None, type=int)
-    if cat_id:
-        current_cat = Cat.query.get(cat_id)
-    else:
-        current_cat = None
-    
     all_cats = Cat.query.order_by(Cat.created_at.desc()).all()
     cats_with_photo = [c for c in all_cats if c.photos]
     
-    if not current_cat and cats_with_photo:
-        current_cat = cats_with_photo[0]
+    liked_ids = set()
+    if current_user.is_authenticated:
+        liked_ids = {l.cat_id for l in Like.query.filter_by(user_id=current_user.id).all()}
     
-    current_index = 0
-    next_cat = None
-    prev_cat = None
-    if current_cat and current_cat in cats_with_photo:
-        current_index = cats_with_photo.index(current_cat)
-        if current_index < len(cats_with_photo) - 1:
-            next_cat = cats_with_photo[current_index + 1]
-        if current_index > 0:
-            prev_cat = cats_with_photo[current_index - 1]
+    comment_counts = {}
+    for c in cats_with_photo:
+        comment_counts[c.id] = Comment.query.filter_by(cat_id=c.id).count()
     
-    liked = False
-    if current_cat:
-        liked = Like.query.filter_by(user_id=current_user.id, cat_id=current_cat.id).first() is not None
-    
-    comments = []
-    if current_cat:
-        comments = Comment.query.filter_by(cat_id=current_cat.id).order_by(Comment.created_at.desc()).limit(20).all()
-    
-    return render_template('reels.html', cat=current_cat, next_cat=next_cat, prev_cat=prev_cat,
-                           liked=liked, comments=comments, total=len(cats_with_photo), index=current_index)
+    return render_template('reels.html', cats=cats_with_photo, liked_ids=liked_ids, comment_counts=comment_counts)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -383,8 +363,23 @@ def add_comment(cat_id):
         comment = Comment(text=text, user_id=current_user.id, cat_id=cat_id)
         db.session.add(comment)
         db.session.commit()
-        flash('Yorum eklendi!', 'success')
+    next_url = request.form.get('next', '')
+    if next_url == 'reels':
+        return redirect(url_for('reels'))
     return redirect(url_for('cat_detail', cat_id=cat_id))
+
+
+@app.route('/api/comments/<int:cat_id>')
+@login_required
+def get_comments(cat_id):
+    comments = Comment.query.filter_by(cat_id=cat_id).order_by(Comment.created_at.desc()).limit(50).all()
+    return jsonify({'comments': [{
+        'text': c.text,
+        'username': c.user.username,
+        'display_name': c.user.display_name or c.user.username,
+        'avatar': c.user.avatar or '',
+        'time': c.created_at.strftime('%d %b')
+    } for c in comments]})
 
 
 @app.route('/cat/<int:cat_id>/comment/<int:comment_id>/delete', methods=['POST'])
