@@ -15,16 +15,16 @@
             </a>
             {% if current_user.is_authenticated %}
             <ul class="navbar-nav">
-                <li><a href="{{ url_for('explore') }}" class="nav-link">Keşfet</a></li>
+                <li><a href="{{ url_for('explore') }}" class="nav-link">Kesfet</a></li>
                 <li><a href="{{ url_for('reels') }}" class="nav-link">Reels</a></li>
                 <li><a href="{{ url_for('new_cat') }}" class="nav-link">+ Kedi Ekle</a></li>
                 <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="nav-link">Profilim</a></li>
-                <li><a href="{{ url_for('logout') }}" class="nav-link">Çıkış</a></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-link">Cikis</a></li>
             </ul>
             {% else %}
             <ul class="navbar-nav">
-                <li><a href="{{ url_for('login') }}" class="nav-link">Giriş</a></li>
-                <li><a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Kayıt Ol</a></li>
+                <li><a href="{{ url_for('login') }}" class="nav-link">Giris</a></li>
+                <li><a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Kayit Ol</a></li>
             </ul>
             {% endif %}
         </div>
@@ -45,7 +45,7 @@
     </main>
 
     <footer class="footer">
-        <p>🐱 PatiliDunya &copy; 2026 &mdash; Her kedinin bir hikayesi var</p>
+        <p>PatiliDunya 2026 - Her kedinin bir hikayesi var</p>
     </footer>
 
     {% if current_user.is_authenticated %}
@@ -75,32 +75,6 @@
             });
         }
         musicPlaying = !musicPlaying;
-    }
-    </script>
-
-    <script src="https://sdk.scdn.co/spotify-player.js"></script>
-    <script>
-    window._spotifyAccessToken = '{{ current_user.spotify_token if current_user.spotify_connected else "" }}';
-    window._spotifyActiveDevice = false;
-    window._spotifyPlayer = null;
-    if (window._spotifyAccessToken) {
-        window.onSpotifyWebPlaybackSDKReady = function() {
-            var player = new Spotify.Player({
-                name: 'PatiliDunya Player',
-                getOAuthToken: function(cb) { cb(window._spotifyAccessToken); },
-                volume: 0.7
-            });
-            window._spotifyPlayer = player;
-            player.addListener('ready', function() {
-                window._spotifyActiveDevice = true;
-            });
-            player.addListener('player_state_changed', function(state) {
-                if (!state) return;
-                var btn = document.getElementById('spotifyPlayBtn');
-                if (btn) btn.textContent = state.paused ? '▶' : '⏸';
-            });
-            player.connect();
-        };
     }
     </script>
     {% endif %}
