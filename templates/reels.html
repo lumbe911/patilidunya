@@ -428,6 +428,50 @@
             var idx = Math.round(container.scrollLeft / container.clientWidth);
             dotEls.forEach(function(d, i) { d.classList.toggle('active', i === idx); });
         });
+
+        container.addEventListener('wheel', function(e) {
+            var maxScroll = container.scrollWidth - container.clientWidth;
+            var atStart = container.scrollLeft <= 5;
+            var atEnd = container.scrollLeft >= maxScroll - 5;
+
+            if (e.deltaY !== 0) {
+                if ((e.deltaY > 0 && !atEnd) || (e.deltaY < 0 && !atStart)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    container.scrollLeft += e.deltaY;
+                }
+            }
+        }, { passive: false });
+    });
+
+    document.querySelectorAll('.reel-card').forEach(function(card) {
+        var photos = card.querySelector('.reel-photos');
+        if (!photos) return;
+        var imgs = photos.querySelectorAll('img');
+        if (imgs.length <= 1) return;
+
+        var isDragging = false;
+        var startX = 0;
+        var scrollStart = 0;
+
+        photos.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            startX = e.pageX;
+            scrollStart = photos.scrollLeft;
+            photos.style.cursor = 'grabbing';
+        });
+
+        photos.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            var dx = e.pageX - startX;
+            photos.scrollLeft = scrollStart - dx;
+        });
+
+        photos.addEventListener('mouseup', function() { isDragging = false; photos.style.cursor = 'grab'; });
+        photos.addEventListener('mouseleave', function() { isDragging = false; photos.style.cursor = 'grab'; });
+
+        photos.style.cursor = 'grab';
     });
     </script>
 </body>
