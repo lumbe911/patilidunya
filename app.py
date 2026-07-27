@@ -751,12 +751,12 @@ with app.app_context():
     except Exception:
         db.session.rollback()
     try:
-        db.session.execute(db.text('ALTER TABLE user ADD COLUMN reset_token VARCHAR(256)'))
+        db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN reset_token VARCHAR(256)'))
         db.session.commit()
     except Exception:
         db.session.rollback()
     try:
-        db.session.execute(db.text('ALTER TABLE user ADD COLUMN reset_expiry DATETIME'))
+        db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN reset_expiry TIMESTAMP'))
         db.session.commit()
     except Exception:
         db.session.rollback()
