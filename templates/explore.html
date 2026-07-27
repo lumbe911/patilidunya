@@ -4,13 +4,13 @@
 <div class="container">
     <h1 class="page-title">Kedileri Kesfet</h1>
 
-    <form method="GET" action="{{ url_for('explore') }}" style="max-width:500px; margin:0 auto 2rem;">
+    <form method="GET" action="{{ url_for('explore') }}" style="max-width:350px; margin-bottom:1.5rem;">
         <div style="display:flex; gap:0.5rem;">
-            <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Kedi ara... (isim, renk, bolge)"
-                style="flex:1; padding:0.75rem 1rem; border:2px solid var(--pink-200); border-radius:var(--radius-full); font-family:'Nunito',sans-serif; font-size:1rem; background:white;">
-            <button type="submit" class="btn btn-primary btn-sm">Ara</button>
+            <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Kedi ara..."
+                style="flex:1; padding:0.5rem 0.85rem; border:1.5px solid var(--pink-200); border-radius:var(--radius-full); font-family:'Nunito',sans-serif; font-size:0.88rem; background:white;">
+            <button type="submit" class="btn btn-primary btn-sm" style="padding:0.45rem 0.9rem;">Ara</button>
             {% if search_query %}
-            <a href="{{ url_for('explore') }}" class="btn btn-secondary btn-sm">Temizle</a>
+            <a href="{{ url_for('explore') }}" class="btn btn-secondary btn-sm" style="padding:0.45rem 0.9rem;">X</a>
             {% endif %}
         </div>
     </form>
