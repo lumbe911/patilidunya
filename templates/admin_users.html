@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Admin - Kullanicilar - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container">
+    <div style="text-align:center; margin-bottom:2rem;">
+        <h1 style="font-size:1.8rem; font-weight:800; background:linear-gradient(135deg, var(--pink-600), var(--purple-500)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">🛡️ Admin Panel</h1>
+        <p style="color:var(--gray-500); margin-top:0.5rem;">Toplam <strong>{{ total }}</strong> kayitli kullanici</p>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:1rem;">
+        {% for item in user_data %}
+        <div style="background:white; border-radius:var(--radius); padding:1.25rem; border:1px solid var(--pink-100); box-shadow:var(--shadow-sm); display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+            {% if item.user.avatar %}
+            <img src="{{ item.user.avatar }}" style="width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid var(--pink-200); flex-shrink:0;">
+            {% else %}
+            <div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, var(--pink-300), var(--purple-400)); display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:800; color:white; flex-shrink:0;">{{ item.user.username[0]|upper }}</div>
+            {% endif %}
+
+            <div style="flex:1; min-width:150px;">
+                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                    <a href="{{ url_for('user_profile', username=item.user.username) }}" style="font-weight:800; font-size:1.05rem; color:var(--pink-600);">{{ item.user.display_name or item.user.username }}</a>
+                    {% if item.user.username == 'Lumbe' %}
+                    <span style="background:linear-gradient(135deg, var(--pink-500), var(--purple-500)); color:white; font-size:0.6rem; font-weight:800; padding:2px 8px; border-radius:9999px;">ADMIN</span>
+                    {% endif %}
+                </div>
+                <div style="font-size:0.8rem; color:var(--gray-500); margin-top:2px;">
+                    @{{ item.user.username }} &middot; {{ item.user.email }}
+                </div>
+                <div style="font-size:0.75rem; color:var(--gray-300); margin-top:2px;">
+                    📅 {{ item.user.created_at.strftime('%d %b %Y, %H:%M') }}
+                </div>
+            </div>
+
+            <div style="display:flex; gap:1.25rem; flex-shrink:0;">
+                <div style="text-align:center;">
+                    <div style="font-weight:800; color:var(--pink-600); font-size:1.1rem;">{{ item.cat_count }}</div>
+                    <div style="font-size:0.7rem; color:var(--gray-500);">Kedi</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="font-weight:800; color:var(--pink-600); font-size:1.1rem;">{{ item.like_count }}</div>
+                    <div style="font-size:0.7rem; color:var(--gray-500);">Begeni</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="font-weight:800; color:var(--pink-600); font-size:1.1rem;">{{ item.comment_count }}</div>
+                    <div style="font-size:0.7rem; color:var(--gray-500);">Yorum</div>
+                </div>
+            </div>
+
+            <a href="{{ url_for('user_profile', username=item.user.username) }}" class="btn btn-secondary btn-sm" style="flex-shrink:0;">Profili Gor</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not user_data %}
+    <div class="empty-state">
+        <div class="icon">👤</div>
+        <h3>Henuz kullanici yok</h3>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

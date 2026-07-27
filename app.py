@@ -680,6 +680,23 @@ def cat_map():
     return render_template('cat_map.html', cat_data=cat_data)
 
 
+@app.route('/admin/users')
+@login_required
+def admin_users():
+    if current_user.username != 'Lumbe':
+        abort(403)
+    users = User.query.order_by(User.created_at.desc()).all()
+    user_data = []
+    for u in users:
+        user_data.append({
+            'user': u,
+            'cat_count': Cat.query.filter_by(owner_id=u.id).count(),
+            'like_count': Like.query.join(Cat).filter(Cat.owner_id == u.id).count(),
+            'comment_count': Comment.query.filter_by(user_id=u.id).count()
+        })
+    return render_template('admin_users.html', user_data=user_data, total=len(users))
+
+
 @app.route('/admin/seed')
 @login_required
 def seed_cats():
