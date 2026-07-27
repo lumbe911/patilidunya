@@ -2,7 +2,24 @@
 {% block title %}Kedileri Kesfet - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container">
-    <h1 class="page-title">Kedileri Kesfet 🐱</h1>
+    <h1 class="page-title">Kedileri Kesfet</h1>
+
+    <form method="GET" action="{{ url_for('explore') }}" style="max-width:500px; margin:0 auto 2rem;">
+        <div style="display:flex; gap:0.5rem;">
+            <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Kedi ara... (isim, renk, bolge)"
+                style="flex:1; padding:0.75rem 1rem; border:2px solid var(--pink-200); border-radius:var(--radius-full); font-family:'Nunito',sans-serif; font-size:1rem; background:white;">
+            <button type="submit" class="btn btn-primary btn-sm">Ara</button>
+            {% if search_query %}
+            <a href="{{ url_for('explore') }}" class="btn btn-secondary btn-sm">Temizle</a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if search_query %}
+    <p style="text-align:center; color:var(--gray-500); margin-bottom:1.5rem;">
+        "<strong>{{ search_query }}</strong>" icin {{ cats.total }} sonuc bulundu
+    </p>
+    {% endif %}
 
     {% if cats.items %}
     <div class="cat-grid">
@@ -52,19 +69,19 @@
     {% if cats.pages > 1 %}
     <div class="pagination">
         {% if cats.has_prev %}
-        <a href="{{ url_for('explore', page=cats.prev_num) }}">&#8592; Onceki</a>
+        <a href="{{ url_for('explore', page=cats.prev_num, q=search_query) }}">&#8592; Onceki</a>
         {% endif %}
         {% for p in cats.iter_pages() %}
             {% if p %}
                 {% if p == cats.page %}
                     <span class="current">{{ p }}</span>
                 {% else %}
-                    <a href="{{ url_for('explore', page=p) }}">{{ p }}</a>
+                    <a href="{{ url_for('explore', page=p, q=search_query) }}">{{ p }}</a>
                 {% endif %}
             {% endif %}
         {% endfor %}
         {% if cats.has_next %}
-        <a href="{{ url_for('explore', page=cats.next_num) }}">Sonraki &#8594;</a>
+        <a href="{{ url_for('explore', page=cats.next_num, q=search_query) }}">Sonraki &#8594;</a>
         {% endif %}
     </div>
     {% endif %}
@@ -72,9 +89,15 @@
     {% else %}
     <div class="empty-state">
         <div class="icon">🐱</div>
+        {% if search_query %}
+        <h3>Sonuc bulunamadi</h3>
+        <p>Farkli kelimelerle tekrar dene.</p>
+        <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Tum Kediler</a>
+        {% else %}
         <h3>Henuz kedi eklenmemis</h3>
         <p>Ilk kediyi sen ekle!</p>
         <a href="{{ url_for('new_cat') }}" class="btn btn-primary" style="margin-top:1rem;">+ Kedi Ekle</a>
+        {% endif %}
     </div>
     {% endif %}
 </div>

@@ -158,8 +158,20 @@ def index():
 @login_required
 def explore():
     page = request.args.get('page', 1, type=int)
-    cats = Cat.query.order_by(Cat.created_at.desc()).paginate(page=page, per_page=12, error_out=False)
-    return render_template('explore.html', cats=cats)
+    q = request.args.get('q', '').strip()
+    query = Cat.query
+    if q:
+        like_pattern = f'%{q}%'
+        query = query.filter(
+            db.or_(
+                Cat.name.ilike(like_pattern),
+                Cat.color.ilike(like_pattern),
+                Cat.location.ilike(like_pattern),
+                Cat.description.ilike(like_pattern)
+            )
+        )
+    cats = query.order_by(Cat.created_at.desc()).paginate(page=page, per_page=12, error_out=False)
+    return render_template('explore.html', cats=cats, search_query=q)
 
 
 @app.route('/reels')
@@ -424,6 +436,73 @@ def delete_comment(cat_id, comment_id):
     db.session.commit()
     flash('Yorum silindi.', 'info')
     return redirect(url_for('cat_detail', cat_id=cat_id))
+
+
+@app.route('/admin/seed')
+@login_required
+def seed_cats():
+    if current_user.username != 'Lumbe':
+        abort(403)
+    if Cat.query.count() > 0:
+        flash('Zaten kedi var, seed calistirilmadi.', 'warning')
+        return redirect(url_for('explore'))
+    import io
+    import urllib.request
+    seed_data = [
+        {'name': 'Pamuk', 'gender': 'Female', 'color': 'Beyaz', 'location': 'Istanbul, Kadikoy', 'description': 'Sokakta buldum, cok uysal ve sevgi dolu. Gozleri masmavi.', 'age': '2 yas', 'photos': [
+            'https://cdn2.thecatapi.com/images/MTk4ODA2Mw.jpg',
+            'https://cdn2.thecatapi.com/images/MTk4ODA2Mw.jpg'
+        ]},
+        {'name': 'Boncuk', 'gender': 'Female', 'color': 'Turuncu', 'location': 'Ankara, Cankaya', 'description': 'Bahce kedisi, gozleri yesil. Miyavlama sesi cok tatli.', 'age': '1 yas', 'photos': [
+            'https://cdn2.thecatapi.com/images/0XYvRd7oD.jpg',
+            'https://cdn2.thecatapi.com/images/0XYvRd7oD.jpg'
+        ]},
+        {'name': 'Karabas', 'gender': 'Male', 'color': 'Siyah', 'location': 'Izmir, Alsancak', 'description': 'Sokak krali, cok cesur ve oyuncu. Herkesi tanir.', 'age': '3 yas', 'photos': [
+            'https://cdn2.thecatapi.com/images/MTk4NjY4Mg.jpg',
+            'https://cdn2.thecatapi.com/images/MTk4NjY4Mg.jpg'
+        ]},
+        {'name': 'Seker', 'gender': 'Female', 'color': 'Gri-beyaz', 'location': 'Istanbul, Besiktas', 'description': 'Cok tatli, kucuk bir kedi. Insanlara cok yakin.', 'age': '6 ay', 'photos': [
+            'https://cdn2.thecatapi.com/images/2m7.jpg',
+            'https://cdn2.thecatapi.com/images/2m7.jpg'
+        ]},
+        {'name': 'Tarçın', 'gender': 'Male', 'color': 'Kahverengi', 'location': 'Bursa, Nilufer', 'description': 'Buyuk ve guclu bir kedi. Patileri cok buyuk.', 'age': '4 yas', 'photos': [
+            'https://cdn2.thecatapi.com/images/MTk4NjY4MQ.jpg',
+            'https://cdn2.thecatapi.com/images/MTk4NjY4MQ.jpg'
+        ]},
+        {'name': 'Luna', 'gender': 'Female', 'color': 'Turuncu-beyaz', 'location': 'Antalya, Konyaalti', 'description': 'Gece kedisi, yildizlari sever. Cok gizemli.', 'age': '2 yas', 'photos': [
+            'https://cdn2.thecatapi.com/images/MTk4ODA2NQ.jpg',
+            'https://cdn2.thecatapi.com/images/MTk4ODA2NQ.jpg'
+        ]},
+        {'name': 'Minik', 'gender': 'Male', 'color': 'Siyah-beyaz', 'location': 'Istanbul, Kadikoy', 'description': 'Cok kucuk ama cok cesur. Oyuncu ve enerjik.', 'age': '4 ay', 'photos': [
+            'https://cdn2.thecatapi.com/images/MTk4NjY4Mw.jpg',
+            'https://cdn2.thecatapi.com/images/MTk4NjY4Mw.jpg'
+        ]},
+        {'name': 'Peri', 'gender': 'Female', 'color': 'Gri', 'location': 'Izmir, Karsiyaka', 'description': 'Peri gibi guzel, cok sessiz ve sakin bir kedi.', 'age': '1.5 yas', 'photos': [
+            'https://cdn2.thecatapi.com/images/MTk4ODA2Ng.jpg',
+            'https://cdn2.thecatapi.com/images/MTk4ODA2Ng.jpg'
+        ]},
+    ]
+    added = 0
+    for item in seed_data:
+        cat = Cat(
+            name=item['name'], age=item['age'], gender=item['gender'],
+            color=item['color'], description=item['description'],
+            location=item['location'], found_date='2026',
+            owner_id=current_user.id
+        )
+        db.session.add(cat)
+        db.session.commit()
+        for photo_url in item['photos'][:1]:
+            try:
+                result = cloudinary.uploader.upload(photo_url, folder="patilidunya")
+                db.session.add(CatPhoto(filename=result['secure_url'], cat_id=cat.id))
+            except Exception as e:
+                print(f"SEED PHOTO ERROR: {e}")
+                db.session.add(CatPhoto(filename=photo_url, cat_id=cat.id))
+        db.session.commit()
+        added += 1
+    flash(f'{added} ornek kedi eklendi!', 'success')
+    return redirect(url_for('explore'))
 
 
 with app.app_context():
