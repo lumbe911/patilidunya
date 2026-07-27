@@ -1,5 +1,6 @@
 import os
 import secrets
+import urllib.request
 from datetime import datetime
 
 import cloudinary
@@ -480,8 +481,6 @@ def seed_cats():
         ]},
     ]
     added = 0
-    colors = ['FCE7F3', 'E0E7FF', 'D1FAE5', 'FEF3C7', 'FEE2E2', 'DBEAFE', 'F3E8FF', 'FDE68A']
-    emojis = ['%F0%9F%90%B1', '%F0%9F%90%B3', '%F0%9F%90%B1', '%F0%9F%90%B8', '%F0%9F%90%B3', '%F0%9F%90%B1', '%F0%9F%90%B3', '%F0%9F%90%B8']
     for i, item in enumerate(seed_data):
         cat = Cat(
             name=item['name'], age=item['age'], gender=item['gender'],
@@ -491,8 +490,14 @@ def seed_cats():
         )
         db.session.add(cat)
         db.session.commit()
-        photo_url = f"https://placehold.co/600x600/{colors[i]}/9333EA?text={item['name']}"
-        db.session.add(CatPhoto(filename=photo_url, cat_id=cat.id))
+        try:
+            import io
+            img_data = urllib.request.urlopen(f'https://cataas.com/cat?t={secrets.token_hex(8)}', timeout=15).read()
+            result = cloudinary.uploader.upload(img_data, folder="patilidunya",
+                public_id=f"seed_{cat.name}_{secrets.token_hex(4)}")
+            db.session.add(CatPhoto(filename=result['secure_url'], cat_id=cat.id))
+        except Exception as e:
+            print(f"SEED PHOTO ERROR {cat.name}: {e}")
         db.session.commit()
         added += 1
     flash(f'{added} ornek kedi eklendi!', 'success')
