@@ -455,30 +455,14 @@ def seed_cats():
     import io
     import urllib.request
     seed_data = [
-        {'name': 'Pamuk', 'gender': 'Female', 'color': 'Beyaz', 'location': 'Istanbul, Kadikoy', 'description': 'Sokakta buldum, cok uysal ve sevgi dolu. Gozleri masmavi.', 'age': '2 yas', 'photos': [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/1200px-Cat03.jpg'
-        ]},
-        {'name': 'Boncuk', 'gender': 'Female', 'color': 'Turuncu', 'location': 'Ankara, Cankaya', 'description': 'Bahce kedisi, gozleri yesil. Miyavlama sesi cok tatli.', 'age': '1 yas', 'photos': [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg'
-        ]},
-        {'name': 'Karabas', 'gender': 'Male', 'color': 'Siyah', 'location': 'Izmir, Alsancak', 'description': 'Sokak krali, cok cesur ve oyuncu. Herkesi tanir.', 'age': '3 yas', 'photos': [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Abysinnian_cat_blue_eyes.jpg/1200px-Abysinnian_cat_blue_eyes.jpg'
-        ]},
-        {'name': 'Seker', 'gender': 'Female', 'color': 'Gri-beyaz', 'location': 'Istanbul, Besiktas', 'description': 'Cok tatli, kucuk bir kedi. Insanlara cok yakin.', 'age': '6 ay', 'photos': [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Akoupleofkittens.JPG/1200px-Akoupleofkittens.JPG'
-        ]},
-        {'name': 'Tarcin', 'gender': 'Male', 'color': 'Kahverengi', 'location': 'Bursa, Nilufer', 'description': 'Buyuk ve guclu bir kedi. Patileri cok buyuk.', 'age': '4 yas', 'photos': [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Ambrose_cat_on_the_ledge.jpg/1200px-Ambrose_cat_on_the_ledge.jpg'
-        ]},
-        {'name': 'Luna', 'gender': 'Female', 'color': 'Turuncu-beyaz', 'location': 'Antalya, Konyaalti', 'description': 'Gece kedisi, yildizlari sever. Cok gizemli.', 'age': '2 yas', 'photos': [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Cat_poster_1.jpg/1200px-Cat_poster_1.jpg'
-        ]},
-        {'name': 'Minik', 'gender': 'Male', 'color': 'Siyah-beyaz', 'location': 'Istanbul, Kadikoy', 'description': 'Cok kucuk ama cok cesur. Oyuncu ve enerjik.', 'age': '4 ay', 'photos': [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/1248px-Cat_img.jpg/1200px-1248px-Cat_img.jpg'
-        ]},
-        {'name': 'Peri', 'gender': 'Female', 'color': 'Gri', 'location': 'Izmir, Karsiyaka', 'description': 'Peri gibi guzel, cok sessiz ve sakin bir kedi.', 'age': '1.5 yas', 'photos': [
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Gatto_europeo4.jpg/1200px-Gatto_europeo4.jpg'
-        ]},
+        {'name': 'Pamuk', 'gender': 'Female', 'color': 'Beyaz', 'location': 'Istanbul, Kadikoy', 'description': 'Sokakta buldum, cok uysal ve sevgi dolu. Kucağa gelmeyi cok seviyor.', 'age': '2 yas'},
+        {'name': 'Boncuk', 'gender': 'Female', 'color': 'Turuncu', 'location': 'Ankara, Cankaya', 'description': 'Bahce kedisi, veryali ve merakli. Her seyin ustune atlar.', 'age': '1 yas'},
+        {'name': 'Karabas', 'gender': 'Male', 'color': 'Siyah', 'location': 'Izmir, Alsancak', 'description': 'Sokak krali, cok cesur ve oyuncu. Herkesi tanir, kimseye korkmaz.', 'age': '3 yas'},
+        {'name': 'Seker', 'gender': 'Female', 'color': 'Gri-beyaz', 'location': 'Istanbul, Besiktas', 'description': 'Cok tatli, kucuk bir kedi. Insanlara cok yakin, sureli miyavlar.', 'age': '6 ay'},
+        {'name': 'Tarcin', 'gender': 'Male', 'color': 'Kahverengi', 'location': 'Bursa, Nilufer', 'description': 'Buyuk ve guclu bir kedi. Yemek zamanini cok iyi bilir.', 'age': '4 yas'},
+        {'name': 'Luna', 'gender': 'Female', 'color': 'Turuncu-beyaz', 'location': 'Antalya, Konyaalti', 'description': 'Gece kedisi, yildizlari sever. Pencere kenarinda saatlerce oturur.', 'age': '2 yas'},
+        {'name': 'Minik', 'gender': 'Male', 'color': 'Siyah-beyaz', 'location': 'Istanbul, Kadikoy', 'description': 'Cok kucuk ama cok cesur. Oyuncu ve enerjik, hic durmaz.', 'age': '4 ay'},
+        {'name': 'Peri', 'gender': 'Female', 'color': 'Gri', 'location': 'Izmir, Karsiyaka', 'description': 'Cok sessiz ve sakin bir kedi. Sevmeyi cok sever, huzur verir.', 'age': '1.5 yas'},
     ]
     added = 0
     for i, item in enumerate(seed_data):
