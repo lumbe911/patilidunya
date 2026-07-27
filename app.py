@@ -1,6 +1,9 @@
 import os
 import secrets
+import smtplib
 import urllib.request
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 
 import cloudinary
@@ -34,11 +37,36 @@ cloudinary.config(
 SITE_PRIVATE = os.environ.get('SITE_PRIVATE', '').strip().lower() in ('true', '1', 'yes')
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', '').strip()
 
+MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
+MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
+MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
+MAIL_SENDER = os.environ.get('MAIL_SENDER', MAIL_USERNAME)
+SITE_URL = os.environ.get('SITE_URL', 'https://patilidunya.onrender.com')
+
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Lutfen giris yapin.'
 login_manager.login_message_category = 'warning'
+
+
+def send_email(to_email, subject, html_body):
+    if not MAIL_USERNAME or not MAIL_PASSWORD:
+        return False
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = MAIL_SENDER
+        msg['To'] = to_email
+        msg.attach(MIMEText(html_body, 'html'))
+        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
+            server.starttls()
+            server.login(MAIL_USERNAME, MAIL_PASSWORD)
+            server.sendmail(MAIL_SENDER, to_email, msg.as_string())
+        return True
+    except Exception:
+        return False
 
 
 class User(UserMixin, db.Model):
@@ -295,14 +323,30 @@ def forgot_password():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         user = User.query.filter_by(username=username).first()
-        if user:
+        if user and user.email:
             token = secrets.token_urlsafe(32)
             user.reset_token = token
             user.reset_expiry = datetime.utcnow() + timedelta(hours=1)
             db.session.commit()
-            flash('Sifre sifirlama baglantisi olusturuldu!', 'success')
-            return redirect(url_for('reset_password', token=token))
-        flash('Boyle bir kullanici bulunamadi!', 'danger')
+            reset_url = SITE_URL + url_for('reset_password', token=token)
+            html = f"""
+            <div style="font-family:sans-serif; max-width:400px; margin:0 auto; padding:2rem;">
+                <h2 style="color:#db2777;">🐱 PatiliDunya - Sifre Sifirlama</h2>
+                <p>Merhaba <strong>{user.display_name or user.username}</strong>,</p>
+                <p>Sifreni sifirlamak icin asagidaki linke tikla:</p>
+                <a href="{reset_url}" style="display:inline-block; padding:0.8rem 1.5rem; background:linear-gradient(135deg,#ec4899,#a855f7); color:white; border-radius:9999px; text-decoration:none; font-weight:700; margin:1rem 0;">Sifremi Sifirla</a>
+                <p style="color:#6b7280; font-size:0.85rem;">Bu link 1 saat icinde gecerlilgini yitirir.</p>
+                <p style="color:#6b7280; font-size:0.85rem;">Eger bu istegi sen yapmadiysan, bu emaili gorunce ignorala.</p>
+            </div>
+            """
+            sent = send_email(user.email, 'PatiliDunya - Sifre Sifirlama', html)
+            if sent:
+                flash('Sifre sifirlama emaili gonderildi! E-postani kontrol et.', 'success')
+            else:
+                flash('Email gonderilemedi. Daha sonra tekrar dene.', 'danger')
+        else:
+            flash('Boyle bir kullanici bulunamadi!', 'danger')
+        return redirect(url_for('login'))
     return render_template('forgot_password.html')
 
 
