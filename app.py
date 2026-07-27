@@ -95,8 +95,10 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     cat_id = db.Column(db.Integer, db.ForeignKey('cat.id'), nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
     user = db.relationship('User', backref='comments')
     cat = db.relationship('Cat', backref=db.backref('comments', lazy=True, cascade='all, delete-orphan'))
+    replies = db.relationship('Comment', backref=db.backref('parent', remote_side='Comment.id'), lazy=True)
 
 
 class View(db.Model):
@@ -471,14 +473,42 @@ def add_comment(cat_id):
 @app.route('/api/comments/<int:cat_id>')
 @login_required
 def get_comments(cat_id):
-    comments = Comment.query.filter_by(cat_id=cat_id).order_by(Comment.created_at.desc()).limit(50).all()
-    return jsonify({'comments': [{
-        'text': c.text,
-        'username': c.user.username,
-        'display_name': c.user.display_name or c.user.username,
-        'avatar': c.user.avatar or '',
-        'time': c.created_at.strftime('%d %b')
-    } for c in comments]})
+    comments = Comment.query.filter_by(cat_id=cat_id, parent_id=None).order_by(Comment.created_at.desc()).limit(50).all()
+    def serialize(c):
+        return {
+            'id': c.id,
+            'text': c.text,
+            'username': c.user.username,
+            'display_name': c.user.display_name or c.user.username,
+            'avatar': c.user.avatar or '',
+            'time': c.created_at.strftime('%d %b'),
+            'user_id': c.user_id,
+            'replies': [serialize(r) for r in sorted(c.replies, key=lambda x: x.created_at)]
+        }
+    return jsonify({'comments': [serialize(c) for c in comments]})
+
+
+@app.route('/cat/<int:cat_id>/comment/<int:comment_id>/reply', methods=['POST'])
+@login_required
+def reply_comment(cat_id, comment_id):
+    parent = Comment.query.get_or_404(comment_id)
+    cat = Cat.query.get_or_404(cat_id)
+    text = request.form.get('text', '').strip()
+    if text:
+        reply = Comment(text=text, user_id=current_user.id, cat_id=cat_id, parent_id=comment_id)
+        db.session.add(reply)
+        if parent.user_id != current_user.id:
+            notif = Notification(
+                user_id=parent.user_id, from_user_id=current_user.id,
+                cat_id=cat_id, notif_type='comment',
+                text=f'{current_user.display_name or current_user.username} "{cat.name}" yorumuna yanit verdi: {text[:50]}'
+            )
+            db.session.add(notif)
+        db.session.commit()
+    next_url = request.form.get('next', '')
+    if next_url == 'reels':
+        return redirect(url_for('reels'))
+    return redirect(url_for('cat_detail', cat_id=cat_id))
 
 
 @app.route('/cat/<int:cat_id>/comment/<int:comment_id>/delete', methods=['POST'])
@@ -669,6 +699,11 @@ def seed_cats():
 
 with app.app_context():
     db.create_all()
+    try:
+        db.session.execute(db.text('ALTER TABLE comment ADD COLUMN parent_id INTEGER'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

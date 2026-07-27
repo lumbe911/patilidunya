@@ -401,7 +401,30 @@
                         } else {
                             html += '<div class="c-avatar-ph">' + c.username[0].toUpperCase() + '</div>';
                         }
-                        html += '<div><span class="c-name">' + c.display_name + '</span> <span class="c-time">' + c.time + '</span><div class="c-text">' + c.text + '</div></div></div>';
+                        html += '<div style="flex:1; min-width:0;">';
+                        html += '<span class="c-name">' + c.display_name + '</span> <span class="c-time">' + c.time + '</span>';
+                        html += '<div class="c-text">' + c.text + '</div>';
+                        html += '<button onclick="toggleReplyInput(' + c.id + ')" style="background:none; border:none; color:#ec4899; font-size:0.7rem; font-weight:700; cursor:pointer; padding:0;">Yanitla</button>';
+                        html += '<div id="reply-input-' + c.id + '" style="display:none; margin-top:6px;">';
+                        html += '<form method="POST" action="/cat/' + catId + '/comment/' + c.id + '/reply" style="display:flex; gap:4px;">';
+                        html += '<input type="text" name="text" placeholder="Yanit yaz..." required style="flex:1; padding:4px 8px; border:1px solid #f9a8d4; border-radius:9999px; font-size:0.75rem; font-family:Nunito,sans-serif;">';
+                        html += '<input type="hidden" name="next" value="reels">';
+                        html += '<button type="submit" style="background:#ec4899; color:white; border:none; border-radius:9999px; padding:4px 10px; font-size:0.7rem; font-weight:700; cursor:pointer;">Gonder</button>';
+                        html += '</form></div>';
+                        if (c.replies && c.replies.length > 0) {
+                            html += '<div style="margin-top:6px; padding-left:8px; border-left:2px solid #fce7f3; display:flex; flex-direction:column; gap:4px;">';
+                            c.replies.forEach(function(r) {
+                                html += '<div class="comment-item" style="padding:4px 0;">';
+                                if (r.avatar) {
+                                    html += '<img class="c-avatar" src="' + r.avatar + '" style="width:22px; height:22px;">';
+                                } else {
+                                    html += '<div class="c-avatar-ph" style="width:22px; height:22px; font-size:0.55rem;">' + r.username[0].toUpperCase() + '</div>';
+                                }
+                                html += '<div><span class="c-name" style="font-size:0.7rem;">' + r.display_name + '</span> <span class="c-time">' + r.time + '</span><div class="c-text" style="font-size:0.75rem;">' + r.text + '</div></div></div>';
+                            });
+                            html += '</div>';
+                        }
+                        html += '</div></div>';
                     });
                 }
                 document.getElementById('commentList').innerHTML = html;
@@ -414,6 +437,11 @@
     function closeComments() {
         document.getElementById('commentBox').classList.remove('open');
         document.getElementById('commentOverlay').classList.remove('open');
+    }
+
+    function toggleReplyInput(commentId) {
+        var el = document.getElementById('reply-input-' + commentId);
+        if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
     }
 
     document.querySelectorAll('.reel-photos').forEach(function(container) {
