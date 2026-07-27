@@ -455,28 +455,28 @@ def seed_cats():
     import urllib.request
     seed_data = [
         {'name': 'Pamuk', 'gender': 'Female', 'color': 'Beyaz', 'location': 'Istanbul, Kadikoy', 'description': 'Sokakta buldum, cok uysal ve sevgi dolu. Gozleri masmavi.', 'age': '2 yas', 'photos': [
-            'https://cataas.com/cat/says/Pamuk?fontSize=50&fontColor=white&type=or'
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/1200px-Cat03.jpg'
         ]},
         {'name': 'Boncuk', 'gender': 'Female', 'color': 'Turuncu', 'location': 'Ankara, Cankaya', 'description': 'Bahce kedisi, gozleri yesil. Miyavlama sesi cok tatli.', 'age': '1 yas', 'photos': [
-            'https://cataas.com/cat/says/Boncuk?fontSize=50&fontColor=white&type=si'
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg'
         ]},
         {'name': 'Karabas', 'gender': 'Male', 'color': 'Siyah', 'location': 'Izmir, Alsancak', 'description': 'Sokak krali, cok cesur ve oyuncu. Herkesi tanir.', 'age': '3 yas', 'photos': [
-            'https://cataas.com/cat/says/Karabas?fontSize=50&fontColor=white&type=fr'
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Abysinnian_cat_blue_eyes.jpg/1200px-Abysinnian_cat_blue_eyes.jpg'
         ]},
         {'name': 'Seker', 'gender': 'Female', 'color': 'Gri-beyaz', 'location': 'Istanbul, Besiktas', 'description': 'Cok tatli, kucuk bir kedi. Insanlara cok yakin.', 'age': '6 ay', 'photos': [
-            'https://cataas.com/cat/says/Seker?fontSize=50&fontColor=white&type=or'
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Akoupleofkittens.JPG/1200px-Akoupleofkittens.JPG'
         ]},
         {'name': 'Tarcin', 'gender': 'Male', 'color': 'Kahverengi', 'location': 'Bursa, Nilufer', 'description': 'Buyuk ve guclu bir kedi. Patileri cok buyuk.', 'age': '4 yas', 'photos': [
-            'https://cataas.com/cat/says/Tarcin?fontSize=50&fontColor=white&type=si'
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Ambrose_cat_on_the_ledge.jpg/1200px-Ambrose_cat_on_the_ledge.jpg'
         ]},
         {'name': 'Luna', 'gender': 'Female', 'color': 'Turuncu-beyaz', 'location': 'Antalya, Konyaalti', 'description': 'Gece kedisi, yildizlari sever. Cok gizemli.', 'age': '2 yas', 'photos': [
-            'https://cataas.com/cat/says/Luna?fontSize=50&fontColor=white&type=or'
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Cat_poster_1.jpg/1200px-Cat_poster_1.jpg'
         ]},
         {'name': 'Minik', 'gender': 'Male', 'color': 'Siyah-beyaz', 'location': 'Istanbul, Kadikoy', 'description': 'Cok kucuk ama cok cesur. Oyuncu ve enerjik.', 'age': '4 ay', 'photos': [
-            'https://cataas.com/cat/says/Minik?fontSize=50&fontColor=white&type=fr'
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/1248px-Cat_img.jpg/1200px-1248px-Cat_img.jpg'
         ]},
         {'name': 'Peri', 'gender': 'Female', 'color': 'Gri', 'location': 'Izmir, Karsiyaka', 'description': 'Peri gibi guzel, cok sessiz ve sakin bir kedi.', 'age': '1.5 yas', 'photos': [
-            'https://cataas.com/cat/says/Peri?fontSize=50&fontColor=white&type=sq'
+            'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Gatto_europeo4.jpg/1200px-Gatto_europeo4.jpg'
         ]},
     ]
     added = 0
@@ -489,13 +489,8 @@ def seed_cats():
         )
         db.session.add(cat)
         db.session.commit()
-        for photo_url in item['photos'][:1]:
-            try:
-                result = cloudinary.uploader.upload(photo_url, folder="patilidunya")
-                db.session.add(CatPhoto(filename=result['secure_url'], cat_id=cat.id))
-            except Exception as e:
-                print(f"SEED PHOTO ERROR: {e}")
-                db.session.add(CatPhoto(filename=photo_url, cat_id=cat.id))
+        for photo_url in item['photos']:
+            db.session.add(CatPhoto(filename=photo_url, cat_id=cat.id))
         db.session.commit()
         added += 1
     flash(f'{added} ornek kedi eklendi!', 'success')
