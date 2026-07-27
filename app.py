@@ -1,7 +1,7 @@
 import os
 import secrets
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import cloudinary
 import cloudinary.uploader
@@ -49,6 +49,8 @@ class User(UserMixin, db.Model):
     display_name = db.Column(db.String(120), default='')
     bio = db.Column(db.Text, default='')
     avatar = db.Column(db.String(256), default='')
+    reset_token = db.Column(db.String(256), nullable=True)
+    reset_expiry = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     cats = db.relationship('Cat', backref='owner', lazy=True, cascade='all, delete-orphan')
     likes = db.relationship('Like', backref='user', lazy=True, cascade='all, delete-orphan')
@@ -284,6 +286,50 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('explore'))
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        user = User.query.filter_by(username=username).first()
+        if user:
+            token = secrets.token_urlsafe(32)
+            user.reset_token = token
+            user.reset_expiry = datetime.utcnow() + timedelta(hours=1)
+            db.session.commit()
+            flash('Sifre sifirlama baglantisi olusturuldu!', 'success')
+            return redirect(url_for('reset_password', token=token))
+        flash('Boyle bir kullanici bulunamadi!', 'danger')
+    return render_template('forgot_password.html')
+
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('explore'))
+    user = User.query.filter_by(reset_token=token).first()
+    if not user or not user.reset_expiry or user.reset_expiry < datetime.utcnow():
+        flash('Gecersiz veya suresi dolmus link!', 'danger')
+        return redirect(url_for('forgot_password'))
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        password2 = request.form.get('password2', '')
+        if len(password) < 6:
+            flash('Sifre en az 6 karakter olmali!', 'danger')
+            return render_template('reset_password.html', token=token)
+        if password != password2:
+            flash('Sifreler eslesmiyor!', 'danger')
+            return render_template('reset_password.html', token=token)
+        user.password = generate_password_hash(password)
+        user.reset_token = None
+        user.reset_expiry = None
+        db.session.commit()
+        flash('Sifreniz basariyla degistirildi! Giris yapabilirsiniz.', 'success')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', token=token)
 
 
 @app.route('/profile/<username>')
@@ -701,6 +747,16 @@ with app.app_context():
     db.create_all()
     try:
         db.session.execute(db.text('ALTER TABLE comment ADD COLUMN parent_id INTEGER'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    try:
+        db.session.execute(db.text('ALTER TABLE user ADD COLUMN reset_token VARCHAR(256)'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    try:
+        db.session.execute(db.text('ALTER TABLE user ADD COLUMN reset_expiry DATETIME'))
         db.session.commit()
     except Exception:
         db.session.rollback()

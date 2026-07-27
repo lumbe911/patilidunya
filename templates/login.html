@@ -15,7 +15,10 @@
         </div>
         <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Giris Yap</button>
     </form>
-    <p style="text-align:center; margin-top:1.5rem; color: var(--gray-500);">
+    <p style="text-align:center; margin-top:1rem;">
+        <a href="{{ url_for('forgot_password') }}" style="font-size:0.85rem; color:var(--pink-500);">Sifremi unuttum</a>
+    </p>
+    <p style="text-align:center; margin-top:1rem; color: var(--gray-500);">
         Hesabin yok mu? <a href="{{ url_for('register') }}">Kayit Ol</a>
     </p>
 </div>
