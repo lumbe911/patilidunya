@@ -4,4 +4,6 @@ flask-login==0.6.3
 werkzeug==3.1.3
 gunicorn==23.0.0
 psycopg2-binary==2.9.10
-cloudinary==1.44.1
+cloudinary
+geopy
+==1.44.1

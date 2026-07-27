@@ -540,6 +540,11 @@ def mark_read():
 @app.route('/map')
 @login_required
 def cat_map():
+    from geopy.geocoders import Nominatim
+    from geopy.exc import GeocoderTimedOut
+    import time
+
+    geolocator = Nominatim(user_agent="patilidunya_map")
     cats = Cat.query.filter(Cat.location != '').all()
     cat_data = []
     for cat in cats:
@@ -556,7 +561,39 @@ def cat_map():
             'likes': cat.like_count,
             'owner': cat.owner.display_name or cat.owner.username
         })
-    return render_template('cat_map.html', cat_data=cat_data)
+    geocoded = []
+    seen = {}
+    for cat in cat_data:
+        loc = cat['location']
+        if loc in seen:
+            cat['lat'] = seen[loc]['lat']
+            cat['lng'] = seen[loc]['lng']
+            geocoded.append(cat)
+            continue
+        try:
+            time.sleep(1.1)
+            result = geolocator.geocode(loc + ', Turkey', timeout=5)
+            if result:
+                cat['lat'] = result.latitude
+                cat['lng'] = result.longitude
+                seen[loc] = {'lat': result.latitude, 'lng': result.longitude}
+            else:
+                city = loc.split(',')[0].strip()
+                if city != loc:
+                    time.sleep(1.1)
+                    result = geolocator.geocode(city + ', Turkey', timeout=5)
+                    if result:
+                        cat['lat'] = result.latitude
+                        cat['lng'] = result.longitude
+                        seen[loc] = {'lat': result.latitude, 'lng': result.longitude}
+                    else:
+                        continue
+                else:
+                    continue
+        except Exception:
+            continue
+        geocoded.append(cat)
+    return render_template('cat_map.html', cat_data=geocoded)
 
 
 @app.route('/admin/seed')
