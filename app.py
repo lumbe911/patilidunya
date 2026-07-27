@@ -537,19 +537,46 @@ def mark_read():
     return jsonify({'ok': True})
 
 
+CITY_COORDS = {
+    'istanbul': (41.0082, 28.9784), 'ankara': (39.9334, 32.8597), 'izmir': (38.4192, 27.1287),
+    'bursa': (40.1885, 29.0610), 'antalya': (36.8969, 30.7133), 'konya': (37.8746, 32.4932),
+    'trabzon': (41.0027, 39.7168),
+}
+NEIGHBORHOOD_COORDS = {
+    'kadikoy': (40.9828, 29.0263), 'besiktas': (41.0422, 29.0068), 'sisli': (41.0602, 28.9874),
+    'beyoglu': (41.0370, 28.9850), 'fatih': (41.0165, 28.9397), 'uskudar': (41.0234, 29.0152),
+    'kartal': (40.8922, 29.1894), 'maltepe': (40.9357, 29.1462),
+    'kizilay': (39.9199, 32.8543), 'cankaya': (39.9010, 32.8630), 'gazi': (39.9659, 32.8430),
+    'alsancak': (38.4389, 27.1420), 'karsiyaka': (38.4489, 27.1715), 'bornova': (38.4705, 27.2248),
+    'cesme': (38.3250, 26.3764), 'seferihisar': (38.1981, 26.8391), 'alacati': (38.2830, 26.3753),
+    'nilufer': (40.2168, 28.9810), 'mudanya': (40.3759, 28.8833), 'goynuk': (40.4000, 29.1500),
+    'inegol': (40.0787, 29.5095),
+    'konyaalti': (36.8754, 30.6544), 'lara': (36.8529, 30.7918), 'side': (36.7670, 31.3880),
+    'ortahisar': (41.0015, 39.7178),
+}
+
+def resolve_coords(location):
+    loc = location.lower().strip()
+    for key, coords in NEIGHBORHOOD_COORDS.items():
+        if key in loc:
+            return coords
+    for key, coords in CITY_COORDS.items():
+        if key in loc:
+            return coords
+    return None
+
+
 @app.route('/map')
 @login_required
 def cat_map():
-    from geopy.geocoders import Nominatim
-    from geopy.exc import GeocoderTimedOut
-    import time
-
-    geolocator = Nominatim(user_agent="patilidunya_map")
     cats = Cat.query.filter(Cat.location != '').all()
     cat_data = []
     for cat in cats:
         loc = cat.location.strip()
         if not loc:
+            continue
+        coords = resolve_coords(loc)
+        if not coords:
             continue
         photo = cat.photos[0].filename if cat.photos else ''
         cat_data.append({
@@ -559,41 +586,11 @@ def cat_map():
             'photo': photo,
             'gender': cat.gender,
             'likes': cat.like_count,
-            'owner': cat.owner.display_name or cat.owner.username
+            'owner': cat.owner.display_name or cat.owner.username,
+            'lat': coords[0],
+            'lng': coords[1]
         })
-    geocoded = []
-    seen = {}
-    for cat in cat_data:
-        loc = cat['location']
-        if loc in seen:
-            cat['lat'] = seen[loc]['lat']
-            cat['lng'] = seen[loc]['lng']
-            geocoded.append(cat)
-            continue
-        try:
-            time.sleep(1.1)
-            result = geolocator.geocode(loc + ', Turkey', timeout=5)
-            if result:
-                cat['lat'] = result.latitude
-                cat['lng'] = result.longitude
-                seen[loc] = {'lat': result.latitude, 'lng': result.longitude}
-            else:
-                city = loc.split(',')[0].strip()
-                if city != loc:
-                    time.sleep(1.1)
-                    result = geolocator.geocode(city + ', Turkey', timeout=5)
-                    if result:
-                        cat['lat'] = result.latitude
-                        cat['lng'] = result.longitude
-                        seen[loc] = {'lat': result.latitude, 'lng': result.longitude}
-                    else:
-                        continue
-                else:
-                    continue
-        except Exception:
-            continue
-        geocoded.append(cat)
-    return render_template('cat_map.html', cat_data=geocoded)
+    return render_template('cat_map.html', cat_data=cat_data)
 
 
 @app.route('/admin/seed')
