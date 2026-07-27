@@ -28,15 +28,6 @@
                 <li><a href="{{ url_for('new_cat') }}" class="nav-link">+ Kedi Ekle</a></li>
                 <li><a href="{{ url_for('notifications') }}" class="nav-link" id="notifLink">🔔</a></li>
                 <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="nav-link">Profilim</a></li>
-                <li>
-                    <div class="theme-selector">
-                        <button class="theme-btn active" data-theme="pembe" onclick="setTheme('pembe')" title="Pembe" style="background: linear-gradient(135deg, #ec4899, #a855f7);"></button>
-                        <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')" title="Karanlik" style="background: linear-gradient(135deg, #1a1025, #4a2878);"></button>
-                        <button class="theme-btn" data-theme="mavi" onclick="setTheme('mavi')" title="Mavi" style="background: linear-gradient(135deg, #3b82f6, #6366f1);"></button>
-                        <button class="theme-btn" data-theme="yesil" onclick="setTheme('yesil')" title="Yesil" style="background: linear-gradient(135deg, #22c55e, #84cc16);"></button>
-                        <button class="theme-btn" data-theme="turuncu" onclick="setTheme('turuncu')" title="Turuncu" style="background: linear-gradient(135deg, #f97316, #ec4899);"></button>
-                    </div>
-                </li>
                 <li><a href="{{ url_for('logout') }}" class="nav-link">Cikis</a></li>
             </ul>
             {% else %}
@@ -67,33 +58,32 @@
     </footer>
 
     {% if current_user.is_authenticated %}
-    <audio id="bgMusic" loop preload="auto">
-        <source src="{{ url_for('static', filename='muzik.mp3') }}" type="audio/mpeg">
-    </audio>
-    <button id="musicBtn" onclick="toggleMusic()" style="position:fixed; bottom:20px; right:20px; width:50px; height:50px; border-radius:50%; border:2px solid var(--pink-300); background:white; cursor:pointer; font-size:1.3rem; display:flex; align-items:center; justify-content:center; z-index:100; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.3s;">
-        🔇
-    </button>
+    <div id="themePicker" style="position:fixed; bottom:20px; right:20px; z-index:100;">
+        <button id="themeToggle" onclick="toggleThemeBox()" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--pink-300); background:white; cursor:pointer; font-size:1.2rem; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.3s;">
+            🎨
+        </button>
+        <div id="themeBox" style="display:none; position:absolute; bottom:60px; right:0; background:white; border-radius:12px; padding:12px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); border:1px solid var(--pink-200); min-width:120px;">
+            <div style="font-size:0.75rem; font-weight:700; color:var(--gray-500); margin-bottom:8px; text-align:center;">Tema Sec</div>
+            <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+                <button class="theme-btn active" data-theme="pembe" onclick="setTheme('pembe')" title="Pembe" style="width:30px; height:30px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background: linear-gradient(135deg, #ec4899, #a855f7);"></button>
+                <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')" title="Karanlik" style="width:30px; height:30px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background: linear-gradient(135deg, #1a1025, #4a2878);"></button>
+                <button class="theme-btn" data-theme="mavi" onclick="setTheme('mavi')" title="Mavi" style="width:30px; height:30px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background: linear-gradient(135deg, #3b82f6, #6366f1);"></button>
+                <button class="theme-btn" data-theme="yesil" onclick="setTheme('yesil')" title="Yesil" style="width:30px; height:30px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background: linear-gradient(135deg, #22c55e, #84cc16);"></button>
+                <button class="theme-btn" data-theme="turuncu" onclick="setTheme('turuncu')" title="Turuncu" style="width:30px; height:30px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background: linear-gradient(135deg, #f97316, #ec4899);"></button>
+            </div>
+        </div>
+    </div>
     <script>
-    var musicPlaying = false;
-    function toggleMusic() {
-        var audio = document.getElementById('bgMusic');
-        var btn = document.getElementById('musicBtn');
-        if (musicPlaying) {
-            audio.pause();
-            btn.textContent = '🔇';
-            btn.style.borderColor = 'var(--pink-300)';
-            btn.style.background = 'white';
-        } else {
-            audio.play().then(function() {
-                btn.textContent = '🔊';
-                btn.style.borderColor = 'var(--pink-500)';
-                btn.style.background = 'var(--pink-100)';
-            }).catch(function() {
-                btn.textContent = '🔇';
-            });
-        }
-        musicPlaying = !musicPlaying;
+    function toggleThemeBox() {
+        var box = document.getElementById('themeBox');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
     }
+    document.addEventListener('click', function(e) {
+        var picker = document.getElementById('themePicker');
+        if (!picker.contains(e.target)) {
+            document.getElementById('themeBox').style.display = 'none';
+        }
+    });
 
     function setTheme(name) {
         document.documentElement.setAttribute('data-theme', name);
