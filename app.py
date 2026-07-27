@@ -537,6 +537,28 @@ def mark_read():
     return jsonify({'ok': True})
 
 
+@app.route('/map')
+@login_required
+def cat_map():
+    cats = Cat.query.filter(Cat.location != '').all()
+    cat_data = []
+    for cat in cats:
+        loc = cat.location.strip()
+        if not loc:
+            continue
+        photo = cat.photos[0].filename if cat.photos else ''
+        cat_data.append({
+            'id': cat.id,
+            'name': cat.name,
+            'location': loc,
+            'photo': photo,
+            'gender': cat.gender,
+            'likes': cat.like_count,
+            'owner': cat.owner.display_name or cat.owner.username
+        })
+    return render_template('cat_map.html', cat_data=cat_data)
+
+
 @app.route('/admin/seed')
 @login_required
 def seed_cats():
