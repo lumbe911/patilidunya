@@ -99,6 +99,34 @@ class Comment(db.Model):
     cat = db.relationship('Cat', backref=db.backref('comments', lazy=True, cascade='all, delete-orphan'))
 
 
+class View(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    cat_id = db.Column(db.Integer, db.ForeignKey('cat.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Favorite(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    cat_id = db.Column(db.Integer, db.ForeignKey('cat.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint('user_id', 'cat_id'),)
+
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    from_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    cat_id = db.Column(db.Integer, db.ForeignKey('cat.id'), nullable=False)
+    notif_type = db.Column(db.String(20), nullable=False)
+    text = db.Column(db.Text, default='')
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    from_user = db.relationship('User', foreign_keys=[from_user_id])
+    cat = db.relationship('Cat')
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))
@@ -261,7 +289,14 @@ def logout():
 def user_profile(username):
     user = User.query.filter_by(username=username).first_or_404()
     cats = Cat.query.filter_by(owner_id=user.id).order_by(Cat.created_at.desc()).all()
-    return render_template('user_profile.html', profile_user=user, cats=cats)
+    cat_ids = [c.id for c in cats]
+    total_likes = Like.query.filter(Like.cat_id.in_(cat_ids)).count() if cat_ids else 0
+    total_comments = Comment.query.filter(Comment.cat_id.in_(cat_ids)).count() if cat_ids else 0
+    total_views = View.query.filter(View.cat_id.in_(cat_ids)).count() if cat_ids else 0
+    unread = Notification.query.filter_by(user_id=user.id, is_read=False).count()
+    return render_template('user_profile.html', profile_user=user, cats=cats,
+                           total_likes=total_likes, total_comments=total_comments,
+                           total_views=total_views, unread=unread)
 
 
 @app.route('/profile/edit', methods=['GET', 'POST'])
@@ -318,11 +353,15 @@ def new_cat():
 @login_required
 def cat_detail(cat_id):
     cat = Cat.query.get_or_404(cat_id)
-    liked = False
-    if current_user.is_authenticated:
-        liked = Like.query.filter_by(user_id=current_user.id, cat_id=cat_id).first() is not None
+    existing_view = View.query.filter_by(user_id=current_user.id, cat_id=cat_id).first()
+    if not existing_view:
+        db.session.add(View(user_id=current_user.id, cat_id=cat_id))
+        db.session.commit()
+    liked = Like.query.filter_by(user_id=current_user.id, cat_id=cat_id).first() is not None
+    is_fav = Favorite.query.filter_by(user_id=current_user.id, cat_id=cat_id).first() is not None
+    view_count = View.query.filter_by(cat_id=cat_id).count()
     comments = Comment.query.filter_by(cat_id=cat_id).order_by(Comment.created_at.desc()).all()
-    return render_template('cat_detail.html', cat=cat, liked=liked, comments=comments)
+    return render_template('cat_detail.html', cat=cat, liked=liked, comments=comments, is_fav=is_fav, view_count=view_count)
 
 
 @app.route('/cat/<int:cat_id>/edit', methods=['GET', 'POST'])
@@ -387,16 +426,24 @@ def delete_photo(cat_id, photo_id):
 @app.route('/api/like/<int:cat_id>', methods=['POST'])
 @login_required
 def toggle_like(cat_id):
+    cat = Cat.query.get_or_404(cat_id)
     existing = Like.query.filter_by(user_id=current_user.id, cat_id=cat_id).first()
     if existing:
         db.session.delete(existing)
         db.session.commit()
-        return jsonify({'liked': False, 'count': Cat.query.get(cat_id).like_count})
+        return jsonify({'liked': False, 'count': cat.like_count})
     else:
         like = Like(user_id=current_user.id, cat_id=cat_id)
         db.session.add(like)
+        if cat.owner_id != current_user.id:
+            notif = Notification(
+                user_id=cat.owner_id, from_user_id=current_user.id,
+                cat_id=cat_id, notif_type='like',
+                text=f'{current_user.display_name or current_user.username} kedin {cat.name} begendi!'
+            )
+            db.session.add(notif)
         db.session.commit()
-        return jsonify({'liked': True, 'count': Cat.query.get(cat_id).like_count})
+        return jsonify({'liked': True, 'count': cat.like_count})
 
 
 @app.route('/cat/<int:cat_id>/comment', methods=['POST'])
@@ -407,6 +454,13 @@ def add_comment(cat_id):
     if text:
         comment = Comment(text=text, user_id=current_user.id, cat_id=cat_id)
         db.session.add(comment)
+        if cat.owner_id != current_user.id:
+            notif = Notification(
+                user_id=cat.owner_id, from_user_id=current_user.id,
+                cat_id=cat_id, notif_type='comment',
+                text=f'{current_user.display_name or current_user.username} kinen {cat.name} yorum yapti: {text[:50]}'
+            )
+            db.session.add(notif)
         db.session.commit()
     next_url = request.form.get('next', '')
     if next_url == 'reels':
@@ -437,6 +491,50 @@ def delete_comment(cat_id, comment_id):
     db.session.commit()
     flash('Yorum silindi.', 'info')
     return redirect(url_for('cat_detail', cat_id=cat_id))
+
+
+@app.route('/api/favorite/<int:cat_id>', methods=['POST'])
+@login_required
+def toggle_favorite(cat_id):
+    existing = Favorite.query.filter_by(user_id=current_user.id, cat_id=cat_id).first()
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        return jsonify({'favorited': False})
+    else:
+        db.session.add(Favorite(user_id=current_user.id, cat_id=cat_id))
+        db.session.commit()
+        return jsonify({'favorited': True})
+
+
+@app.route('/favorites')
+@login_required
+def favorites():
+    favs = Favorite.query.filter_by(user_id=current_user.id).order_by(Favorite.created_at.desc()).all()
+    cats = [Cat.query.get(f.cat_id) for f in favs if Cat.query.get(f.cat_id)]
+    return render_template('favorites.html', cats=cats)
+
+
+@app.route('/notifications')
+@login_required
+def notifications():
+    notifs = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(50).all()
+    return render_template('notifications.html', notifications=notifs)
+
+
+@app.route('/api/notifications/unread')
+@login_required
+def unread_count():
+    count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+    return jsonify({'count': count})
+
+
+@app.route('/api/notifications/read', methods=['POST'])
+@login_required
+def mark_read():
+    Notification.query.filter_by(user_id=current_user.id, is_read=False).update({'is_read': True})
+    db.session.commit()
+    return jsonify({'ok': True})
 
 
 @app.route('/admin/seed')
@@ -486,9 +584,6 @@ def seed_cats():
         {'name': 'Cilek', 'gender': 'Female', 'color': 'Pembe-beyaz', 'location': 'Izmir, Alacati', 'description': 'Pembe patili, tatli mi tatli. Herkesin gozdesi olur hemen.', 'age': '6 ay', 'photo': 'https://cdn2.thecatapi.com/images/MTk4ODA2Mg.jpg'},
     ]
     added = 0
-    colors = ['FCE7F3','E0E7FF','D1FAE5','FEF3C7','FEE2E2','DBEAFE','F3E8FF','FDE68A',
-              'FECACA','CCFBF1','E9D5FF','FEF9C3','D1D5DB','BFDBFE','FBCFE8','A7F3D0',
-              'FED7AA','C7D2FE','FCA5A5','BBF7D0','FDE68A','DDD6FE','BAE6FD','F9A8D4']
     for i, item in enumerate(seed_data):
         cat = Cat(
             name=item['name'], age=item['age'], gender=item['gender'],
@@ -498,8 +593,7 @@ def seed_cats():
         )
         db.session.add(cat)
         db.session.commit()
-        photo_url = f"https://placehold.co/600x600/{colors[i % len(colors)]}/7C3AED?text={item['name']}"
-        db.session.add(CatPhoto(filename=photo_url, cat_id=cat.id))
+        db.session.add(CatPhoto(filename=item['photo'], cat_id=cat.id))
         db.session.commit()
         added += 1
     flash(f'{added} ornek kedi eklendi!', 'success')

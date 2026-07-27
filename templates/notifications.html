@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Bildirimler - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="page-title">Bildirimler</h1>
+
+    {% if notifications %}
+    <div style="max-width:600px; margin:0 auto;">
+        {% for n in notifications %}
+        <div style="display:flex; align-items:center; gap:0.75rem; padding:1rem; margin-bottom:0.5rem; border-radius:var(--radius-sm); background:{% if not n.is_read %}var(--pink-50){% else %}white{% endif %}; border:1px solid var(--pink-100);">
+            {% if n.from_user.avatar %}
+            <img src="{{ n.from_user.avatar }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+            {% else %}
+            <div style="width:40px; height:40px; border-radius:50%; background:var(--pink-200); display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;">{{ n.from_user.username[0]|upper }}</div>
+            {% endif %}
+            <div style="flex:1;">
+                <div style="font-weight:600; font-size:0.9rem;">
+                    {% if n.notif_type == 'like' %}
+                    💖 {{ n.text }}
+                    {% elif n.notif_type == 'comment' %}
+                    💬 {{ n.text }}
+                    {% else %}
+                    {{ n.text }}
+                    {% endif %}
+                </div>
+                <div style="font-size:0.75rem; color:var(--gray-500); margin-top:0.2rem;">{{ n.created_at.strftime('%d %b %Y, %H:%M') }}</div>
+            </div>
+            <a href="{{ url_for('cat_detail', cat_id=n.cat_id) }}" style="font-size:0.8rem; color:var(--pink-600); font-weight:700; white-space:nowrap;">Gor</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">🔔</div>
+        <h3>Henuz bildirimin yok</h3>
+        <p>Birisi kedilerini begendiginde veya yorum yaptiginda burada gorunecek.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

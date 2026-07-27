@@ -56,6 +56,13 @@
                     {% if liked %}❤️{% else %}🤍{% endif %}
                 </button>
                 <span class="like-count" id="like-count-{{ cat.id }}" style="font-size:1.1rem;">{{ cat.like_count }} kisi begendi</span>
+                <button class="like-btn {% if is_fav %}liked{% endif %}" onclick="toggleFav({{ cat.id }}, this)" style="font-size:1.5rem;">
+                    {% if is_fav %}⭐{% else %}☆{% endif %}
+                </button>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:var(--gray-500);">
+                <span>👁 {{ view_count }} kez goruntulendi</span>
             </div>
 
             {% if current_user.id == cat.owner_id %}
@@ -135,6 +142,12 @@ async function toggleLike(catId, btn) {
     btn.innerHTML = data.liked ? '❤️' : '🤍';
     btn.classList.toggle('liked', data.liked);
     document.getElementById(`like-count-${catId}`).textContent = `${data.count} kisi begendi`;
+}
+async function toggleFav(catId, btn) {
+    const resp = await fetch(`/api/favorite/${catId}`, { method: 'POST' });
+    const data = await resp.json();
+    btn.innerHTML = data.favorited ? '⭐' : '☆';
+    btn.classList.toggle('liked', data.favorited);
 }
 function openLightbox(src) {
     document.getElementById('lightboxImg').src = src;
