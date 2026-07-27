@@ -443,43 +443,40 @@ def delete_comment(cat_id, comment_id):
 def seed_cats():
     if current_user.username != 'Lumbe':
         abort(403)
-    if Cat.query.count() > 0:
-        flash('Zaten kedi var, seed calistirilmadi.', 'warning')
+    reset = request.args.get('reset') == '1'
+    if reset:
+        for cat in Cat.query.filter_by(owner_id=current_user.id).all():
+            db.session.delete(cat)
+        db.session.commit()
+    elif Cat.query.count() > 0:
+        flash('Zaten kedi var. /admin/seed?reset=1 ile sifirlayabilirsin.', 'warning')
         return redirect(url_for('explore'))
     import io
     import urllib.request
     seed_data = [
         {'name': 'Pamuk', 'gender': 'Female', 'color': 'Beyaz', 'location': 'Istanbul, Kadikoy', 'description': 'Sokakta buldum, cok uysal ve sevgi dolu. Gozleri masmavi.', 'age': '2 yas', 'photos': [
-            'https://cdn2.thecatapi.com/images/MTk4ODA2Mw.jpg',
-            'https://cdn2.thecatapi.com/images/MTk4ODA2Mw.jpg'
+            'https://cataas.com/cat/says/Pamuk?fontSize=50&fontColor=white&type=or'
         ]},
         {'name': 'Boncuk', 'gender': 'Female', 'color': 'Turuncu', 'location': 'Ankara, Cankaya', 'description': 'Bahce kedisi, gozleri yesil. Miyavlama sesi cok tatli.', 'age': '1 yas', 'photos': [
-            'https://cdn2.thecatapi.com/images/0XYvRd7oD.jpg',
-            'https://cdn2.thecatapi.com/images/0XYvRd7oD.jpg'
+            'https://cataas.com/cat/says/Boncuk?fontSize=50&fontColor=white&type=si'
         ]},
         {'name': 'Karabas', 'gender': 'Male', 'color': 'Siyah', 'location': 'Izmir, Alsancak', 'description': 'Sokak krali, cok cesur ve oyuncu. Herkesi tanir.', 'age': '3 yas', 'photos': [
-            'https://cdn2.thecatapi.com/images/MTk4NjY4Mg.jpg',
-            'https://cdn2.thecatapi.com/images/MTk4NjY4Mg.jpg'
+            'https://cataas.com/cat/says/Karabas?fontSize=50&fontColor=white&type=fr'
         ]},
         {'name': 'Seker', 'gender': 'Female', 'color': 'Gri-beyaz', 'location': 'Istanbul, Besiktas', 'description': 'Cok tatli, kucuk bir kedi. Insanlara cok yakin.', 'age': '6 ay', 'photos': [
-            'https://cdn2.thecatapi.com/images/2m7.jpg',
-            'https://cdn2.thecatapi.com/images/2m7.jpg'
+            'https://cataas.com/cat/says/Seker?fontSize=50&fontColor=white&type=or'
         ]},
-        {'name': 'Tarçın', 'gender': 'Male', 'color': 'Kahverengi', 'location': 'Bursa, Nilufer', 'description': 'Buyuk ve guclu bir kedi. Patileri cok buyuk.', 'age': '4 yas', 'photos': [
-            'https://cdn2.thecatapi.com/images/MTk4NjY4MQ.jpg',
-            'https://cdn2.thecatapi.com/images/MTk4NjY4MQ.jpg'
+        {'name': 'Tarcin', 'gender': 'Male', 'color': 'Kahverengi', 'location': 'Bursa, Nilufer', 'description': 'Buyuk ve guclu bir kedi. Patileri cok buyuk.', 'age': '4 yas', 'photos': [
+            'https://cataas.com/cat/says/Tarcin?fontSize=50&fontColor=white&type=si'
         ]},
         {'name': 'Luna', 'gender': 'Female', 'color': 'Turuncu-beyaz', 'location': 'Antalya, Konyaalti', 'description': 'Gece kedisi, yildizlari sever. Cok gizemli.', 'age': '2 yas', 'photos': [
-            'https://cdn2.thecatapi.com/images/MTk4ODA2NQ.jpg',
-            'https://cdn2.thecatapi.com/images/MTk4ODA2NQ.jpg'
+            'https://cataas.com/cat/says/Luna?fontSize=50&fontColor=white&type=or'
         ]},
         {'name': 'Minik', 'gender': 'Male', 'color': 'Siyah-beyaz', 'location': 'Istanbul, Kadikoy', 'description': 'Cok kucuk ama cok cesur. Oyuncu ve enerjik.', 'age': '4 ay', 'photos': [
-            'https://cdn2.thecatapi.com/images/MTk4NjY4Mw.jpg',
-            'https://cdn2.thecatapi.com/images/MTk4NjY4Mw.jpg'
+            'https://cataas.com/cat/says/Minik?fontSize=50&fontColor=white&type=fr'
         ]},
         {'name': 'Peri', 'gender': 'Female', 'color': 'Gri', 'location': 'Izmir, Karsiyaka', 'description': 'Peri gibi guzel, cok sessiz ve sakin bir kedi.', 'age': '1.5 yas', 'photos': [
-            'https://cdn2.thecatapi.com/images/MTk4ODA2Ng.jpg',
-            'https://cdn2.thecatapi.com/images/MTk4ODA2Ng.jpg'
+            'https://cataas.com/cat/says/Peri?fontSize=50&fontColor=white&type=sq'
         ]},
     ]
     added = 0
