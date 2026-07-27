@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="pembe">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,12 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
 </head>
 <body>
+    <script>
+    (function() {
+        var saved = localStorage.getItem('pd-theme') || 'pembe';
+        document.documentElement.setAttribute('data-theme', saved);
+    })();
+    </script>
     <nav class="navbar">
         <div class="container">
             <a href="{{ url_for('index') }}" class="navbar-brand">
@@ -22,6 +28,15 @@
                 <li><a href="{{ url_for('new_cat') }}" class="nav-link">+ Kedi Ekle</a></li>
                 <li><a href="{{ url_for('notifications') }}" class="nav-link" id="notifLink">🔔</a></li>
                 <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="nav-link">Profilim</a></li>
+                <li>
+                    <div class="theme-selector">
+                        <button class="theme-btn active" data-theme="pembe" onclick="setTheme('pembe')" title="Pembe" style="background: linear-gradient(135deg, #ec4899, #a855f7);"></button>
+                        <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')" title="Karanlik" style="background: linear-gradient(135deg, #1a1025, #4a2878);"></button>
+                        <button class="theme-btn" data-theme="mavi" onclick="setTheme('mavi')" title="Mavi" style="background: linear-gradient(135deg, #3b82f6, #6366f1);"></button>
+                        <button class="theme-btn" data-theme="yesil" onclick="setTheme('yesil')" title="Yesil" style="background: linear-gradient(135deg, #22c55e, #84cc16);"></button>
+                        <button class="theme-btn" data-theme="turuncu" onclick="setTheme('turuncu')" title="Turuncu" style="background: linear-gradient(135deg, #f97316, #ec4899);"></button>
+                    </div>
+                </li>
                 <li><a href="{{ url_for('logout') }}" class="nav-link">Cikis</a></li>
             </ul>
             {% else %}
@@ -79,6 +94,20 @@
         }
         musicPlaying = !musicPlaying;
     }
+
+    function setTheme(name) {
+        document.documentElement.setAttribute('data-theme', name);
+        localStorage.setItem('pd-theme', name);
+        document.querySelectorAll('.theme-btn').forEach(function(b) {
+            b.classList.toggle('active', b.getAttribute('data-theme') === name);
+        });
+    }
+    (function() {
+        var current = document.documentElement.getAttribute('data-theme') || 'pembe';
+        document.querySelectorAll('.theme-btn').forEach(function(b) {
+            b.classList.toggle('active', b.getAttribute('data-theme') === current);
+        });
+    })();
 
     function checkNotifs() {
         fetch('/api/notifications/unread').then(function(r){return r.json()}).then(function(d){
