@@ -563,6 +563,17 @@ def resolve_coords(location):
     for key, coords in CITY_COORDS.items():
         if key in loc:
             return coords
+    try:
+        import urllib.request, urllib.parse, json, time
+        q = urllib.parse.quote(loc + ', Turkey')
+        url = 'https://nominatim.openstreetmap.org/search?q=' + q + '&format=json&limit=1'
+        req = urllib.request.Request(url, headers={'User-Agent': 'PatiliDunya/1.0'})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read())
+            if data:
+                return (float(data[0]['lat']), float(data[0]['lon']))
+    except Exception:
+        pass
     return None
 
 
