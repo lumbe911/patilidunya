@@ -1,7 +1,25 @@
 {% extends "base.html" %}
 {% block title %}PatiliDunya - Kedilerin Dunyasi{% endblock %}
 {% block content %}
-<div class="landing">
+<div style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow:hidden;">
+    <div style="position:absolute; top:10%; left:5%; font-size:3rem; opacity:0.15; animation: floatSlow 8s ease-in-out infinite;">🐾</div>
+    <div style="position:absolute; top:20%; right:8%; font-size:2rem; opacity:0.12; animation: floatSlow 10s ease-in-out infinite 1s;">💖</div>
+    <div style="position:absolute; top:60%; left:8%; font-size:2.5rem; opacity:0.1; animation: floatSlow 9s ease-in-out infinite 2s;">⭐</div>
+    <div style="position:absolute; bottom:20%; right:5%; font-size:2rem; opacity:0.12; animation: floatSlow 7s ease-in-out infinite 0.5s;">🐾</div>
+    <div style="position:absolute; top:40%; left:2%; font-size:1.5rem; opacity:0.08; animation: floatSlow 11s ease-in-out infinite 3s;">🌸</div>
+    <div style="position:absolute; bottom:30%; right:12%; font-size:1.8rem; opacity:0.1; animation: floatSlow 8.5s ease-in-out infinite 1.5s;">💜</div>
+    <div style="position:absolute; top:15%; left:45%; font-size:1.2rem; opacity:0.08; animation: floatSlow 12s ease-in-out infinite 4s;">✨</div>
+    <div style="position:absolute; bottom:10%; left:30%; font-size:1.5rem; opacity:0.1; animation: floatSlow 9.5s ease-in-out infinite 2.5s;">🎀</div>
+</div>
+<style>
+@keyframes floatSlow {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-15px) rotate(5deg); }
+    75% { transform: translateY(10px) rotate(-3deg); }
+}
+</style>
+
+<div class="landing" style="position:relative; z-index:1;">
     <div class="landing-hero">🐱</div>
     <h1>Patili Dunya'ya Hos Geldin!</h1>
     <p>Yolda buldugun kedilerin fotograflarini yukle, onlara profil olustur ve diger hayvanseverlerle paylas.</p>
