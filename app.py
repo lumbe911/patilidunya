@@ -1,7 +1,10 @@
 import os
 import secrets
+import smtplib
 import urllib.request
-from datetime import datetime
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timedelta
 
 import cloudinary
 import cloudinary.uploader
@@ -33,6 +36,12 @@ cloudinary.config(
 
 SITE_PRIVATE = os.environ.get('SITE_PRIVATE', '').strip().lower() in ('true', '1', 'yes')
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', '').strip()
+
+MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
+MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
+MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
+MAIL_SENDER = os.environ.get('MAIL_SENDER', MAIL_USERNAME)
 SITE_URL = os.environ.get('SITE_URL', 'https://patilidunya.onrender.com')
 
 db = SQLAlchemy(app)
@@ -40,6 +49,24 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Lutfen giris yapin.'
 login_manager.login_message_category = 'warning'
+
+
+def send_email(to_email, subject, html_body):
+    if not MAIL_USERNAME or not MAIL_PASSWORD:
+        return False
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = MAIL_SENDER
+        msg['To'] = to_email
+        msg.attach(MIMEText(html_body, 'html'))
+        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
+            server.starttls()
+            server.login(MAIL_USERNAME, MAIL_PASSWORD)
+            server.sendmail(MAIL_SENDER, to_email, msg.as_string())
+        return True
+    except Exception:
+        return False
 
 
 class User(UserMixin, db.Model):
@@ -231,13 +258,14 @@ def login():
         return redirect(url_for('explore'))
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
         user = User.query.filter_by(username=username).first()
-        if user:
+        if user and check_password_hash(user.password, password):
             login_user(user, remember=True)
-            flash('Hosgeldin!', 'success')
+            flash('Hosgeldiniz!', 'success')
             next_page = request.args.get('next')
             return redirect(next_page or url_for('explore'))
-        flash('Boyle bir kullanici bulunamadi!', 'danger')
+        flash('Kullanici adi veya sifre hatali!', 'danger')
     return render_template('login.html')
 
 
@@ -248,10 +276,16 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        password2 = request.form.get('password2', '')
 
         errors = []
         if len(username) < 3:
             errors.append('Kullanici adi en az 3 karakter olmali.')
+        if len(password) < 6:
+            errors.append('Sifre en az 6 karakter olmali.')
+        if password != password2:
+            errors.append('Sifreler eslesmiyor.')
         if User.query.filter_by(username=username).first():
             errors.append('Bu kullanici adi zaten alinmis.')
         if User.query.filter_by(email=email).first():
@@ -265,14 +299,13 @@ def register():
         user = User(
             username=username,
             email=email,
-            password='',
+            password=generate_password_hash(password),
             display_name=username
         )
         db.session.add(user)
         db.session.commit()
-        login_user(user, remember=True)
-        flash('Hos geldin!', 'success')
-        return redirect(url_for('explore'))
+        flash('Kayit basarili! Giris yapabilirsiniz.', 'success')
+        return redirect(url_for('login'))
     return render_template('register.html')
 
 
@@ -281,6 +314,66 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('explore'))
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        user = User.query.filter_by(username=username).first()
+        if user and user.email:
+            token = secrets.token_urlsafe(32)
+            user.reset_token = token
+            user.reset_expiry = datetime.utcnow() + timedelta(hours=1)
+            db.session.commit()
+            reset_url = SITE_URL + url_for('reset_password', token=token)
+            html = f"""
+            <div style="font-family:sans-serif; max-width:400px; margin:0 auto; padding:2rem;">
+                <h2 style="color:#db2777;">🐱 PatiliDunya - Sifre Sifirlama</h2>
+                <p>Merhaba <strong>{user.display_name or user.username}</strong>,</p>
+                <p>Sifreni sifirlamak icin asagidaki linke tikla:</p>
+                <a href="{reset_url}" style="display:inline-block; padding:0.8rem 1.5rem; background:linear-gradient(135deg,#ec4899,#a855f7); color:white; border-radius:9999px; text-decoration:none; font-weight:700; margin:1rem 0;">Sifremi Sifirla</a>
+                <p style="color:#6b7280; font-size:0.85rem;">Bu link 1 saat icinde gecerlilgini yitirir.</p>
+                <p style="color:#6b7280; font-size:0.85rem;">Eger bu istegi sen yapmadiysan, bu emaili gorunce ignorala.</p>
+            </div>
+            """
+            sent = send_email(user.email, 'PatiliDunya - Sifre Sifirlama', html)
+            if sent:
+                flash('Sifre sifirlama emaili gonderildi! E-postani kontrol et.', 'success')
+            else:
+                flash('Email gonderilemedi. Daha sonra tekrar dene.', 'danger')
+        else:
+            flash('Boyle bir kullanici bulunamadi!', 'danger')
+        return redirect(url_for('login'))
+    return render_template('forgot_password.html')
+
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('explore'))
+    user = User.query.filter_by(reset_token=token).first()
+    if not user or not user.reset_expiry or user.reset_expiry < datetime.utcnow():
+        flash('Gecersiz veya suresi dolmus link!', 'danger')
+        return redirect(url_for('forgot_password'))
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        password2 = request.form.get('password2', '')
+        if len(password) < 6:
+            flash('Sifre en az 6 karakter olmali!', 'danger')
+            return render_template('reset_password.html', token=token)
+        if password != password2:
+            flash('Sifreler eslesmiyor!', 'danger')
+            return render_template('reset_password.html', token=token)
+        user.password = generate_password_hash(password)
+        user.reset_token = None
+        user.reset_expiry = None
+        db.session.commit()
+        flash('Sifreniz basariyla degistirildi! Giris yapabilirsiniz.', 'success')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', token=token)
 
 
 @app.route('/profile/<username>')

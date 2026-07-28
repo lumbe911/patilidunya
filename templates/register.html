@@ -13,7 +13,15 @@
             <label class="form-label">E-posta</label>
             <input type="email" name="email" class="form-control" placeholder="ornek@email.com" required>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Kayit Ol 🎉</button>
+        <div class="form-group">
+            <label class="form-label">Sifre</label>
+            <input type="password" name="password" class="form-control" placeholder="En az 6 karakter" required minlength="6">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Sifre Tekrar</label>
+            <input type="password" name="password2" class="form-control" placeholder="Sifreni tekrar gir" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Kayit Ol</button>
     </form>
     <p style="text-align:center; margin-top:1.5rem; color: var(--gray-500);">
         Zaten hesabin var mi? <a href="{{ url_for('login') }}">Giris Yap</a>
