@@ -93,11 +93,11 @@
         <h3>Sonuc bulunamadi</h3>
         <p>Farkli kelimelerle tekrar dene.</p>
                     <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Tum Patililer</a>
-                    {% endif %}
+                    {% else %}
                     <h3>Henuz patili eklenmemis</h3>
                     <p>Ilk patiliyi sen ekle!</p>
                     <a href="{{ url_for('new_cat') }}" class="btn btn-primary" style="margin-top:1rem;">+ Patili Ekle</a>
-        {% endif %}
+                    {% endif %}
     </div>
     {% endif %}
 </div>
