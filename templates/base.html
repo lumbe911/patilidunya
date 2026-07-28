@@ -25,7 +25,7 @@
                 <li><a href="{{ url_for('reels') }}" class="nav-link">Reels</a></li>
                 <li><a href="{{ url_for('cat_map') }}" class="nav-link">Harita</a></li>
                 <li><a href="{{ url_for('favorites') }}" class="nav-link">Favoriler</a></li>
-                <li><a href="{{ url_for('new_cat') }}" class="nav-link">+ Kedi Ekle</a></li>
+                <li><a href="{{ url_for('new_cat') }}" class="nav-link">+ Patili Ekle</a></li>
                 <li><a href="{{ url_for('notifications') }}" class="nav-link" id="notifLink">🔔</a></li>
                 <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="nav-link">Profilim</a></li>
                 <li><a href="{{ url_for('logout') }}" class="nav-link">Cikis</a></li>
@@ -54,7 +54,7 @@
     </main>
 
     <footer class="footer">
-        <p>PatiliDunya 2026 - Her kedinin bir hikayesi var</p>
+        <p>PatiliDunya 2026 - Her patinin bir hikayesi var</p>
     </footer>
 
     {% if current_user.is_authenticated %}

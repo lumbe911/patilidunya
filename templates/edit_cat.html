@@ -3,11 +3,11 @@
 {% block content %}
 <div class="container">
     <div class="auth-card" style="max-width: 600px;">
-        <h2>Kediyi Duzenle ✏️</h2>
-        <p class="subtitle">{{ cat.name }} profilini guncelle</p>
-        <form method="POST" enctype="multipart/form-data" id="editForm">
+        <h2>Patiliyi Duzenle ✏️</h2>
+        <p class="subtitle">{{ cat.name }}'in bilgilerini guncelle</p>
+        <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
-                <label class="form-label">Kedinin Adi *</label>
+                <label class="form-label">Patilinin Adi *</label>
                 <input type="text" name="name" class="form-control" value="{{ cat.name }}" required>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Kedileri Kesfet - PatiliDunya{% endblock %}
+{% block title %}Patilileri Kesfet - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container">
-    <h1 class="page-title">🐱 Kedileri Kesfet</h1>
+    <h1 class="page-title">🐱 Patilileri Kesfet</h1>
 
     <form method="GET" action="{{ url_for('explore') }}" style="max-width:350px; margin-bottom:1.5rem;">
         <div style="display:flex; gap:0.5rem;">
-            <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Kedi ara..."
+            <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Patili ara..."
                 style="flex:1; padding:0.5rem 0.85rem; border:1.5px solid var(--pink-200); border-radius:var(--radius-full); font-family:'Nunito',sans-serif; font-size:0.88rem; background:white;">
             <button type="submit" class="btn btn-primary btn-sm" style="padding:0.45rem 0.9rem;">Ara</button>
             {% if search_query %}
@@ -92,11 +92,11 @@
         {% if search_query %}
         <h3>Sonuc bulunamadi</h3>
         <p>Farkli kelimelerle tekrar dene.</p>
-        <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Tum Kediler</a>
-        {% else %}
-        <h3>Henuz kedi eklenmemis</h3>
-        <p>Ilk kediyi sen ekle!</p>
-        <a href="{{ url_for('new_cat') }}" class="btn btn-primary" style="margin-top:1rem;">+ Kedi Ekle</a>
+                    <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Tum Patililer</a>
+                    {% endif %}
+                    <h3>Henuz patili eklenmemis</h3>
+                    <p>Ilk patiliyi sen ekle!</p>
+                    <a href="{{ url_for('new_cat') }}" class="btn btn-primary" style="margin-top:1rem;">+ Patili Ekle</a>
         {% endif %}
     </div>
     {% endif %}

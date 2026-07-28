@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kedi Haritasi - PatiliDunya</title>
+    <title>Patili Haritasi - PatiliDunya</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
@@ -116,7 +116,7 @@
     if (cats.length === 0) {
         var loader = document.createElement('div');
         loader.className = 'loading-overlay';
-        loader.innerHTML = '<div class="spinner">🐱</div><p>Henuz konumlu kedi yok</p>';
+        loader.innerHTML = '<div class="spinner">🐱</div><p>Henuz konumlu patili yok</p>';
         document.body.appendChild(loader);
         setTimeout(function() { loader.style.display = 'none'; }, 2000);
     }

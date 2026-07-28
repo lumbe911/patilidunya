@@ -482,7 +482,7 @@ def edit_cat(cat_id):
                     db.session.add(CatPhoto(filename=filename, cat_id=cat.id))
                     uploaded += 1
         db.session.commit()
-        flash(f'Kedi profili guncellendi! {uploaded} yeni fotograf yuklendi.', 'success')
+            flash(f'{uploaded} yeni fotograf yuklendi.', 'success')
         return redirect(url_for('cat_detail', cat_id=cat.id))
     return render_template('edit_cat.html', cat=cat)
 
@@ -531,7 +531,7 @@ def toggle_like(cat_id):
             notif = Notification(
                 user_id=cat.owner_id, from_user_id=current_user.id,
                 cat_id=cat_id, notif_type='like',
-                text=f'{current_user.display_name or current_user.username} kedin {cat.name} begendi!'
+                    text=f'{current_user.display_name or current_user.username} "{cat.name}" begendi!'
             )
             db.session.add(notif)
         db.session.commit()
@@ -752,7 +752,7 @@ def seed_cats():
             db.session.delete(cat)
         db.session.commit()
     elif Cat.query.count() > 0:
-        flash('Zaten kedi var. /admin/seed?reset=1 ile sifirlayabilirsin.', 'warning')
+        flash('Zaten kayit var. /admin/seed?reset=1 ile sifirlayabilirsin.', 'warning')
         return redirect(url_for('explore'))
     import io
     import urllib.request
@@ -800,7 +800,7 @@ def seed_cats():
         db.session.add(CatPhoto(filename=item['photo'], cat_id=cat.id))
         db.session.commit()
         added += 1
-    flash(f'{added} ornek kedi eklendi!', 'success')
+    flash(f'{added} ornek profil eklendi!', 'success')
     return redirect(url_for('explore'))
 
 

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Yeni Kedi Ekle - PatiliDunya{% endblock %}
+{% block title %}Yeni Patili Ekle - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container">
-    <div class="auth-card" style="max-width: 600px;">
-        <h2>Yeni Kedi Ekle 🐱</h2>
-        <p class="subtitle">Buldugun kedinin profilini olustur</p>
+    <div class="auth-card" style="max-width:600px;">
+        <h2>Yeni Patili Ekle 🐱</h2>
+        <p class="subtitle">Buldugun hayvanin profilini olustur</p>
         <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
-                <label class="form-label">Kedinin Adi *</label>
+                <label class="form-label">Patilinin Adi *</label>
                 <input type="text" name="name" class="form-control" placeholder="Ornegin: Pamuk, Misket, Boncuk..." required>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -41,7 +41,7 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Hikaye / Aciklama</label>
-                <textarea name="description" class="form-control" placeholder="Bu kedi hakkinda bilinenleri yaz... Nerede buldun? Nasil bir durumdaydi? 📝" rows="4"></textarea>
+                    <textarea name="description" class="form-control" placeholder="Bu hayvan hakkinda bilinenleri yaz... Nerede buldun? Nasil bir durumdaydi? 📝" rows="4"></textarea>
             </div>
             <div class="form-group">
                 <label class="form-label">Fotograflar</label>
@@ -51,7 +51,7 @@
                     <div id="photo-preview" class="photo-grid"></div>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Kediyi Ekle 🐾</button>
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Patiliyi Ekle 🐾</button>
         </form>
     </div>
 </div>

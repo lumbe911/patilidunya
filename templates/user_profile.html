@@ -13,7 +13,7 @@
         <div class="profile-stats">
             <div class="stat">
                 <div class="stat-number">{{ cats|length }}</div>
-                <div class="stat-label">Kedi</div>
+                <div class="stat-label">Patili</div>
             </div>
             <div class="stat">
                 <div class="stat-number">{{ total_likes }}</div>
@@ -31,7 +31,7 @@
         {% if current_user.id == profile_user.id %}
         <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
             <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary btn-sm">Profili Duzenle</a>
-            <a href="{{ url_for('new_cat') }}" class="btn btn-primary btn-sm">+ Kedi Ekle</a>
+            <a href="{{ url_for('new_cat') }}" class="btn btn-primary btn-sm">+ Patili Ekle</a>
             {% if unread > 0 %}
             <a href="{{ url_for('notifications') }}" class="btn btn-sm" style="background:#ef4444; color:white; position:relative;">Bildirimler <span style="background:white; color:#ef4444; border-radius:50%; padding:0 6px; font-size:0.7rem; font-weight:800; margin-left:4px;">{{ unread }}</span></a>
             {% endif %}
@@ -48,7 +48,7 @@
     </div>
 
     {% if cats %}
-    <h2 style="text-align:center; font-weight:800; margin-bottom:1.5rem;">{{ profile_user.display_name or profile_user.username }}'in Kedileri</h2>
+    <h2 style="text-align:center; font-weight:800; margin-bottom:1.5rem;">{{ profile_user.display_name or profile_user.username }}'in Patilileri</h2>
     <div class="cat-grid">
         {% for cat in cats %}
         <div class="card">
@@ -78,9 +78,9 @@
     {% else %}
     <div class="empty-state">
         <div class="icon">🐾</div>
-        <h3>Henuz kedi eklenmemis</h3>
+        <h3>Henuz patili eklenmemis</h3>
         {% if current_user.id == profile_user.id %}
-        <a href="{{ url_for('new_cat') }}" class="btn btn-primary" style="margin-top:1rem;">+ Kedi Ekle</a>
+        <a href="{{ url_for('new_cat') }}" class="btn btn-primary" style="margin-top:1rem;">+ Patili Ekle</a>
         {% endif %}
     </div>
     {% endif %}
