@@ -482,7 +482,7 @@ def edit_cat(cat_id):
                     db.session.add(CatPhoto(filename=filename, cat_id=cat.id))
                     uploaded += 1
         db.session.commit()
-            flash(f'{uploaded} yeni fotograf yuklendi.', 'success')
+        flash(f'{uploaded} yeni fotograf yuklendi.', 'success')
         return redirect(url_for('cat_detail', cat_id=cat.id))
     return render_template('edit_cat.html', cat=cat)
 
