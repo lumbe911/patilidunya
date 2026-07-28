@@ -261,7 +261,7 @@ def login():
         password = request.form.get('password', '')
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
-            login_user(user, remember=True)
+            login_user(user, remember=request.form.get('remember') is not None)
             flash('Hosgeldiniz!', 'success')
             next_page = request.args.get('next')
             return redirect(next_page or url_for('explore'))
