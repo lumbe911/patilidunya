@@ -680,6 +680,12 @@ NEIGHBORHOOD_COORDS = {
     'inegol': (40.0787, 29.5095),
     'konyaalti': (36.8754, 30.6544), 'lara': (36.8529, 30.7918), 'side': (36.7670, 31.3880),
     'ortahisar': (41.0015, 39.7178),
+    'kucukcekmece': (40.9852, 28.7752), 'bakirkoy': (40.9760, 28.8210),
+    'bahcelievler': (40.9990, 28.8617), 'zeytinburnu': (40.9870, 28.9074),
+    'esenyurt': (41.0288, 28.6620), 'avcilar': (40.9826, 28.7120), 'sariyer': (41.1597, 29.0360),
+    'pendik': (40.9116, 29.2710), 'atasehir': (40.9913, 29.1359), 'basaksehir': (41.0933, 28.8067),
+    'gaziosmanpasa': (41.0537, 28.9089), 'eyup': (41.0450, 28.9440), 'kagithane': (41.0807, 28.9736),
+    'umraniye': (41.0191, 29.0993), 'sultanbeyli': (40.9645, 29.2588), 'cekmekoy': (41.0282, 29.0973),
 }
 
 def resolve_coords(location):
@@ -695,7 +701,7 @@ def resolve_coords(location):
         q = urllib.parse.quote(loc + ', Turkey')
         url = 'https://nominatim.openstreetmap.org/search?q=' + q + '&format=json&limit=1'
         req = urllib.request.Request(url, headers={'User-Agent': 'PatiliDunya/1.0'})
-        with urllib.request.urlopen(req, timeout=5) as resp:
+        with urllib.request.urlopen(req, timeout=3) as resp:
             data = json.loads(resp.read())
             if data:
                 return (float(data[0]['lat']), float(data[0]['lon']))
@@ -843,6 +849,23 @@ with app.app_context():
         db.session.commit()
     except Exception:
         db.session.rollback()
+
+@app.errorhandler(500)
+def internal_error(e):
+    import traceback, sys
+    traceback.print_exc()
+    print('INTERNAL ERROR:', repr(e), file=sys.stderr, flush=True)
+    try:
+        db.session.rollback()
+    except Exception:
+        pass
+    return render_template('error.html', code=500,
+                           message='Beklenmedik bir hata oluştu. Lütfen tekrar dene.'), 500
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('error.html', code=404,
+                           message='Aradığın sayfa bulunamadı.'), 404
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

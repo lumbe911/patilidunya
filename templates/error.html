@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Hata {{ code }} - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container" style="text-align:center; padding:60px 20px;">
+    <div style="font-size:80px;">🐾</div>
+    <h1 style="font-size:48px; margin:10px 0; color:var(--primary);">{{ code }}</h1>
+    <p style="font-size:18px; color:var(--text);">{{ message }}</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary" style="margin-top:20px;">Ana Sayfaya Don</a>
+</div>
+{% endblock %}
