@@ -25,6 +25,11 @@
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
             <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                 <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--pink-600); margin:0;">{{ cat.name }}</h1>
+                {% if cat.status == 'sokak' %}
+                <span class="gender-badge sokak">🏙️ Sokak Patilisi</span>
+                {% else %}
+                <span class="gender-badge sahipli">🏠 Sahipli</span>
+                {% endif %}
                 {% if cat.gender %}
                 <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
                 {% endif %}
@@ -33,8 +38,8 @@
             {% if cat.age %}
             <div class="info-row"><span class="info-label">🎂 Yasi</span><span class="info-value">{{ cat.age }}</span></div>
             {% endif %}
-            {% if cat.color %}
-            <div class="info-row"><span class="info-label">🎨 Rengi</span><span class="info-value">{{ cat.color }}</span></div>
+            {% if cat.breed %}
+            <div class="info-row"><span class="info-label">🏷 Cinsi</span><span class="info-value">{{ cat.breed }}</span></div>
             {% endif %}
             {% if cat.location %}
             <div class="info-row"><span class="info-label">📍 Konum</span><span class="info-value">{{ cat.location }}</span></div>

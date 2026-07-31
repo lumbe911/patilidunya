@@ -27,17 +27,26 @@
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                    <label class="form-label">Rengi</label>
-                    <input type="text" name="color" class="form-control" value="{{ cat.color or '' }}">
+                    <label class="form-label">Durumu</label>
+                    <select name="status" class="form-control">
+                        <option value="sahipli" {% if cat.status != 'sokak' %}selected{% endif %}>Sahipli 🏠</option>
+                        <option value="sokak" {% if cat.status == 'sokak' %}selected{% endif %}>Sokak Patilisi 🏙️</option>
+                    </select>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Cinsi</label>
+                    <input type="text" name="breed" class="form-control" value="{{ cat.breed or '' }}" placeholder="Ornegin: Tekir, Sokar, British, Van...">
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                     <label class="form-label">Bulma Tarihi</label>
                     <input type="text" name="found_date" class="form-control" value="{{ cat.found_date or '' }}">
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Nerede Bulundu?</label>
-                <input type="text" name="location" class="form-control" value="{{ cat.location or '' }}">
+                <div class="form-group">
+                    <label class="form-label">Nerede Bulundu?</label>
+                    <input type="text" name="location" class="form-control" value="{{ cat.location or '' }}">
+                </div>
             </div>
             <div class="form-group">
                 <label class="form-label">Hikaye / Aciklama</label>

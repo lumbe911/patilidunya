@@ -33,6 +33,11 @@
             <div class="cat-card-footer">
                 <div>
                     <a href="{{ url_for('cat_detail', cat_id=cat.id) }}" class="card-title">{{ cat.name }}</a>
+                    {% if cat.status == 'sokak' %}
+                    <span class="gender-badge sokak">Sokak 🏙️</span>
+                    {% else %}
+                    <span class="gender-badge sahipli">Sahipli 🏠</span>
+                    {% endif %}
                     {% if cat.gender %}
                     <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
                     {% endif %}

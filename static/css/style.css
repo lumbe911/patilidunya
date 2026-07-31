@@ -338,6 +338,8 @@ a:hover { color: var(--pink-700); }
 }
 .gender-badge.female { background: #fce7f3; color: #be185d; }
 .gender-badge.male { background: #dbeafe; color: #1d4ed8; }
+.gender-badge.sokak { background: #fef3c7; color: #b45309; }
+.gender-badge.sahipli { background: #dcfce7; color: #15803d; }
 
 /* FORMS */
 .form-group { margin-bottom: 1.25rem; }

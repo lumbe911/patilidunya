@@ -89,7 +89,9 @@ class Cat(db.Model):
     name = db.Column(db.String(100), nullable=False)
     age = db.Column(db.String(50), default='')
     gender = db.Column(db.String(20), default='')
+    status = db.Column(db.String(20), default='sahipli')
     color = db.Column(db.String(100), default='')
+    breed = db.Column(db.String(100), default='')
     description = db.Column(db.Text, default='')
     location = db.Column(db.String(200), default='')
     found_date = db.Column(db.String(50), default='')
@@ -227,6 +229,7 @@ def explore():
             db.or_(
                 Cat.name.ilike(like_pattern),
                 Cat.color.ilike(like_pattern),
+                Cat.breed.ilike(like_pattern),
                 Cat.location.ilike(like_pattern),
                 Cat.description.ilike(like_pattern)
             )
@@ -418,7 +421,9 @@ def new_cat():
             name=request.form.get('name', '').strip(),
             age=request.form.get('age', '').strip(),
             gender=request.form.get('gender', ''),
+            status=request.form.get('status', 'sahipli').strip() or 'sahipli',
             color=request.form.get('color', '').strip(),
+            breed=request.form.get('breed', '').strip(),
             description=request.form.get('description', '').strip(),
             location=request.form.get('location', '').strip(),
             found_date=request.form.get('found_date', '').strip(),
@@ -466,7 +471,9 @@ def edit_cat(cat_id):
         cat.name = request.form.get('name', '').strip()
         cat.age = request.form.get('age', '').strip()
         cat.gender = request.form.get('gender', '')
+        cat.status = request.form.get('status', 'sahipli').strip() or 'sahipli'
         cat.color = request.form.get('color', '').strip()
+        cat.breed = request.form.get('breed', '').strip()
         cat.description = request.form.get('description', '').strip()
         cat.location = request.form.get('location', '').strip()
         cat.found_date = request.form.get('found_date', '').strip()
@@ -791,9 +798,9 @@ def seed_cats():
     for i, item in enumerate(seed_data):
         cat = Cat(
             name=item['name'], age=item['age'], gender=item['gender'],
-            color=item['color'], description=item['description'],
-            location=item['location'], found_date='2026',
-            owner_id=current_user.id
+            status='sokak', color=item['color'], breed=item['color'],
+            description=item['description'], location=item['location'],
+            found_date='2026', owner_id=current_user.id
         )
         db.session.add(cat)
         db.session.commit()
@@ -818,6 +825,21 @@ with app.app_context():
         db.session.rollback()
     try:
         db.session.execute(db.text('ALTER TABLE "user" ADD COLUMN reset_expiry TIMESTAMP'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    try:
+        db.session.execute(db.text('ALTER TABLE cat ADD COLUMN status VARCHAR(20) DEFAULT \'sahipli\''))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    try:
+        db.session.execute(db.text('ALTER TABLE cat ADD COLUMN breed VARCHAR(100)'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    try:
+        db.session.execute(db.text('UPDATE cat SET breed = color WHERE (breed IS NULL OR breed = \'\') AND color IS NOT NULL AND color != \'\''))
         db.session.commit()
     except Exception:
         db.session.rollback()
