@@ -73,9 +73,11 @@
                 <span>👁 {{ view_count }} kez goruntulendi</span>
             </div>
 
-            {% if current_user.id == cat.owner_id %}
+            {% if current_user.id == cat.owner_id or current_user.username == 'Lumbe' %}
             <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+                {% if current_user.id == cat.owner_id %}
                 <a href="{{ url_for('edit_cat', cat_id=cat.id) }}" class="btn btn-secondary btn-sm">Duzenle ✏️</a>
+                {% endif %}
                 <form method="POST" action="{{ url_for('delete_cat', cat_id=cat.id) }}" onsubmit="return confirm('Emin misin?');">
                     <button type="submit" class="btn btn-danger btn-sm">Sil 🗑️</button>
                 </form>
@@ -123,7 +125,7 @@
                     </div>
                     <div style="display:flex; gap:0.5rem; align-items:center;">
                         <button type="button" onclick="document.getElementById('reply-form-{{ comment.id }}').style.display = document.getElementById('reply-form-{{ comment.id }}').style.display === 'none' ? 'block' : 'none'" style="background:none; border:none; cursor:pointer; color: var(--pink-500); font-size: 0.8rem; font-weight:700;">Yanitla</button>
-                        {% if current_user.id == comment.user_id %}
+                        {% if current_user.id == comment.user_id or current_user.username == 'Lumbe' %}
                         <form method="POST" action="{{ url_for('delete_comment', cat_id=cat.id, comment_id=comment.id) }}" onsubmit="return confirm('Yorumu silmek istediginden emin misin?');">
                             <button type="submit" style="background:none; border:none; cursor:pointer; color: var(--gray-500); font-size: 0.85rem;">🗑️</button>
                         </form>
@@ -151,7 +153,7 @@
                             {% endif %}
                             <a href="{{ url_for('user_profile', username=reply.user.username) }}" style="font-weight:700; font-size:0.8rem;">{{ reply.user.display_name or reply.user.username }}</a>
                             <span style="color:var(--gray-500); font-size:0.65rem;">{{ reply.created_at.strftime('%d %b %Y, %H:%M') }}</span>
-                            {% if current_user.id == reply.user_id %}
+                            {% if current_user.id == reply.user_id or current_user.username == 'Lumbe' %}
                             <form method="POST" action="{{ url_for('delete_comment', cat_id=cat.id, comment_id=reply.id) }}" onsubmit="return confirm('Yaniti silmek istediginden emin misin?');" style="margin-left:auto;">
                                 <button type="submit" style="background:none; border:none; cursor:pointer; color:var(--gray-500); font-size:0.7rem;">🗑️</button>
                             </form>

