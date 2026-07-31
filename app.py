@@ -501,6 +501,9 @@ def delete_cat(cat_id):
     if cat.owner_id != current_user.id:
         abort(403)
     name = cat.name
+    View.query.filter_by(cat_id=cat_id).delete()
+    Favorite.query.filter_by(cat_id=cat_id).delete()
+    Notification.query.filter_by(cat_id=cat_id).delete()
     db.session.delete(cat)
     db.session.commit()
     flash(f'{name} silindi.', 'info')
@@ -614,6 +617,7 @@ def delete_comment(cat_id, comment_id):
     comment = Comment.query.get_or_404(comment_id)
     if comment.user_id != current_user.id:
         abort(403)
+    Comment.query.filter_by(parent_id=comment_id).delete()
     db.session.delete(comment)
     db.session.commit()
     flash('Yorum silindi.', 'info')
@@ -762,6 +766,9 @@ def seed_cats():
     reset = request.args.get('reset') == '1'
     if reset:
         for cat in Cat.query.filter_by(owner_id=current_user.id).all():
+            View.query.filter_by(cat_id=cat.id).delete()
+            Favorite.query.filter_by(cat_id=cat.id).delete()
+            Notification.query.filter_by(cat_id=cat.id).delete()
             db.session.delete(cat)
         db.session.commit()
     elif Cat.query.count() > 0:
