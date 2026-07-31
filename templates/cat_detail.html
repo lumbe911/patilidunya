@@ -45,7 +45,10 @@
             <div class="info-row"><span class="info-label">📍 Konum</span><span class="info-value">{{ cat.location }}</span></div>
             {% endif %}
             {% if cat.found_date %}
-            <div class="info-row"><span class="info-label">📅 Bulma Tarihi</span><span class="info-value">{{ cat.found_date }}</span></div>
+            <div class="info-row"><span class="info-label">{% if cat.status == 'sokak' %}📅 Bulma Tarihi{% else %}📅 Sahiplenilme Tarihi{% endif %}</span><span class="info-value">{{ cat.found_date }}</span></div>
+            {% endif %}
+            {% if cat.location and cat.status == 'sokak' %}
+            <div class="info-row"><span class="info-label">📍 Bulundugu Yer</span><span class="info-value">{{ cat.location }}</span></div>
             {% endif %}
             <div class="info-row">
                 <span class="info-label">👤 Sahibi</span>

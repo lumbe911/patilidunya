@@ -28,8 +28,8 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                     <label class="form-label">Durumu</label>
-                    <select name="status" class="form-control">
-                        <option value="sahipli">Sahipli 🏠</option>
+                    <select name="status" id="statusSelect" class="form-control">
+                        <option value="sahipli" selected>Sahipli 🏠</option>
                         <option value="sokak">Sokak Patilisi 🏙️</option>
                     </select>
                 </div>
@@ -40,17 +40,17 @@
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                    <label class="form-label">Bulma Tarihi</label>
-                    <input type="text" name="found_date" class="form-control" placeholder="Ornegin: 15 Mart 2026">
+                    <label class="form-label" id="dateLabel">Sahiplenilme Tarihi</label>
+                    <input type="text" name="found_date" class="form-control" id="dateInput" placeholder="Ornegin: 15 Mart 2026">
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="locationGroup">
                     <label class="form-label">Nerede Bulundu?</label>
                     <input type="text" name="location" class="form-control" placeholder="Ornegin: Kizilay, Ankara">
                 </div>
             </div>
             <div class="form-group">
                 <label class="form-label">Hikaye / Aciklama</label>
-                    <textarea name="description" class="form-control" placeholder="Bu hayvan hakkinda bilinenleri yaz... Nerede buldun? Nasil bir durumdaydi? 📝" rows="4"></textarea>
+                    <textarea name="description" class="form-control" id="descInput" placeholder="Nasil sahiplendin? Hikayesi ne? 📝" rows="4"></textarea>
             </div>
             <div class="form-group">
                 <label class="form-label">Fotograflar</label>
@@ -67,6 +67,27 @@
 {% endblock %}
 {% block scripts %}
 <script>
+function updateStatusFields() {
+    var status = document.getElementById('statusSelect').value;
+    var dateLabel = document.getElementById('dateLabel');
+    var locationGroup = document.getElementById('locationGroup');
+    var descInput = document.getElementById('descInput');
+    var dateInput = document.getElementById('dateInput');
+
+    if (status === 'sokak') {
+        dateLabel.textContent = 'Bulma Tarihi';
+        locationGroup.style.display = 'block';
+        descInput.placeholder = 'Bu hayvan hakkinda bilinenleri yaz... Nerede buldun? Nasil bir durumdaydi? 📝';
+    } else {
+        dateLabel.textContent = 'Sahiplenilme Tarihi';
+        locationGroup.style.display = 'none';
+        descInput.placeholder = 'Nasil sahiplendin? Hikayesi ne? 📝';
+    }
+}
+
+document.getElementById('statusSelect').addEventListener('change', updateStatusFields);
+updateStatusFields();
+
 function previewPhotos(input) {
     const container = document.getElementById('photo-preview');
     container.innerHTML = '';

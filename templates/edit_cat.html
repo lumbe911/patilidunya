@@ -28,7 +28,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                     <label class="form-label">Durumu</label>
-                    <select name="status" class="form-control">
+                    <select name="status" id="statusSelect" class="form-control">
                         <option value="sahipli" {% if cat.status != 'sokak' %}selected{% endif %}>Sahipli 🏠</option>
                         <option value="sokak" {% if cat.status == 'sokak' %}selected{% endif %}>Sokak Patilisi 🏙️</option>
                     </select>
@@ -40,10 +40,10 @@
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                    <label class="form-label">Bulma Tarihi</label>
-                    <input type="text" name="found_date" class="form-control" value="{{ cat.found_date or '' }}">
+                    <label class="form-label" id="dateLabel">{% if cat.status == 'sokak' %}Bulma Tarihi{% else %}Sahiplenilme Tarihi{% endif %}</label>
+                    <input type="text" name="found_date" class="form-control" id="dateInput" value="{{ cat.found_date or '' }}">
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="locationGroup" {% if cat.status != 'sokak' %}style="display:none;"{% endif %}>
                     <label class="form-label">Nerede Bulundu?</label>
                     <input type="text" name="location" class="form-control" value="{{ cat.location or '' }}">
                 </div>
@@ -85,6 +85,26 @@
 {% endblock %}
 {% block scripts %}
 <script>
+function updateStatusFields() {
+    var status = document.getElementById('statusSelect').value;
+    var dateLabel = document.getElementById('dateLabel');
+    var locationGroup = document.getElementById('locationGroup');
+    var descInput = document.getElementById('descInput');
+
+    if (status === 'sokak') {
+        dateLabel.textContent = 'Bulma Tarihi';
+        locationGroup.style.display = 'block';
+        if (descInput) descInput.placeholder = 'Bu hayvan hakkinda bilinenleri yaz... Nerede buldun? Nasil bir durumdaydi? 📝';
+    } else {
+        dateLabel.textContent = 'Sahiplenilme Tarihi';
+        locationGroup.style.display = 'none';
+        if (descInput) descInput.placeholder = 'Nasil sahiplendin? Hikayesi ne? 📝';
+    }
+}
+
+document.getElementById('statusSelect').addEventListener('change', updateStatusFields);
+updateStatusFields();
+
 function previewPhotos(input) {
     const container = document.getElementById('photo-preview');
     container.innerHTML = '';
