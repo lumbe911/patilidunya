@@ -5,18 +5,22 @@ import urllib.request
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
 
 import cloudinary
 import cloudinary.uploader
 from flask import (Flask, render_template, redirect, url_for, request,
                    flash, jsonify, abort)
+from flask_limiter import Limiter
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (LoginManager, UserMixin, login_user, logout_user,
                          current_user, login_required)
+from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 database_url = os.environ.get('DATABASE_URL', '').strip()
 if not database_url:
@@ -25,7 +29,7 @@ elif database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024
 
 cloudinary.config(
     cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
@@ -44,11 +48,90 @@ MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
 MAIL_SENDER = os.environ.get('MAIL_SENDER', MAIL_USERNAME)
 SITE_URL = os.environ.get('SITE_URL', 'https://patilidunya.onrender.com')
 
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = SITE_URL.startswith('https://')
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Lutfen giris yapin.'
 login_manager.login_message_category = 'warning'
+
+
+def _client_ip():
+    xff = request.headers.get('X-Forwarded-For', '')
+    if xff:
+        return xff.split(',')[-1].strip()
+    return request.remote_addr or 'unknown'
+
+
+limiter = Limiter(
+    key_func=_client_ip,
+    app=app,
+    default_limits=["600 per hour"],
+    storage_uri="memory://",
+)
+
+
+@limiter.request_filter
+def _not_static():
+    return request.endpoint == 'static'
+
+
+_ALLOWED_ORIGINS = {SITE_URL.rstrip('/')}
+for _u in ('http://localhost:5000', 'http://127.0.0.1:5000'):
+    _ALLOWED_ORIGINS.add(_u)
+
+
+@app.before_request
+def csrf_protect():
+    if request.method in ('POST', 'PUT', 'PATCH', 'DELETE'):
+        origin = request.headers.get('Origin')
+        referer = request.headers.get('Referer')
+        if origin:
+            o = urlparse(origin)
+            ok = False
+            for allowed in _ALLOWED_ORIGINS:
+                a = urlparse(allowed)
+                if o.scheme == a.scheme and o.netloc == a.netloc:
+                    ok = True
+                    break
+            if not ok:
+                abort(403)
+        elif referer:
+            r = urlparse(referer)
+            if r.netloc:
+                ok = False
+                for allowed in _ALLOWED_ORIGINS:
+                    a = urlparse(allowed)
+                    if r.netloc == a.netloc:
+                        ok = True
+                        break
+                if not ok:
+                    abort(403)
+
+
+@app.after_request
+def security_headers(resp):
+    resp.headers['X-Content-Type-Options'] = 'nosniff'
+    resp.headers['X-Frame-Options'] = 'DENY'
+    resp.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    resp.headers['X-XSS-Protection'] = '1; mode=block'
+    resp.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=(), payment=()'
+    resp.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://unpkg.com; "
+        "style-src 'self' 'unsafe-inline' https://unpkg.com; "
+        "img-src 'self' data: blob: https:; "
+        "font-src 'self' data: https:; "
+        "connect-src 'self' https:; "
+        "frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    )
+    if request.is_secure:
+        resp.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    return resp
 
 
 def send_email(to_email, subject, html_body):
@@ -256,6 +339,7 @@ def reels():
 
 
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("10 per minute, 40 per hour", methods=['POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('explore'))
@@ -273,6 +357,7 @@ def login():
 
 
 @app.route('/register', methods=['GET', 'POST'])
+@limiter.limit("5 per hour, 20 per day", methods=['POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('explore'))
@@ -320,6 +405,7 @@ def logout():
 
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
+@limiter.limit("5 per hour", methods=['POST'])
 def forgot_password():
     if current_user.is_authenticated:
         return redirect(url_for('explore'))
@@ -354,6 +440,7 @@ def forgot_password():
 
 
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])
+@limiter.limit("10 per hour", methods=['POST'])
 def reset_password(token):
     if current_user.is_authenticated:
         return redirect(url_for('explore'))
@@ -415,6 +502,7 @@ def edit_profile():
 
 @app.route('/cat/new', methods=['GET', 'POST'])
 @login_required
+@limiter.limit("30 per hour")
 def new_cat():
     if request.method == 'POST':
         cat = Cat(
@@ -527,6 +615,7 @@ def delete_photo(cat_id, photo_id):
 
 @app.route('/api/like/<int:cat_id>', methods=['POST'])
 @login_required
+@limiter.limit("60 per minute")
 def toggle_like(cat_id):
     cat = Cat.query.get_or_404(cat_id)
     existing = Like.query.filter_by(user_id=current_user.id, cat_id=cat_id).first()
@@ -550,6 +639,7 @@ def toggle_like(cat_id):
 
 @app.route('/cat/<int:cat_id>/comment', methods=['POST'])
 @login_required
+@limiter.limit("30 per minute")
 def add_comment(cat_id):
     cat = Cat.query.get_or_404(cat_id)
     text = request.form.get('text', '').strip()
@@ -590,6 +680,7 @@ def get_comments(cat_id):
 
 @app.route('/cat/<int:cat_id>/comment/<int:comment_id>/reply', methods=['POST'])
 @login_required
+@limiter.limit("30 per minute")
 def reply_comment(cat_id, comment_id):
     parent = Comment.query.get_or_404(comment_id)
     cat = Cat.query.get_or_404(cat_id)
@@ -613,6 +704,7 @@ def reply_comment(cat_id, comment_id):
 
 @app.route('/cat/<int:cat_id>/comment/<int:comment_id>/delete', methods=['POST'])
 @login_required
+@limiter.limit("30 per minute")
 def delete_comment(cat_id, comment_id):
     comment = Comment.query.get_or_404(comment_id)
     if comment.user_id != current_user.id and current_user.username != 'Lumbe':
@@ -626,6 +718,7 @@ def delete_comment(cat_id, comment_id):
 
 @app.route('/api/favorite/<int:cat_id>', methods=['POST'])
 @login_required
+@limiter.limit("60 per minute")
 def toggle_favorite(cat_id):
     existing = Favorite.query.filter_by(user_id=current_user.id, cat_id=cat_id).first()
     if existing:
@@ -655,6 +748,7 @@ def notifications():
 
 @app.route('/api/notifications/unread')
 @login_required
+@limiter.limit("120 per minute")
 def unread_count():
     count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
     return jsonify({'count': count})
@@ -662,6 +756,7 @@ def unread_count():
 
 @app.route('/api/notifications/read', methods=['POST'])
 @login_required
+@limiter.limit("120 per minute")
 def mark_read():
     Notification.query.filter_by(user_id=current_user.id, is_read=False).update({'is_read': True})
     db.session.commit()
@@ -760,6 +855,7 @@ def admin_users():
 
 @app.route('/admin/seed')
 @login_required
+@limiter.limit("10 per hour")
 def seed_cats():
     if current_user.username != 'Lumbe':
         abort(403)
@@ -873,6 +969,21 @@ def internal_error(e):
 def not_found(e):
     return render_template('error.html', code=404,
                            message='Aradığın sayfa bulunamadı.'), 404
+
+@app.errorhandler(429)
+def too_many_requests(e):
+    return render_template('error.html', code=429,
+                           message='Çok fazla istek gönderdin. Biraz bekle ve tekrar dene.'), 429
+
+@app.errorhandler(413)
+def too_large(e):
+    return render_template('error.html', code=413,
+                           message='Yüklenen dosya çok büyük. En fazla 20 MB.'), 413
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('error.html', code=403,
+                           message='Bu işlemi yapmaya yetkin yok.'), 403
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

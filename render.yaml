@@ -3,7 +3,7 @@ services:
     name: patilidunya
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 30 --max-requests 1000 --max-requests-jitter 100 --limit-request-line 4094 --limit-request-field_size 4094
     envVars:
       - key: SECRET_KEY
         generateValue: true

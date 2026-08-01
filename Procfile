@@ -1,1 +1,1 @@
-web: gunicorn app:app
+web: gunicorn app:app --workers 1 --threads 4 --timeout 30 --max-requests 1000 --max-requests-jitter 100 --limit-request-line 4094 --limit-request-field_size 4094
