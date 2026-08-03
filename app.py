@@ -345,7 +345,7 @@ def check_private_mode():
         return
     from flask import make_response
     html = '''<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>PatiliDunya</title>
+<html><head><meta charset="utf-8"><title>Patili Dünya</title>
 <link rel="stylesheet" href="/static/css/style.css"></head>
 <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem;">
 <div><h1 style="font-size:5rem;">&#128274;</h1>
@@ -544,7 +544,7 @@ def forgot_password():
             reset_url = SITE_URL + url_for('reset_password', token=token)
             html = f"""
             <div style="font-family:sans-serif; max-width:400px; margin:0 auto; padding:2rem;">
-                <h2 style="color:#db2777;">🐱 PatiliDunya - Şifre Sıfırlama</h2>
+                <h2 style="color:#db2777;">🐱 Patili Dünya - Şifre Sıfırlama</h2>
                 <p>Merhaba <strong>{user.display_name or user.username}</strong>,</p>
                 <p>Şifreni sıfırlamak için aşağıdaki linke tıkla:</p>
                 <a href="{reset_url}" style="display:inline-block; padding:0.8rem 1.5rem; background:linear-gradient(135deg,#ec4899,#a855f7); color:white; border-radius:9999px; text-decoration:none; font-weight:700; margin:1rem 0;">Şifremi Sıfırla</a>
@@ -552,7 +552,7 @@ def forgot_password():
                 <p style="color:#6b7280; font-size:0.85rem;">Eğer bu isteği sen yapmadıysan, bu e-postası görünce ignorala.</p>
             </div>
             """
-            sent = send_email(user.email, 'PatiliDunya - Şifre Sıfırlama', html)
+            sent = send_email(user.email, 'Patili Dünya - Şifre Sıfırlama', html)
             if sent:
                 flash('Şifre sıfırlama e-postası gönderildi! E-postanı kontrol et.', 'success')
             else:
