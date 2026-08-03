@@ -11,12 +11,13 @@
         <h1 class="profile-name">{{ profile_user.display_name or profile_user.username }}</h1>
         <p class="profile-bio">{{ profile_user.bio or 'Henuz bio eklenmemis...' }}</p>
         {% if current_user.id != profile_user.id %}
-        <div style="margin-top:1rem;">
+        <div style="margin-top:1rem; display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap;">
             <button class="btn {% if is_following %}btn-secondary{% else %}btn-primary{% endif %} btn-sm follow-btn"
                     data-username="{{ profile_user.username }}"
                     onclick="toggleFollow(this.getAttribute('data-username'), this)">
                 {% if is_following %}Takibi Birak{% else %}Takip Et{% endif %}
             </button>
+            <a href="{{ url_for('conversation', username=profile_user.username) }}" class="btn btn-secondary btn-sm">Mesaj</a>
         </div>
         {% endif %}
         <div class="profile-stats">

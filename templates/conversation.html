@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}{{ other.display_name or other.username }} - Mesajlar - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="chat-card">
+        <div class="chat-header">
+            {% if other.avatar %}
+            <img src="{{ other.avatar }}" alt="" style="width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid var(--pink-200);">
+            {% else %}
+            <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, var(--pink-300), var(--purple-400)); display:flex; align-items:center; justify-content:center; font-weight:800; color:white;">{{ other.username[0]|upper }}</div>
+            {% endif %}
+            <div style="flex:1; min-width:0;">
+                <a href="{{ url_for('user_profile', username=other.username) }}" style="font-weight:800; color:var(--gray-900);">{{ other.display_name or other.username }}</a>
+                <div style="font-size:0.75rem; color:var(--gray-500);">@{{ other.username }}</div>
+            </div>
+            <a href="{{ url_for('user_profile', username=other.username) }}" class="btn btn-secondary btn-sm">Profil</a>
+        </div>
+
+        <div class="chat-body" id="chatBody" data-username="{{ other.username }}" data-last-id="{{ messages[-1].id if messages else 0 }}">
+            {% for m in messages %}
+            <div class="msg-row {% if m.sender_id == current_user.id %}msg-mine{% else %}msg-theirs{% endif %}" data-msg-id="{{ m.id }}">
+                <div class="msg-bubble">{{ m.text }}</div>
+                <div class="msg-time">{{ m.created_at.strftime('%d %b, %H:%M') }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <form class="chat-form" id="chatForm">
+            <input type="text" id="chatInput" name="text" maxlength="2000" placeholder="Mesaj yaz..." autocomplete="off" required>
+            <button type="submit" class="btn btn-primary">Gonder ➤</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    var body = document.getElementById('chatBody');
+    var form = document.getElementById('chatForm');
+    var input = document.getElementById('chatInput');
+    var username = body.getAttribute('data-username');
+    var lastId = parseInt(body.getAttribute('data-last-id'), 10) || 0;
+    var nearBottom = true;
+
+    function scrollToBottom() {
+        body.scrollTop = body.scrollHeight;
+    }
+
+    function appendMsg(m) {
+        var row = document.createElement('div');
+        row.className = 'msg-row ' + (m.from_me ? 'msg-mine' : 'msg-theirs');
+        row.setAttribute('data-msg-id', m.id);
+        var bub = document.createElement('div');
+        bub.className = 'msg-bubble';
+        bub.textContent = m.text;
+        var time = document.createElement('div');
+        time.className = 'msg-time';
+        time.textContent = m.time;
+        row.appendChild(bub);
+        row.appendChild(time);
+        body.appendChild(row);
+        lastId = m.id;
+    }
+
+    body.addEventListener('scroll', function() {
+        nearBottom = (body.scrollHeight - body.scrollTop - body.clientHeight) < 120;
+    });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        fetch('/api/messages/send/' + username, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'text=' + encodeURIComponent(text)
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            if (data.error) { alert(data.error); return; }
+            appendMsg(data.message);
+            scrollToBottom();
+        });
+    });
+
+    function poll() {
+        fetch('/api/messages/' + username + '?after=' + lastId, { cache: 'no-store' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.messages && data.messages.length) {
+                    data.messages.forEach(appendMsg);
+                    if (nearBottom) scrollToBottom();
+                }
+            });
+    }
+    scrollToBottom();
+    setInterval(poll, 3000);
+})();
+</script>
+{% endblock %}

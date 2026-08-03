@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Admin - Konusma - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container" style="max-width:760px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+        <div>
+            <a href="{{ url_for('admin_dms') }}" style="font-weight:700; font-size:0.9rem;">&#8592; DM Yonetim</a>
+            <h1 style="font-size:1.4rem; font-weight:800; margin-top:0.4rem;">
+                <a href="{{ url_for('user_profile', username=u1.username) }}">{{ u1.display_name or u1.username }}</a>
+                <span style="color:var(--gray-500);"> &#8596; </span>
+                <a href="{{ url_for('user_profile', username=u2.username) }}">{{ u2.display_name or u2.username }}</a>
+            </h1>
+            <p style="font-size:0.85rem; color:var(--gray-500); margin-top:0.3rem;">{{ msgs|length }} mesaj</p>
+        </div>
+        <form method="POST" action="{{ url_for('admin_delete_conversation', conv_id=conv.id) }}" onsubmit="return confirm('Bu konusmayi silmek istediginize emin misiniz?');">
+            <button type="submit" class="btn btn-danger btn-sm">Konusmayi Sil</button>
+        </form>
+    </div>
+
+    {% if msgs %}
+    <div style="display:flex; flex-direction:column; gap:0.6rem;">
+        {% for m in msgs %}
+        <div style="background:{% if m.sender_id == u1.id %}var(--pink-50){% else %}#f5f3ff{% endif %}; border:1px solid var(--pink-100); border-radius:var(--radius-sm); padding:0.85rem 1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    {% if m.sender.avatar %}
+                    <img src="{{ m.sender.avatar }}" alt="" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
+                    {% else %}
+                    <div style="width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg, var(--pink-300), var(--purple-400)); display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:800; color:white;">{{ m.sender.username[0]|upper }}</div>
+                    {% endif %}
+                    <a href="{{ url_for('user_profile', username=m.sender.username) }}" style="font-weight:800; font-size:0.85rem; color:var(--pink-600);">@{{ m.sender.username }}</a>
+                    <span style="font-size:0.72rem; color:var(--gray-500);">{{ m.created_at.strftime('%d %b %Y, %H:%M') }}</span>
+                </div>
+                <form method="POST" action="{{ url_for('admin_delete_message', msg_id=m.id) }}" onsubmit="return confirm('Bu mesaji silmek istediginize emin misiniz?');" style="display:inline;">
+                    <button type="submit" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.75rem; font-weight:700;">Sil</button>
+                </form>
+            </div>
+            <div style="margin-top:0.5rem; white-space:pre-wrap; word-break:break-word;">{{ m.text }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">💬</div>
+        <h3>Bu konusmada mesaj yok</h3>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

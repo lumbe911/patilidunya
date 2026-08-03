@@ -27,8 +27,13 @@
                 <li><a href="{{ url_for('cat_map') }}" class="nav-link">Harita</a></li>
                 <li><a href="{{ url_for('favorites') }}" class="nav-link">Favoriler</a></li>
                 <li><a href="{{ url_for('new_cat') }}" class="nav-link">+ Patili Ekle</a></li>
+                <li><a href="{{ url_for('messages') }}" class="nav-link" id="msgLink">💬<span id="msgBadge" class="nav-badge" style="display:none;">0</span></a></li>
                 <li><a href="{{ url_for('notifications') }}" class="nav-link" id="notifLink">🔔</a></li>
                 <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="nav-link">Profilim</a></li>
+                {% if current_user.username == 'Lumbe' %}
+                <li><a href="{{ url_for('admin_users') }}" class="nav-link">🛡️ Kullanicilar</a></li>
+                <li><a href="{{ url_for('admin_dms') }}" class="nav-link">🛡️ DM Yonetim</a></li>
+                {% endif %}
                 <li><a href="{{ url_for('logout') }}" class="nav-link">Cikis</a></li>
             </ul>
             {% else %}
@@ -99,6 +104,20 @@
     }
     checkNotifs();
     setInterval(checkNotifs, 30000);
+
+    function checkMessages() {
+        fetch('/api/messages/unread').then(function(r){return r.json()}).then(function(d){
+            var badge = document.getElementById('msgBadge');
+            if (d.count > 0) {
+                badge.textContent = d.count > 99 ? '99+' : d.count;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+    }
+    checkMessages();
+    setInterval(checkMessages, 30000);
     </script>
     {% endif %}
 

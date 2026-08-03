@@ -261,9 +261,72 @@ class Reaction(db.Model):
     __table_args__ = (db.UniqueConstraint('user_id', 'cat_id'),)
 
 
+class Conversation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user1_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_message_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint('user1_id', 'user2_id'),)
+    messages = db.relationship('Message', backref='conversation', lazy=True, cascade='all, delete-orphan')
+
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey('conversation.id'), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))
+
+
+def find_conversation(u1_id, u2_id):
+    a, b = (u1_id, u2_id) if u1_id < u2_id else (u2_id, u1_id)
+    return Conversation.query.filter_by(user1_id=a, user2_id=b).first()
+
+
+def get_or_create_conversation(u1_id, u2_id):
+    a, b = (u1_id, u2_id) if u1_id < u2_id else (u2_id, u1_id)
+    conv = Conversation.query.filter_by(user1_id=a, user2_id=b).first()
+    if not conv:
+        conv = Conversation(user1_id=a, user2_id=b)
+        db.session.add(conv)
+        db.session.flush()
+    return conv
+
+
+def user_conversations(user_id):
+    return Conversation.query.filter(
+        db.or_(Conversation.user1_id == user_id, Conversation.user2_id == user_id)
+    ).order_by(Conversation.last_message_at.desc()).all()
+
+
+def other_in_conversation(conv, user_id):
+    return db.session.get(User, conv.user2_id if conv.user1_id == user_id else conv.user1_id)
+
+
+def unread_msg_count(user_id):
+    conv_ids = [c.id for c in user_conversations(user_id)]
+    if not conv_ids:
+        return 0
+    return Message.query.filter(Message.conversation_id.in_(conv_ids),
+                                Message.sender_id != user_id,
+                                Message.is_read == False).count()
+
+
+def _serialize_msg(m, user_id):
+    return {
+        'id': m.id,
+        'text': m.text,
+        'from_me': m.sender_id == user_id,
+        'time': m.created_at.strftime('%d %b, %H:%M')
+    }
 
 
 @app.before_request
@@ -897,6 +960,149 @@ def mark_read():
     Notification.query.filter_by(user_id=current_user.id, is_read=False).update({'is_read': True})
     db.session.commit()
     return jsonify({'ok': True})
+
+
+@app.route('/messages')
+@login_required
+def messages():
+    rows = []
+    for conv in user_conversations(current_user.id):
+        other = other_in_conversation(conv, current_user.id)
+        if not other:
+            continue
+        last = Message.query.filter_by(conversation_id=conv.id).order_by(Message.created_at.desc()).first()
+        unread = Message.query.filter_by(conversation_id=conv.id,
+                                         sender_id=other.id, is_read=False).count()
+        rows.append({'conv': conv, 'other': other, 'last': last, 'unread': unread})
+    return render_template('messages.html', rows=rows)
+
+
+@app.route('/messages/<username>', methods=['GET', 'POST'])
+@login_required
+@limiter.limit("20 per minute", methods=['POST'])
+def conversation(username):
+    other = User.query.filter_by(username=username).first_or_404()
+    if other.id == current_user.id:
+        flash('Kendine mesaj atamazsin.', 'warning')
+        return redirect(url_for('messages'))
+    if request.method == 'POST':
+        text = request.form.get('text', '').strip()
+        if text:
+            conv = get_or_create_conversation(current_user.id, other.id)
+            conv.last_message_at = datetime.utcnow()
+            db.session.add(Message(conversation_id=conv.id, sender_id=current_user.id, text=text[:2000]))
+            db.session.commit()
+        return redirect(url_for('conversation', username=username))
+    conv = find_conversation(current_user.id, other.id)
+    msgs = []
+    if conv:
+        msgs = Message.query.filter_by(conversation_id=conv.id).order_by(Message.created_at.asc(), Message.id.asc()).limit(200).all()
+        Message.query.filter_by(conversation_id=conv.id, sender_id=other.id, is_read=False).update({'is_read': True})
+        db.session.commit()
+    return render_template('conversation.html', other=other, messages=msgs)
+
+
+@app.route('/api/messages/send/<username>', methods=['POST'])
+@login_required
+@limiter.limit("20 per minute")
+def send_message(username):
+    other = User.query.filter_by(username=username).first_or_404()
+    if other.id == current_user.id:
+        return jsonify({'error': 'Kendine mesaj atamazsin.'}), 400
+    text = request.form.get('text', '').strip()
+    if not text:
+        return jsonify({'error': 'Mesaj bos olamaz.'}), 400
+    conv = get_or_create_conversation(current_user.id, other.id)
+    conv.last_message_at = datetime.utcnow()
+    msg = Message(conversation_id=conv.id, sender_id=current_user.id, text=text[:2000])
+    db.session.add(msg)
+    db.session.commit()
+    return jsonify({'ok': True, 'message': _serialize_msg(msg, current_user.id)})
+
+
+@app.route('/api/messages/<username>')
+@login_required
+@limiter.limit("60 per minute")
+def poll_messages(username):
+    other = User.query.filter_by(username=username).first_or_404()
+    conv = find_conversation(current_user.id, other.id)
+    if not conv:
+        return jsonify({'messages': []})
+    after = request.args.get('after', 0, type=int)
+    msgs = Message.query.filter(Message.conversation_id == conv.id,
+                                Message.id > after).order_by(Message.id.asc()).all()
+    Message.query.filter_by(conversation_id=conv.id, sender_id=other.id, is_read=False).update({'is_read': True})
+    db.session.commit()
+    return jsonify({'messages': [_serialize_msg(m, current_user.id) for m in msgs]})
+
+
+@app.route('/api/messages/unread')
+@login_required
+@limiter.limit("60 per minute")
+def messages_unread():
+    return jsonify({'count': unread_msg_count(current_user.id)})
+
+
+@app.route('/admin/dms')
+@login_required
+def admin_dms():
+    if current_user.username != 'Lumbe':
+        abort(403)
+    q = request.args.get('q', '').strip()
+    convs = Conversation.query.order_by(Conversation.last_message_at.desc()).all()
+    rows = []
+    for conv in convs:
+        u1 = db.session.get(User, conv.user1_id)
+        u2 = db.session.get(User, conv.user2_id)
+        if not u1 or not u2:
+            continue
+        if q and q.lower() not in u1.username.lower() and q.lower() not in u2.username.lower() \
+                and q.lower() not in (u1.display_name or '').lower() and q.lower() not in (u2.display_name or '').lower():
+            continue
+        total = Message.query.filter_by(conversation_id=conv.id).count()
+        last = Message.query.filter_by(conversation_id=conv.id).order_by(Message.created_at.desc()).first()
+        rows.append({'conv': conv, 'u1': u1, 'u2': u2, 'total': total, 'last': last})
+    return render_template('admin_dms.html', rows=rows, q=q, total=len(rows))
+
+
+@app.route('/admin/dms/<int:conv_id>')
+@login_required
+def admin_conversation(conv_id):
+    if current_user.username != 'Lumbe':
+        abort(403)
+    conv = Conversation.query.get_or_404(conv_id)
+    u1 = db.session.get(User, conv.user1_id)
+    u2 = db.session.get(User, conv.user2_id)
+    msgs = Message.query.filter_by(conversation_id=conv.id).order_by(Message.created_at.asc(), Message.id.asc()).all()
+    return render_template('admin_conversation.html', conv=conv, u1=u1, u2=u2, msgs=msgs)
+
+
+@app.route('/admin/dms/<int:conv_id>/delete', methods=['POST'])
+@login_required
+@limiter.limit("30 per minute")
+def admin_delete_conversation(conv_id):
+    if current_user.username != 'Lumbe':
+        abort(403)
+    conv = Conversation.query.get_or_404(conv_id)
+    Message.query.filter_by(conversation_id=conv.id).delete()
+    db.session.delete(conv)
+    db.session.commit()
+    flash('Konusma silindi.', 'info')
+    return redirect(url_for('admin_dms'))
+
+
+@app.route('/admin/dms/message/<int:msg_id>/delete', methods=['POST'])
+@login_required
+@limiter.limit("30 per minute")
+def admin_delete_message(msg_id):
+    if current_user.username != 'Lumbe':
+        abort(403)
+    msg = Message.query.get_or_404(msg_id)
+    conv_id = msg.conversation_id
+    db.session.delete(msg)
+    db.session.commit()
+    flash('Mesaj silindi.', 'info')
+    return redirect(url_for('admin_conversation', conv_id=conv_id))
 
 
 CITY_COORDS = {

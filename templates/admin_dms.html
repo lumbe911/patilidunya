@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Admin - DM Yonetim - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container">
+    <div style="text-align:center; margin-bottom:2rem;">
+        <h1 style="font-size:1.8rem; font-weight:800; background:linear-gradient(135deg, var(--pink-600), var(--purple-500)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">💬 DM Yonetim Paneli</h1>
+        <p style="color:var(--gray-500); margin-top:0.5rem;">Toplam <strong>{{ total }}</strong> konusma</p>
+    </div>
+
+    <div style="max-width:760px; margin:0 auto 1.5rem;">
+        <form method="GET" action="{{ url_for('admin_dms') }}" style="display:flex; gap:0.5rem;">
+            <input type="text" name="q" value="{{ q }}" placeholder="Kullanici adi ile ara..." class="form-control" style="flex:1;">
+            <button type="submit" class="btn btn-secondary">Ara</button>
+            {% if q %}<a href="{{ url_for('admin_dms') }}" class="btn btn-secondary">Temizle</a>{% endif %}
+        </form>
+    </div>
+
+    {% if rows %}
+    <div style="max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:0.75rem;">
+        {% for row in rows %}
+        <div style="background:white; border-radius:var(--radius); padding:1rem 1.25rem; border:1px solid var(--pink-100); box-shadow:var(--shadow-sm); display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:200px;">
+                <span style="width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg, var(--pink-500), var(--purple-500)); flex-shrink:0;"></span>
+                <div>
+                    <a href="{{ url_for('user_profile', username=row.u1.username) }}" style="font-weight:800; color:var(--pink-600);">{{ row.u1.display_name or row.u1.username }}</a>
+                    <span style="color:var(--gray-500);"> &#8596; </span>
+                    <a href="{{ url_for('user_profile', username=row.u2.username) }}" style="font-weight:800; color:var(--pink-600);">{{ row.u2.display_name or row.u2.username }}</a>
+                    <div style="font-size:0.75rem; color:var(--gray-500); margin-top:2px;">
+                        {{ row.total }} mesaj
+                        {% if row.last %}
+                        &middot; son: {{ row.last.sender.display_name or row.last.sender.username }}: {{ row.last.text[:60] }} ({{ row.last.created_at.strftime('%d %b, %H:%M') }})
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex; gap:0.5rem; flex-shrink:0;">
+                <a href="{{ url_for('admin_conversation', conv_id=row.conv.id) }}" class="btn btn-secondary btn-sm">Mesajlari Gor</a>
+                <form method="POST" action="{{ url_for('admin_delete_conversation', conv_id=row.conv.id) }}" onsubmit="return confirm('Bu konusmayi silmek istediginize emin misiniz?');" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Sil</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">💬</div>
+        <h3>Konusma bulunamadi</h3>
+        <p>Henuz kimse mesajlasmamis veya arama sonucu bos.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -46,7 +46,10 @@
                 </div>
             </div>
 
-            <a href="{{ url_for('user_profile', username=item.user.username) }}" class="btn btn-secondary btn-sm" style="flex-shrink:0;">Profili Gor</a>
+            <div style="display:flex; gap:0.5rem; flex-shrink:0; align-items:center;">
+                <a href="{{ url_for('admin_dms', q=item.user.username) }}" class="btn btn-secondary btn-sm" style="margin:0;">Mesajlari</a>
+                <a href="{{ url_for('user_profile', username=item.user.username) }}" class="btn btn-secondary btn-sm" style="margin:0;">Profili Gor</a>
+            </div>
         </div>
         {% endfor %}
     </div>

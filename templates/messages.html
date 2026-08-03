@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Mesajlar - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="page-title">💬 Mesajlar</h1>
+
+    {% if rows %}
+    <div style="max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:0.75rem;">
+        {% for row in rows %}
+        <a href="{{ url_for('conversation', username=row.other.username) }}" class="msg-thread">
+            <div style="position:relative; flex-shrink:0;">
+                {% if row.other.avatar %}
+                <img src="{{ row.other.avatar }}" alt="" style="width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--pink-200);">
+                {% else %}
+                <div style="width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg, var(--pink-300), var(--purple-400)); display:flex; align-items:center; justify-content:center; font-weight:800; color:white;">{{ row.other.username[0]|upper }}</div>
+                {% endif %}
+                {% if row.unread > 0 %}
+                <span class="nav-badge" style="position:absolute; top:-4px; right:-4px; display:inline-flex;">{{ row.unread }}</span>
+                {% endif %}
+            </div>
+            <div style="flex:1; min-width:0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
+                    <span style="font-weight:800; color:var(--gray-900); {% if row.unread > 0 %}color:var(--pink-600);{% endif %}">{{ row.other.display_name or row.other.username }}</span>
+                    {% if row.last %}
+                    <span style="font-size:0.72rem; color:var(--gray-500); flex-shrink:0;">{{ row.last.created_at.strftime('%d %b, %H:%M') }}</span>
+                    {% endif %}
+                </div>
+                <div style="font-size:0.85rem; color:var(--gray-500); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
+                    {% if row.last %}
+                        {% if row.last.sender_id == current_user.id %}Siz: {% endif %}{{ row.last.text }}
+                    {% else %}
+                        Henuz mesaj yok
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">💬</div>
+        <h3>Henuz mesajin yok</h3>
+        <p>Bir profil sayfasindan "Mesaj" butonuna tiklayarak konusma baslatabilirsin.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
