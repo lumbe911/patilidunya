@@ -392,16 +392,16 @@
         <form class="comment-input-bar" id="commentForm" method="POST" action="">
             <input type="hidden" name="next" value="reels">
             <input type="text" name="text" id="commentInput" placeholder="Yorum yaz..." required>
-            <button type="submit">Gonder</button>
+            <button type="submit">Gönder</button>
         </form>
     </div>
 
     {% else %}
     <div class="no-reels">
         <div class="icon">🐱</div>
-        <h2>Henuz reels yok!</h2>
-                    <p>Fotografli hayvan profilleri olusturulduktan sonra burada gorunecek.</p>
-        <a href="{{ url_for('explore') }}" class="btn btn-primary">Kesfete Don</a>
+        <h2>Henüz reels yok!</h2>
+                    <p>Fotoğraflı hayvan profilleri oluşturulduktan sonra burada görünecek.</p>
+        <a href="{{ url_for('explore') }}" class="btn btn-primary">Keşfete Dön</a>
     </div>
     {% endif %}
 
@@ -433,7 +433,7 @@
         document.getElementById('commentForm').action = '/cat/' + catId + '/comment';
         document.getElementById('commentTitle').textContent = 'Yorumlar';
         document.getElementById('commentInput').value = '';
-        document.getElementById('commentList').innerHTML = '<p style="text-align:center; color:#9ca3af; padding:1rem;">Yukleniyor...</p>';
+        document.getElementById('commentList').innerHTML = '<p style="text-align:center; color:#9ca3af; padding:1rem;">Yükleniyor...</p>';
         document.getElementById('commentBox').classList.add('open');
         document.getElementById('commentOverlay').classList.add('open');
 
@@ -442,7 +442,7 @@
             .then(function(data) {
                 var html = '';
                 if (data.comments.length === 0) {
-                    html = '<p style="text-align:center; color:#9ca3af; padding:1rem;">Henuz yorum yok</p>';
+                    html = '<p style="text-align:center; color:#9ca3af; padding:1rem;">Henüz yorum yok</p>';
                 } else {
                     data.comments.forEach(function(c) {
                         html += '<div class="comment-item">';
@@ -454,12 +454,12 @@
                         html += '<div style="flex:1; min-width:0;">';
                         html += '<span class="c-name">' + c.display_name + '</span> <span class="c-time">' + c.time + '</span>';
                         html += '<div class="c-text">' + c.text + '</div>';
-                        html += '<button onclick="toggleReplyInput(' + c.id + ')" style="background:none; border:none; color:#ec4899; font-size:0.7rem; font-weight:700; cursor:pointer; padding:0;">Yanitla</button>';
+                        html += '<button onclick="toggleReplyInput(' + c.id + ')" style="background:none; border:none; color:#ec4899; font-size:0.7rem; font-weight:700; cursor:pointer; padding:0;">Yanıtla</button>';
                         html += '<div id="reply-input-' + c.id + '" style="display:none; margin-top:6px;">';
                         html += '<form method="POST" action="/cat/' + catId + '/comment/' + c.id + '/reply" style="display:flex; gap:4px;">';
-                        html += '<input type="text" name="text" placeholder="Yanit yaz..." required style="flex:1; padding:4px 8px; border:1px solid #f9a8d4; border-radius:9999px; font-size:0.75rem; font-family:Nunito,sans-serif;">';
+                        html += '<input type="text" name="text" placeholder="Yanıt yaz..." required style="flex:1; padding:4px 8px; border:1px solid #f9a8d4; border-radius:9999px; font-size:0.75rem; font-family:Nunito,sans-serif;">';
                         html += '<input type="hidden" name="next" value="reels">';
-                        html += '<button type="submit" style="background:#ec4899; color:white; border:none; border-radius:9999px; padding:4px 10px; font-size:0.7rem; font-weight:700; cursor:pointer;">Gonder</button>';
+                        html += '<button type="submit" style="background:#ec4899; color:white; border:none; border-radius:9999px; padding:4px 10px; font-size:0.7rem; font-weight:700; cursor:pointer;">Gönder</button>';
                         html += '</form></div>';
                         if (c.replies && c.replies.length > 0) {
                             html += '<div style="margin-top:6px; padding-left:8px; border-left:2px solid #fce7f3; display:flex; flex-direction:column; gap:4px;">';
@@ -480,7 +480,7 @@
                 document.getElementById('commentList').innerHTML = html;
             })
             .catch(function() {
-                document.getElementById('commentList').innerHTML = '<p style="text-align:center; color:#ef4444; padding:1rem;">Yorumlar yuklenemedi</p>';
+                document.getElementById('commentList').innerHTML = '<p style="text-align:center; color:#ef4444; padding:1rem;">Yorumlar yüklenemedi</p>';
             });
     }
 

@@ -105,7 +105,7 @@
 <body>
     <a href="{{ url_for('explore') }}" class="back-btn">&larr;</a>
     <div class="map-search">
-        <input type="text" id="searchInput" placeholder="Bolge ara... (orn: Kadikoy, Istanbul)">
+        <input type="text" id="searchInput" placeholder="Bölge ara... (orn: Kadıköy, İstanbul)">
         <button onclick="searchLocation()">Ara</button>
     </div>
     <div id="map"></div>
@@ -123,7 +123,7 @@
     if (cats.length === 0) {
         var loader = document.createElement('div');
         loader.className = 'loading-overlay';
-        loader.innerHTML = '<div class="spinner">🐱</div><p>Henuz konumlu patili yok</p>';
+        loader.innerHTML = '<div class="spinner">🐱</div><p>Henüz konumlu patili yok</p>';
         document.body.appendChild(loader);
         setTimeout(function() { loader.style.display = 'none'; }, 2000);
     }

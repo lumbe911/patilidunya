@@ -29,7 +29,7 @@
                     {% if row.last %}
                         {% if row.last.sender_id == current_user.id %}Siz: {% endif %}{{ row.last.text }}
                     {% else %}
-                        Henuz mesaj yok
+                        Henüz mesaj yok
                     {% endif %}
                 </div>
             </div>
@@ -39,8 +39,8 @@
     {% else %}
     <div class="empty-state">
         <div class="icon">💬</div>
-        <h3>Henuz mesajin yok</h3>
-        <p>Bir profil sayfasindan "Mesaj" butonuna tiklayarak konusma baslatabilirsin.</p>
+        <h3>Henüz mesajın yok</h3>
+        <p>Bir profil sayfasından "Mesaj" butonuna tıklayarak konuşma başlatabilirsin.</p>
     </div>
     {% endif %}
 </div>

@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Admin - DM Yonetim - PatiliDunya{% endblock %}
+{% block title %}Admin - DM Yönetim - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container">
     <div style="text-align:center; margin-bottom:2rem;">
-        <h1 style="font-size:1.8rem; font-weight:800; background:linear-gradient(135deg, var(--pink-600), var(--purple-500)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">💬 DM Yonetim Paneli</h1>
-        <p style="color:var(--gray-500); margin-top:0.5rem;">Toplam <strong>{{ total }}</strong> konusma</p>
+        <h1 style="font-size:1.8rem; font-weight:800; background:linear-gradient(135deg, var(--pink-600), var(--purple-500)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">💬 DM Yönetim Paneli</h1>
+        <p style="color:var(--gray-500); margin-top:0.5rem;">Toplam <strong>{{ total }}</strong> konuşma</p>
     </div>
 
     <div style="max-width:760px; margin:0 auto 1.5rem;">
         <form method="GET" action="{{ url_for('admin_dms') }}" style="display:flex; gap:0.5rem;">
-            <input type="text" name="q" value="{{ q }}" placeholder="Kullanici adi ile ara..." class="form-control" style="flex:1;">
+            <input type="text" name="q" value="{{ q }}" placeholder="Kullanıcı adı ile ara..." class="form-control" style="flex:1;">
             <button type="submit" class="btn btn-secondary">Ara</button>
             {% if q %}<a href="{{ url_for('admin_dms') }}" class="btn btn-secondary">Temizle</a>{% endif %}
         </form>
@@ -34,8 +34,8 @@
                 </div>
             </div>
             <div style="display:flex; gap:0.5rem; flex-shrink:0;">
-                <a href="{{ url_for('admin_conversation', conv_id=row.conv.id) }}" class="btn btn-secondary btn-sm">Mesajlari Gor</a>
-                <form method="POST" action="{{ url_for('admin_delete_conversation', conv_id=row.conv.id) }}" onsubmit="return confirm('Bu konusmayi silmek istediginize emin misiniz?');" style="display:inline;">
+                <a href="{{ url_for('admin_conversation', conv_id=row.conv.id) }}" class="btn btn-secondary btn-sm">Mesajları Gör</a>
+                <form method="POST" action="{{ url_for('admin_delete_conversation', conv_id=row.conv.id) }}" onsubmit="return confirm('Bu konuşmayı silmek istediğinize emin misiniz?');" style="display:inline;">
                     <button type="submit" class="btn btn-danger btn-sm">Sil</button>
                 </form>
             </div>
@@ -45,8 +45,8 @@
     {% else %}
     <div class="empty-state">
         <div class="icon">💬</div>
-        <h3>Konusma bulunamadi</h3>
-        <p>Henuz kimse mesajlasmamis veya arama sonucu bos.</p>
+        <h3>Konuşma bulunamadı</h3>
+        <p>Henüz kimse mesajlaşmamış veya arama sonucu boş.</p>
     </div>
     {% endif %}
 </div>

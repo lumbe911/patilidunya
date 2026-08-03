@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Takipciler' if mode == 'followers' else 'Takip Edilenler' }} - PatiliDunya{% endblock %}
+{% block title %}{{ 'Takipçiler' if mode == 'followers' else 'Takip Edilenler' }} - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container" style="max-width:560px;">
     <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem;">
         <a href="{{ url_for('user_profile', username=page_user.username) }}" style="font-size:0.9rem; color:var(--pink-600); font-weight:700;">&#8592; {{ page_user.display_name or page_user.username }}</a>
         <h1 class="page-title" style="margin:0; font-size:1.4rem;">
-            {{ 'Takipciler' if mode == 'followers' else 'Takip Edilenler' }}
+            {{ 'Takipçiler' if mode == 'followers' else 'Takip Edilenler' }}
         </h1>
     </div>
 
@@ -26,7 +26,7 @@
             <button class="btn {% if u.id in followed_ids %}btn-secondary{% else %}btn-primary{% endif %} btn-sm follow-btn"
                     data-username="{{ u.username }}"
                     onclick="toggleFollow(this.getAttribute('data-username'), this)">
-                {% if u.id in followed_ids %}Takibi Birak{% else %}Takip Et{% endif %}
+                {% if u.id in followed_ids %}Takibi Bırak{% else %}Takip Et{% endif %}
             </button>
             {% endif %}
         </div>
@@ -35,8 +35,8 @@
     {% else %}
     <div class="empty-state">
         <div class="icon">👥</div>
-        <h3>Henuz kimse yok</h3>
-        <p>{{ 'Bu kullaniciyi henuz kimse takip etmiyor.' if mode == 'followers' else 'Bu kullanici henuz kimseyi takip etmiyor.' }}</p>
+        <h3>Henüz kimse yok</h3>
+        <p>{{ 'Bu kullanıcıyı henüz kimse takip etmiyor.' if mode == 'followers' else 'Bu kullanıcı henüz kimseyi takip etmiyor.' }}</p>
     </div>
     {% endif %}
 </div>

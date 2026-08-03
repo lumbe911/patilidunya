@@ -9,13 +9,13 @@
         <div class="profile-avatar-large" style="background: linear-gradient(135deg, var(--pink-300), var(--purple-400)); display:flex; align-items:center; justify-content:center; font-size:3rem; color:white; margin: 0 auto 1rem;">{{ profile_user.username[0]|upper }}</div>
         {% endif %}
         <h1 class="profile-name">{{ profile_user.display_name or profile_user.username }}</h1>
-        <p class="profile-bio">{{ profile_user.bio or 'Henuz bio eklenmemis...' }}</p>
+        <p class="profile-bio">{{ profile_user.bio or 'Henüz bio eklenmemiş...' }}</p>
         {% if current_user.id != profile_user.id %}
         <div style="margin-top:1rem; display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap;">
             <button class="btn {% if is_following %}btn-secondary{% else %}btn-primary{% endif %} btn-sm follow-btn"
                     data-username="{{ profile_user.username }}"
                     onclick="toggleFollow(this.getAttribute('data-username'), this)">
-                {% if is_following %}Takibi Birak{% else %}Takip Et{% endif %}
+                {% if is_following %}Takibi Bırak{% else %}Takip Et{% endif %}
             </button>
             <a href="{{ url_for('conversation', username=profile_user.username) }}" class="btn btn-secondary btn-sm">Mesaj</a>
         </div>
@@ -24,7 +24,7 @@
             <div class="stat">
                 <a href="{{ url_for('followers_list', username=profile_user.username) }}" style="text-decoration:none;">
                     <div class="stat-number follow-count" data-username="{{ profile_user.username }}">{{ follower_count }}</div>
-                    <div class="stat-label">Takipci</div>
+                    <div class="stat-label">Takipçi</div>
                 </a>
             </div>
             <div class="stat">
@@ -39,7 +39,7 @@
             </div>
             <div class="stat">
                 <div class="stat-number">{{ total_likes }}</div>
-                <div class="stat-label">Begeni</div>
+                <div class="stat-label">Beğeni</div>
             </div>
             <div class="stat">
                 <div class="stat-number">{{ total_comments }}</div>
@@ -47,7 +47,7 @@
             </div>
             <div class="stat">
                 <div class="stat-number">{{ total_views }}</div>
-                <div class="stat-label">Goruntulenme</div>
+                <div class="stat-label">Görüntülenme</div>
             </div>
             {% if current_user.id == profile_user.id %}
             <div class="stat">
@@ -60,7 +60,7 @@
         </div>
         {% if current_user.id == profile_user.id %}
         <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
-            <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary btn-sm">Profili Duzenle</a>
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary btn-sm">Profili Düzenle</a>
             <a href="{{ url_for('new_cat') }}" class="btn btn-primary btn-sm">+ Patili Ekle</a>
             {% if unread > 0 %}
             <a href="{{ url_for('notifications') }}" class="btn btn-sm" style="background:#ef4444; color:white; position:relative;">Bildirimler <span style="background:white; color:#ef4444; border-radius:50%; padding:0 6px; font-size:0.7rem; font-weight:800; margin-left:4px;">{{ unread }}</span></a>
@@ -69,9 +69,9 @@
         <div style="margin-top:1.25rem; display:inline-flex; align-items:center; gap:0.75rem; background:white; border-radius:var(--radius-full); padding:0.6rem 1.2rem; border:1px solid var(--pink-200); box-shadow:var(--shadow-sm);">
             <span style="font-size:0.8rem; font-weight:700; color:var(--gray-500);">🎨 Tema:</span>
             <button class="theme-btn active" data-theme="pembe" onclick="setTheme('pembe')" title="Pembe" style="width:28px; height:28px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background:linear-gradient(135deg, #ec4899, #a855f7); transition:transform 0.2s;"></button>
-            <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')" title="Karanlik" style="width:28px; height:28px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background:linear-gradient(135deg, #1a1025, #4a2878); transition:transform 0.2s;"></button>
+            <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')" title="Karanlık" style="width:28px; height:28px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background:linear-gradient(135deg, #1a1025, #4a2878); transition:transform 0.2s;"></button>
             <button class="theme-btn" data-theme="mavi" onclick="setTheme('mavi')" title="Mavi" style="width:28px; height:28px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background:linear-gradient(135deg, #3b82f6, #6366f1); transition:transform 0.2s;"></button>
-            <button class="theme-btn" data-theme="yesil" onclick="setTheme('yesil')" title="Yesil" style="width:28px; height:28px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background:linear-gradient(135deg, #22c55e, #84cc16); transition:transform 0.2s;"></button>
+            <button class="theme-btn" data-theme="yesil" onclick="setTheme('yesil')" title="Yeşil" style="width:28px; height:28px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background:linear-gradient(135deg, #22c55e, #84cc16); transition:transform 0.2s;"></button>
             <button class="theme-btn" data-theme="turuncu" onclick="setTheme('turuncu')" title="Turuncu" style="width:28px; height:28px; border-radius:50%; border:2px solid rgba(0,0,0,0.1); cursor:pointer; background:linear-gradient(135deg, #f97316, #ec4899); transition:transform 0.2s;"></button>
         </div>
         {% endif %}
@@ -100,7 +100,7 @@
                     <span class="gender-badge sahipli">Sahipli 🏠</span>
                     {% endif %}
                     {% if cat.gender %}
-                    <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
+                    <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kız' if cat.gender == 'Female' else 'Erkek' }}</span>
                     {% endif %}
                 </div>
                 <div style="display:flex; align-items:center; gap:0.5rem;">
@@ -113,7 +113,7 @@
     {% else %}
     <div class="empty-state">
         <div class="icon">🐾</div>
-        <h3>Henuz patili eklenmemis</h3>
+        <h3>Henüz patili eklenmemiş</h3>
         {% if current_user.id == profile_user.id %}
         <a href="{{ url_for('new_cat') }}" class="btn btn-primary" style="margin-top:1rem;">+ Patili Ekle</a>
         {% endif %}

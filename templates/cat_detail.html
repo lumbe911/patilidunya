@@ -31,12 +31,12 @@
                 <span class="gender-badge sahipli">🏠 Sahipli</span>
                 {% endif %}
                 {% if cat.gender %}
-                <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
+                <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kız' if cat.gender == 'Female' else 'Erkek' }}</span>
                 {% endif %}
             </div>
 
             {% if cat.age %}
-            <div class="info-row"><span class="info-label">🎂 Yasi</span><span class="info-value">{{ cat.age }}</span></div>
+            <div class="info-row"><span class="info-label">🎂 Yaşı</span><span class="info-value">{{ cat.age }}</span></div>
             {% endif %}
             {% if cat.breed %}
             <div class="info-row"><span class="info-label">🏷 Cinsi</span><span class="info-value">{{ cat.breed }}</span></div>
@@ -48,7 +48,7 @@
             <div class="info-row"><span class="info-label">{% if cat.status == 'sokak' %}📅 Bulma Tarihi{% else %}📅 Sahiplenilme Tarihi{% endif %}</span><span class="info-value">{{ cat.found_date }}</span></div>
             {% endif %}
             {% if cat.location and cat.status == 'sokak' %}
-            <div class="info-row"><span class="info-label">📍 Bulundugu Yer</span><span class="info-value">{{ cat.location }}</span></div>
+            <div class="info-row"><span class="info-label">📍 Bulunduğu Yer</span><span class="info-value">{{ cat.location }}</span></div>
             {% endif %}
             <div class="info-row">
                 <span class="info-label">👤 Sahibi</span>
@@ -63,7 +63,7 @@
                 <button class="like-btn {% if liked %}liked{% endif %}" onclick="toggleLike({{ cat.id }}, this)" style="font-size:1.8rem;">
                     {% if liked %}❤️{% else %}🤍{% endif %}
                 </button>
-                <span class="like-count" id="like-count-{{ cat.id }}" style="font-size:1.1rem;">{{ cat.like_count }} kisi begendi</span>
+                <span class="like-count" id="like-count-{{ cat.id }}" style="font-size:1.1rem;">{{ cat.like_count }} kişi beğendi</span>
                 <button class="like-btn {% if is_fav %}liked{% endif %}" onclick="toggleFav({{ cat.id }}, this)" style="font-size:1.5rem;">
                     {% if is_fav %}⭐{% else %}☆{% endif %}
                 </button>
@@ -81,13 +81,13 @@
             </div>
 
             <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:var(--gray-500);">
-                <span>👁 {{ view_count }} kez goruntulendi</span>
+                <span>👁 {{ view_count }} kez görüntülendi</span>
             </div>
 
             {% if current_user.id == cat.owner_id or current_user.username == 'Lumbe' %}
             <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
                 {% if current_user.id == cat.owner_id %}
-                <a href="{{ url_for('edit_cat', cat_id=cat.id) }}" class="btn btn-secondary btn-sm">Duzenle ✏️</a>
+                <a href="{{ url_for('edit_cat', cat_id=cat.id) }}" class="btn btn-secondary btn-sm">Düzenle ✏️</a>
                 {% endif %}
                 <form method="POST" action="{{ url_for('delete_cat', cat_id=cat.id) }}" onsubmit="return confirm('Emin misin?');">
                     <button type="submit" class="btn btn-danger btn-sm">Sil 🗑️</button>
@@ -99,7 +99,7 @@
 
     {% if cat.photos|length > 1 %}
     <div style="margin-bottom: 2rem;">
-        <h2 style="font-weight: 800; margin-bottom: 1rem;">📸 Tum Fotograflar ({{ cat.photos|length }})</h2>
+        <h2 style="font-weight: 800; margin-bottom: 1rem;">📸 Tüm Fotoğraflar ({{ cat.photos|length }})</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem;">
             {% for photo in cat.photos %}
             <div style="border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--pink-200);">
@@ -116,7 +116,7 @@
         <form method="POST" action="{{ url_for('add_comment', cat_id=cat.id) }}" style="margin-bottom: 1.5rem;">
             <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
                 <textarea name="text" class="form-control" placeholder="Yorum yaz..." rows="2" required style="flex:1; min-width:0;"></textarea>
-                <button type="submit" class="btn btn-primary btn-sm" style="height: fit-content; white-space:nowrap;">Gonder</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="height: fit-content; white-space:nowrap;">Gönder</button>
             </div>
         </form>
 
@@ -135,9 +135,9 @@
                         <span style="color: var(--gray-500); font-size: 0.75rem;">{{ comment.created_at.strftime('%d %b %Y, %H:%M') }}</span>
                     </div>
                     <div style="display:flex; gap:0.5rem; align-items:center;">
-                        <button type="button" onclick="document.getElementById('reply-form-{{ comment.id }}').style.display = document.getElementById('reply-form-{{ comment.id }}').style.display === 'none' ? 'block' : 'none'" style="background:none; border:none; cursor:pointer; color: var(--pink-500); font-size: 0.8rem; font-weight:700;">Yanitla</button>
+                        <button type="button" onclick="document.getElementById('reply-form-{{ comment.id }}').style.display = document.getElementById('reply-form-{{ comment.id }}').style.display === 'none' ? 'block' : 'none'" style="background:none; border:none; cursor:pointer; color: var(--pink-500); font-size: 0.8rem; font-weight:700;">Yanıtla</button>
                         {% if current_user.id == comment.user_id or current_user.username == 'Lumbe' %}
-                        <form method="POST" action="{{ url_for('delete_comment', cat_id=cat.id, comment_id=comment.id) }}" onsubmit="return confirm('Yorumu silmek istediginden emin misin?');">
+                        <form method="POST" action="{{ url_for('delete_comment', cat_id=cat.id, comment_id=comment.id) }}" onsubmit="return confirm('Yorumu silmek istediğinden emin misin?');">
                             <button type="submit" style="background:none; border:none; cursor:pointer; color: var(--gray-500); font-size: 0.85rem;">🗑️</button>
                         </form>
                         {% endif %}
@@ -147,8 +147,8 @@
 
                 <form id="reply-form-{{ comment.id }}" method="POST" action="{{ url_for('reply_comment', cat_id=cat.id, comment_id=comment.id) }}" style="display:none; margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--pink-100);">
                     <div style="display:flex; gap:0.5rem; align-items:flex-end;">
-                        <input type="text" name="text" placeholder="{{ comment.user.display_name or comment.user.username }} yanitla..." required style="flex:1; min-width:0; padding:0.4rem 0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm); font-size:0.85rem;">
-                        <button type="submit" class="btn btn-primary btn-sm" style="font-size:0.8rem; padding:0.4rem 0.7rem;">Gonder</button>
+                        <input type="text" name="text" placeholder="{{ comment.user.display_name or comment.user.username }} yanıtla..." required style="flex:1; min-width:0; padding:0.4rem 0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm); font-size:0.85rem;">
+                        <button type="submit" class="btn btn-primary btn-sm" style="font-size:0.8rem; padding:0.4rem 0.7rem;">Gönder</button>
                     </div>
                 </form>
 
@@ -165,7 +165,7 @@
                             <a href="{{ url_for('user_profile', username=reply.user.username) }}" style="font-weight:700; font-size:0.8rem;">{{ reply.user.display_name or reply.user.username }}</a>
                             <span style="color:var(--gray-500); font-size:0.65rem;">{{ reply.created_at.strftime('%d %b %Y, %H:%M') }}</span>
                             {% if current_user.id == reply.user_id or current_user.username == 'Lumbe' %}
-                            <form method="POST" action="{{ url_for('delete_comment', cat_id=cat.id, comment_id=reply.id) }}" onsubmit="return confirm('Yaniti silmek istediginden emin misin?');" style="margin-left:auto;">
+                            <form method="POST" action="{{ url_for('delete_comment', cat_id=cat.id, comment_id=reply.id) }}" onsubmit="return confirm('Yanıtı silmek istediğinden emin misin?');" style="margin-left:auto;">
                                 <button type="submit" style="background:none; border:none; cursor:pointer; color:var(--gray-500); font-size:0.7rem;">🗑️</button>
                             </form>
                             {% endif %}
@@ -179,7 +179,7 @@
             {% endfor %}
         </div>
         {% else %}
-        <p style="text-align:center; color: var(--gray-500); padding: 2rem;">Henuz yorum yok. Ilk yorumu sen yap! 🐱</p>
+        <p style="text-align:center; color: var(--gray-500); padding: 2rem;">Henüz yorum yok. İlk yorumu sen yap! 🐱</p>
         {% endif %}
     </div>
 </div>
@@ -196,7 +196,7 @@ async function toggleLike(catId, btn) {
     const data = await resp.json();
     btn.innerHTML = data.liked ? '❤️' : '🤍';
     btn.classList.toggle('liked', data.liked);
-    document.getElementById(`like-count-${catId}`).textContent = `${data.count} kisi begendi`;
+    document.getElementById(`like-count-${catId}`).textContent = `${data.count} kişi beğendi`;
 }
 async function toggleFav(catId, btn) {
     const resp = await fetch(`/api/favorite/${catId}`, { method: 'POST' });

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Takip Akisi - PatiliDunya{% endblock %}
+{% block title %}Takip Akışı - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container">
-    <h1 class="page-title">🐾 Takip Akisi</h1>
-    <p style="text-align:center; color:var(--gray-500); margin-bottom:1.5rem;">Takip ettigin kisilerin paylasimlari</p>
+    <h1 class="page-title">🐾 Takip Akışı</h1>
+    <p style="text-align:center; color:var(--gray-500); margin-bottom:1.5rem;">Takip ettiğin kişilerin paylaşımları</p>
 
     {% if following %}
     <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.5rem;">
@@ -55,7 +55,7 @@
                     <span class="gender-badge sahipli">Sahipli 🏠</span>
                     {% endif %}
                     {% if cat.gender %}
-                    <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
+                    <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kız' if cat.gender == 'Female' else 'Erkek' }}</span>
                     {% endif %}
                 </div>
                 <div style="display:flex; align-items:center; gap:0.5rem;">
@@ -68,9 +68,9 @@
     {% else %}
     <div class="empty-state">
         <div class="icon">👥</div>
-        <h3>Takip akisin henuz bos</h3>
-        <p>Kesfet sayfasindan sevdigin hayvanseverleri takip et, paylasimlari burada gorunecek.</p>
-        <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Kesfete Git</a>
+        <h3>Takip akışın henüz boş</h3>
+        <p>Keşfet sayfasından sevdiğin hayvanseverleri takip et, paylaşımları burada görünecek.</p>
+        <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Keşfete Git</a>
     </div>
     {% endif %}
 </div>

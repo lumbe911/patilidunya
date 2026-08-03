@@ -20,8 +20,8 @@
         <a href="{{ url_for('index') }}" class="brand-link"><span>🐱</span> PatiliDunya</a>
         {% if current_user.is_authenticated and current_user.username == 'Lumbe' %}
         <div class="brand-admin">
-            <a href="{{ url_for('admin_users') }}" class="brand-admin-link" title="Kullanicilar">{{ icon_shield() }}</a>
-            <a href="{{ url_for('admin_dms') }}" class="brand-admin-link" title="DM Yonetim">{{ icon_panel() }}</a>
+            <a href="{{ url_for('admin_users') }}" class="brand-admin-link" title="Kullanıcılar">{{ icon_shield() }}</a>
+            <a href="{{ url_for('admin_dms') }}" class="brand-admin-link" title="DM Yönetim">{{ icon_panel() }}</a>
         </div>
         {% endif %}
     </header>
@@ -50,9 +50,9 @@
             <span class="bottom-icon">{{ icon_home() }}</span>
             <span class="bottom-label">Ana Sayfa</span>
         </a>
-        <a href="{{ url_for('explore') }}" class="bottom-item{% if active_nav == 'explore' %} active{% endif %}" title="Kesfet">
+        <a href="{{ url_for('explore') }}" class="bottom-item{% if active_nav == 'explore' %} active{% endif %}" title="Keşfet">
             <span class="bottom-icon">{{ icon_search() }}</span>
-            <span class="bottom-label">Kesfet</span>
+            <span class="bottom-label">Keşfet</span>
         </a>
         <a href="{{ url_for('reels') }}" class="bottom-item{% if active_nav == 'reels' %} active{% endif %}" title="Reels">
             <span class="bottom-icon">{{ icon_reels() }}</span>
@@ -97,7 +97,7 @@
         if (data.error) { alert(data.error); return; }
         document.querySelectorAll('.follow-btn').forEach(function(b) {
             if (b.getAttribute('data-username') === username) {
-                b.textContent = data.following ? 'Takibi Birak' : 'Takip Et';
+                b.textContent = data.following ? 'Takibi Bırak' : 'Takip Et';
                 b.classList.toggle('following', data.following);
                 b.classList.toggle('btn-primary', !data.following);
                 b.classList.toggle('btn-secondary', data.following);

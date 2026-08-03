@@ -56,7 +56,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-login_manager.login_message = 'Lutfen giris yapin.'
+login_manager.login_message = 'Lütfen giriş yapın.'
 login_manager.login_message_category = 'warning'
 
 
@@ -349,10 +349,10 @@ def check_private_mode():
 <link rel="stylesheet" href="/static/css/style.css"></head>
 <body style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem;">
 <div><h1 style="font-size:5rem;">&#128274;</h1>
-<h2 style="font-weight:800;margin:1rem 0;">Site Simdilik Kapali</h2>
-<p style="color:var(--gray-500);">Yakinda geri donucez!</p>
+<h2 style="font-weight:800;margin:1rem 0;">Site Şimdilik Kapalı</h2>
+<p style="color:var(--gray-500);">Yakında geri döneceğiz!</p>
 <p style="color:var(--gray-700);margin-top:0.5rem;font-weight:700;">Owner: Lumbe</p>
-<a href="/login" style="color:var(--pink-600);font-weight:700;margin-top:1rem;display:inline-block;">Yonetici Giris</a></div>
+<a href="/login" style="color:var(--pink-600);font-weight:700;margin-top:1rem;display:inline-block;">Yönetici Giriş</a></div>
 </body></html>'''
     resp = make_response(html, 503)
     abort(resp)
@@ -473,10 +473,10 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             login_user(user, remember=request.form.get('remember') is not None)
-            flash('Hosgeldiniz!', 'success')
+            flash('Hoş geldiniz!', 'success')
             next_page = request.args.get('next')
             return redirect(next_page or url_for('home'))
-        flash('Kullanici adi veya sifre hatali!', 'danger')
+        flash('Kullanıcı adı veya şifre hatalı!', 'danger')
     return render_template('login.html')
 
 
@@ -493,15 +493,15 @@ def register():
 
         errors = []
         if len(username) < 3:
-            errors.append('Kullanici adi en az 3 karakter olmali.')
+            errors.append('Kullanıcı adı en az 3 karakter olmalı.')
         if len(password) < 6:
-            errors.append('Sifre en az 6 karakter olmali.')
+            errors.append('Şifre en az 6 karakter olmalı.')
         if password != password2:
-            errors.append('Sifreler eslesmiyor.')
+            errors.append('Şifreler eşleşmiyor.')
         if User.query.filter_by(username=username).first():
-            errors.append('Bu kullanici adi zaten alinmis.')
+            errors.append('Bu kullanıcı adı zaten alınmış.')
         if User.query.filter_by(email=email).first():
-            errors.append('Bu e-posta zaten kayitli.')
+            errors.append('Bu e-posta zaten kayıtlı.')
 
         if errors:
             for e in errors:
@@ -516,7 +516,7 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
-        flash('Kayit basarili! Giris yapabilirsiniz.', 'success')
+        flash('Kayıt başarılı! Giriş yapabilirsiniz.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html')
 
@@ -544,21 +544,21 @@ def forgot_password():
             reset_url = SITE_URL + url_for('reset_password', token=token)
             html = f"""
             <div style="font-family:sans-serif; max-width:400px; margin:0 auto; padding:2rem;">
-                <h2 style="color:#db2777;">🐱 PatiliDunya - Sifre Sifirlama</h2>
+                <h2 style="color:#db2777;">🐱 PatiliDunya - Şifre Sıfırlama</h2>
                 <p>Merhaba <strong>{user.display_name or user.username}</strong>,</p>
-                <p>Sifreni sifirlamak icin asagidaki linke tikla:</p>
-                <a href="{reset_url}" style="display:inline-block; padding:0.8rem 1.5rem; background:linear-gradient(135deg,#ec4899,#a855f7); color:white; border-radius:9999px; text-decoration:none; font-weight:700; margin:1rem 0;">Sifremi Sifirla</a>
-                <p style="color:#6b7280; font-size:0.85rem;">Bu link 1 saat icinde gecerlilgini yitirir.</p>
-                <p style="color:#6b7280; font-size:0.85rem;">Eger bu istegi sen yapmadiysan, bu emaili gorunce ignorala.</p>
+                <p>Şifreni sıfırlamak için aşağıdaki linke tıkla:</p>
+                <a href="{reset_url}" style="display:inline-block; padding:0.8rem 1.5rem; background:linear-gradient(135deg,#ec4899,#a855f7); color:white; border-radius:9999px; text-decoration:none; font-weight:700; margin:1rem 0;">Şifremi Sıfırla</a>
+                <p style="color:#6b7280; font-size:0.85rem;">Bu link 1 saat içinde geçerliliğini yitirir.</p>
+                <p style="color:#6b7280; font-size:0.85rem;">Eğer bu isteği sen yapmadıysan, bu e-postası görünce ignorala.</p>
             </div>
             """
-            sent = send_email(user.email, 'PatiliDunya - Sifre Sifirlama', html)
+            sent = send_email(user.email, 'PatiliDunya - Şifre Sıfırlama', html)
             if sent:
-                flash('Sifre sifirlama emaili gonderildi! E-postani kontrol et.', 'success')
+                flash('Şifre sıfırlama e-postası gönderildi! E-postanı kontrol et.', 'success')
             else:
-                flash('Email gonderilemedi. Daha sonra tekrar dene.', 'danger')
+                flash('E-posta gönderilemedi. Daha sonra tekrar dene.', 'danger')
         else:
-            flash('Boyle bir kullanici bulunamadi!', 'danger')
+            flash('Böyle bir kullanıcı bulunamadı!', 'danger')
         return redirect(url_for('login'))
     return render_template('forgot_password.html')
 
@@ -570,22 +570,22 @@ def reset_password(token):
         return redirect(url_for('explore'))
     user = User.query.filter_by(reset_token=token).first()
     if not user or not user.reset_expiry or user.reset_expiry < datetime.utcnow():
-        flash('Gecersiz veya suresi dolmus link!', 'danger')
+        flash('Geçersiz veya süresi dolmuş link!', 'danger')
         return redirect(url_for('forgot_password'))
     if request.method == 'POST':
         password = request.form.get('password', '')
         password2 = request.form.get('password2', '')
         if len(password) < 6:
-            flash('Sifre en az 6 karakter olmali!', 'danger')
+            flash('Şifre en az 6 karakter olmalı!', 'danger')
             return render_template('reset_password.html', token=token)
         if password != password2:
-            flash('Sifreler eslesmiyor!', 'danger')
+            flash('Şifreler eşleşmiyor!', 'danger')
             return render_template('reset_password.html', token=token)
         user.password = generate_password_hash(password)
         user.reset_token = None
         user.reset_expiry = None
         db.session.commit()
-        flash('Sifreniz basariyla degistirildi! Giris yapabilirsiniz.', 'success')
+        flash('Şifreniz başarıyla değiştirildi! Giriş yapabilirsiniz.', 'success')
         return redirect(url_for('login'))
     return render_template('reset_password.html', token=token)
 
@@ -653,7 +653,7 @@ def toggle_follow(username):
     if not existing_notif:
         db.session.add(Notification(
             user_id=target.id, from_user_id=current_user.id, notif_type='follow',
-            text=f'{current_user.display_name or current_user.username} seni takip etmeye basladi!'
+            text=f'{current_user.display_name or current_user.username} seni takip etmeye başladı!'
         ))
     db.session.commit()
     return jsonify({'following': True, 'follower_count': Follow.query.filter_by(followed_id=target.id).count()})
@@ -706,7 +706,7 @@ def edit_profile():
                 current_user.avatar = filename
 
         db.session.commit()
-        flash('Profil guncellendi!', 'success')
+        flash('Profil güncellendi!', 'success')
         return redirect(url_for('user_profile', username=current_user.username))
     return render_template('edit_profile.html')
 
@@ -740,7 +740,7 @@ def new_cat():
                 db.session.add(CatPhoto(filename=filename, cat_id=cat.id))
         db.session.commit()
 
-        flash(f'{cat.name} basariyla eklendi!', 'success')
+        flash(f'{cat.name} başarıyla eklendi!', 'success')
         return redirect(url_for('cat_detail', cat_id=cat.id))
     return render_template('new_cat.html')
 
@@ -795,7 +795,7 @@ def edit_cat(cat_id):
                     db.session.add(CatPhoto(filename=filename, cat_id=cat.id))
                     uploaded += 1
         db.session.commit()
-        flash(f'{uploaded} yeni fotograf yuklendi.', 'success')
+        flash(f'{uploaded} yeni fotoğraf yüklendi.', 'success')
         return redirect(url_for('cat_detail', cat_id=cat.id))
     return render_template('edit_cat.html', cat=cat)
 
@@ -828,7 +828,7 @@ def delete_photo(cat_id, photo_id):
         abort(404)
     db.session.delete(photo)
     db.session.commit()
-    flash('Fotograf silindi.', 'info')
+    flash('Fotoğraf silindi.', 'info')
     return redirect(url_for('edit_cat', cat_id=cat_id))
 
 
@@ -849,7 +849,7 @@ def toggle_like(cat_id):
             notif = Notification(
                 user_id=cat.owner_id, from_user_id=current_user.id,
                 cat_id=cat_id, notif_type='like',
-                    text=f'{current_user.display_name or current_user.username} "{cat.name}" begendi!'
+                    text=f'{current_user.display_name or current_user.username} "{cat.name}" beğendi!'
             )
             db.session.add(notif)
         db.session.commit()
@@ -866,7 +866,7 @@ def toggle_reaction(cat_id):
     cat = Cat.query.get_or_404(cat_id)
     emoji = request.form.get('emoji', '').strip()
     if emoji not in REACTION_EMOJIS:
-        return jsonify({'error': 'Gecersiz tepki.'}), 400
+        return jsonify({'error': 'Geçersiz tepki.'}), 400
     existing = Reaction.query.filter_by(user_id=current_user.id, cat_id=cat_id).first()
     if existing and existing.emoji == emoji:
         db.session.delete(existing)
@@ -883,7 +883,7 @@ def toggle_reaction(cat_id):
                 db.session.add(Notification(
                     user_id=cat.owner_id, from_user_id=current_user.id, cat_id=cat_id,
                     notif_type='reaction',
-                    text=f'{current_user.display_name or current_user.username} "{cat.name}" gonderisine {emoji} tepkisi birakti!'
+                    text=f'{current_user.display_name or current_user.username} "{cat.name}" gönderisine {emoji} tepkisi bıraktı!'
                 ))
     db.session.commit()
     counts = {}
@@ -906,7 +906,7 @@ def add_comment(cat_id):
             notif = Notification(
                 user_id=cat.owner_id, from_user_id=current_user.id,
                 cat_id=cat_id, notif_type='comment',
-                text=f'{current_user.display_name or current_user.username} kinen {cat.name} yorum yapti: {text[:50]}'
+                text=f'{current_user.display_name or current_user.username} adlı {cat.name} yorum yaptı: {text[:50]}'
             )
             db.session.add(notif)
         db.session.commit()
@@ -948,7 +948,7 @@ def reply_comment(cat_id, comment_id):
             notif = Notification(
                 user_id=parent.user_id, from_user_id=current_user.id,
                 cat_id=cat_id, notif_type='comment',
-                text=f'{current_user.display_name or current_user.username} "{cat.name}" yorumuna yanit verdi: {text[:50]}'
+                text=f'{current_user.display_name or current_user.username} "{cat.name}" yorumuna yanıt verdi: {text[:50]}'
             )
             db.session.add(notif)
         db.session.commit()
@@ -1040,7 +1040,7 @@ def messages():
 def conversation(username):
     other = User.query.filter_by(username=username).first_or_404()
     if other.id == current_user.id:
-        flash('Kendine mesaj atamazsin.', 'warning')
+        flash('Kendine mesaj atamazsın.', 'warning')
         return redirect(url_for('messages'))
     if request.method == 'POST':
         text = request.form.get('text', '').strip()
@@ -1065,10 +1065,10 @@ def conversation(username):
 def send_message(username):
     other = User.query.filter_by(username=username).first_or_404()
     if other.id == current_user.id:
-        return jsonify({'error': 'Kendine mesaj atamazsin.'}), 400
+        return jsonify({'error': 'Kendine mesaj atamazsın.'}), 400
     text = request.form.get('text', '').strip()
     if not text:
-        return jsonify({'error': 'Mesaj bos olamaz.'}), 400
+        return jsonify({'error': 'Mesaj boş olamaz.'}), 400
     conv = get_or_create_conversation(current_user.id, other.id)
     conv.last_message_at = datetime.utcnow()
     msg = Message(conversation_id=conv.id, sender_id=current_user.id, text=text[:2000])
@@ -1144,7 +1144,7 @@ def admin_delete_conversation(conv_id):
     Message.query.filter_by(conversation_id=conv.id).delete()
     db.session.delete(conv)
     db.session.commit()
-    flash('Konusma silindi.', 'info')
+    flash('Konuşma silindi.', 'info')
     return redirect(url_for('admin_dms'))
 
 
@@ -1272,7 +1272,7 @@ def seed_cats():
             db.session.delete(cat)
         db.session.commit()
     elif Cat.query.count() > 0:
-        flash('Zaten kayit var. /admin/seed?reset=1 ile sifirlayabilirsin.', 'warning')
+        flash('Zaten kayıt var. /admin/seed?reset=1 ile sıfırlayabilirsin.', 'warning')
         return redirect(url_for('explore'))
     import io
     import urllib.request
@@ -1320,7 +1320,7 @@ def seed_cats():
         db.session.add(CatPhoto(filename=item['photo'], cat_id=cat.id))
         db.session.commit()
         added += 1
-    flash(f'{added} ornek profil eklendi!', 'success')
+    flash(f'{added} örnek profil eklendi!', 'success')
     return redirect(url_for('explore'))
 
 

@@ -1,25 +1,25 @@
 {% extends "base.html" %}
-{% block title %}{{ cat.name }} Duzenle - PatiliDunya{% endblock %}
+{% block title %}{{ cat.name }} Düzenle - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container">
     <div class="auth-card" style="max-width: 600px;">
-        <h2>Patiliyi Duzenle ✏️</h2>
-        <p class="subtitle">{{ cat.name }}'in bilgilerini guncelle</p>
+        <h2>Patiliyi Düzenle ✏️</h2>
+        <p class="subtitle">{{ cat.name }}'in bilgilerini güncelle</p>
         <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
-                <label class="form-label">Patilinin Adi *</label>
+                <label class="form-label">Patilinin Adı *</label>
                 <input type="text" name="name" class="form-control" value="{{ cat.name }}" required>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                    <label class="form-label">Yasi</label>
+                    <label class="form-label">Yaşı</label>
                     <input type="text" name="age" class="form-control" value="{{ cat.age or '' }}">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Cinsiyet</label>
                     <select name="gender" class="form-control">
-                        <option value="" {% if not cat.gender %}selected{% endif %}>Sec...</option>
-                        <option value="Female" {% if cat.gender == 'Female' %}selected{% endif %}>Kiz</option>
+                        <option value="" {% if not cat.gender %}selected{% endif %}>Seç...</option>
+                        <option value="Female" {% if cat.gender == 'Female' %}selected{% endif %}>Kız</option>
                         <option value="Male" {% if cat.gender == 'Male' %}selected{% endif %}>Erkek</option>
                         <option value="Unknown" {% if cat.gender == 'Unknown' %}selected{% endif %}>Bilinmiyor</option>
                     </select>
@@ -35,7 +35,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Cinsi</label>
-                    <input type="text" name="breed" class="form-control" value="{{ cat.breed or '' }}" placeholder="Ornegin: Tekir, Sokar, British, Van...">
+                    <input type="text" name="breed" class="form-control" value="{{ cat.breed or '' }}" placeholder="Örneğin: Tekir, Sokar, British, Van...">
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -49,19 +49,19 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Hikaye / Aciklama</label>
+                <label class="form-label">Hikaye / Açıklama</label>
                 <textarea name="description" class="form-control" rows="4">{{ cat.description or '' }}</textarea>
             </div>
 
             {% if cat.photos %}
             <div class="form-group">
-                <label class="form-label">Mevcut Fotograflar ({{ cat.photos|length }})</label>
+                <label class="form-label">Mevcut Fotoğraflar ({{ cat.photos|length }})</label>
                 <div class="photo-grid">
                     {% for photo in cat.photos %}
                     <div class="photo-grid-item">
                         <img src="{{ photo.filename }}" alt="">
                         <form method="POST" action="{{ url_for('delete_photo', cat_id=cat.id, photo_id=photo.id) }}" style="position:absolute; top:0; right:0;">
-                            <button type="submit" class="delete-btn" onclick="return confirm('Bu fotograf silinecek. Emin misin?');">✕</button>
+                            <button type="submit" class="delete-btn" onclick="return confirm('Bu fotoğraf silinecek. Emin misin?');">✕</button>
                         </form>
                     </div>
                     {% endfor %}
@@ -70,10 +70,10 @@
             {% endif %}
 
             <div class="form-group">
-                <label class="form-label">Yeni Fotograf Ekle</label>
+                <label class="form-label">Yeni Fotoğraf Ekle</label>
                 <div style="border: 2px dashed var(--pink-300); border-radius: var(--radius); padding: 2rem; text-align: center; background: var(--pink-50); cursor: pointer;" onclick="document.getElementById('photoInput').click()">
                     <input type="file" id="photoInput" name="photos" accept="image/*" multiple style="display:none;" onchange="previewPhotos(this)">
-                    <p id="photo-label" style="margin:0; color: var(--gray-500);">📷 Tikla ve fotograflari sec</p>
+                    <p id="photo-label" style="margin:0; color: var(--gray-500);">📷 Tıkla ve fotoğrafları seç</p>
                     <div id="photo-preview" class="photo-grid" style="margin-top: 0.75rem;"></div>
                 </div>
             </div>
@@ -94,11 +94,11 @@ function updateStatusFields() {
     if (status === 'sokak') {
         dateLabel.textContent = 'Bulma Tarihi';
         locationGroup.style.display = 'block';
-        if (descInput) descInput.placeholder = 'Bu hayvan hakkinda bilinenleri yaz... Nerede buldun? Nasil bir durumdaydi? 📝';
+        if (descInput) descInput.placeholder = 'Bu hayvan hakkında bilinenleri yaz... Nerede buldun? Nasıl bir durumdaydı? 📝';
     } else {
         dateLabel.textContent = 'Sahiplenilme Tarihi';
         locationGroup.style.display = 'none';
-        if (descInput) descInput.placeholder = 'Nasil sahiplendin? Hikayesi ne? 📝';
+        if (descInput) descInput.placeholder = 'Nasıl sahiplendin? Hikayesi ne? 📝';
     }
 }
 
@@ -108,7 +108,7 @@ updateStatusFields();
 function previewPhotos(input) {
     const container = document.getElementById('photo-preview');
     container.innerHTML = '';
-    document.getElementById('photo-label').textContent = input.files.length + ' fotograf secildi!';
+    document.getElementById('photo-label').textContent = input.files.length + ' fotoğraf seçildi!';
     Array.from(input.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = function(e) {

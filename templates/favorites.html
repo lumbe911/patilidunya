@@ -39,7 +39,7 @@
                     <span class="gender-badge sahipli">Sahipli 🏠</span>
                     {% endif %}
                     {% if cat.gender %}
-                    <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
+                    <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kız' if cat.gender == 'Female' else 'Erkek' }}</span>
                     {% endif %}
                 </div>
                 <div style="display:flex; align-items:center; gap:0.5rem;">
@@ -55,9 +55,9 @@
     {% else %}
     <div class="empty-state">
         <div class="icon">⭐</div>
-        <h3>Henuz favorin yok</h3>
-                    <p>Hayvanlari kesfet ve kalp butonuna basin!</p>
-        <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Kesfete Don</a>
+        <h3>Henüz favorin yok</h3>
+                    <p>Hayvanları keşfet ve kalp butonuna basın!</p>
+        <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Keşfete Dön</a>
     </div>
     {% endif %}
 </div>

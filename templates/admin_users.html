@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Admin - Kullanicilar - PatiliDunya{% endblock %}
+{% block title %}Admin - Kullanıcılar - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container">
     <div style="text-align:center; margin-bottom:2rem;">
         <h1 style="font-size:1.8rem; font-weight:800; background:linear-gradient(135deg, var(--pink-600), var(--purple-500)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">🛡️ Admin Panel</h1>
-        <p style="color:var(--gray-500); margin-top:0.5rem;">Toplam <strong>{{ total }}</strong> kayitli kullanici</p>
+        <p style="color:var(--gray-500); margin-top:0.5rem;">Toplam <strong>{{ total }}</strong> kayıtlı kullanıcı</p>
     </div>
 
     <div style="display:flex; flex-direction:column; gap:1rem;">
@@ -38,7 +38,7 @@
                 </div>
                 <div style="text-align:center;">
                     <div style="font-weight:800; color:var(--pink-600); font-size:1.1rem;">{{ item.like_count }}</div>
-                    <div style="font-size:0.7rem; color:var(--gray-500);">Begeni</div>
+                    <div style="font-size:0.7rem; color:var(--gray-500);">Beğeni</div>
                 </div>
                 <div style="text-align:center;">
                     <div style="font-weight:800; color:var(--pink-600); font-size:1.1rem;">{{ item.comment_count }}</div>
@@ -47,8 +47,8 @@
             </div>
 
             <div style="display:flex; gap:0.5rem; flex-shrink:0; align-items:center;">
-                <a href="{{ url_for('admin_dms', q=item.user.username) }}" class="btn btn-secondary btn-sm" style="margin:0;">Mesajlari</a>
-                <a href="{{ url_for('user_profile', username=item.user.username) }}" class="btn btn-secondary btn-sm" style="margin:0;">Profili Gor</a>
+                <a href="{{ url_for('admin_dms', q=item.user.username) }}" class="btn btn-secondary btn-sm" style="margin:0;">Mesajları</a>
+                <a href="{{ url_for('user_profile', username=item.user.username) }}" class="btn btn-secondary btn-sm" style="margin:0;">Profili Gör</a>
             </div>
         </div>
         {% endfor %}
@@ -57,7 +57,7 @@
     {% if not user_data %}
     <div class="empty-state">
         <div class="icon">👤</div>
-        <h3>Henuz kullanici yok</h3>
+        <h3>Henüz kullanıcı yok</h3>
     </div>
     {% endif %}
 </div>

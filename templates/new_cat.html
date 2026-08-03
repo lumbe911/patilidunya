@@ -4,22 +4,22 @@
 <div class="container">
     <div class="auth-card" style="max-width:600px;">
         <h2>Yeni Patili Ekle 🐱</h2>
-        <p class="subtitle">Buldugun hayvanin profilini olustur</p>
+        <p class="subtitle">Bulduğun hayvanın profilini oluştur</p>
         <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
-                <label class="form-label">Patilinin Adi *</label>
-                <input type="text" name="name" class="form-control" placeholder="Ornegin: Pamuk, Misket, Boncuk..." required>
+                <label class="form-label">Patilinin Adı *</label>
+                <input type="text" name="name" class="form-control" placeholder="Örneğin: Pamuk, Misket, Boncuk..." required>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
-                    <label class="form-label">Yasi</label>
-                    <input type="text" name="age" class="form-control" placeholder="Ornegin: 2 yas">
+                    <label class="form-label">Yaşı</label>
+                    <input type="text" name="age" class="form-control" placeholder="Örneğin: 2 yaş">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Cinsiyet</label>
                     <select name="gender" class="form-control">
-                        <option value="">Sec...</option>
-                        <option value="Female">Kiz</option>
+                        <option value="">Seç...</option>
+                        <option value="Female">Kız</option>
                         <option value="Male">Erkek</option>
                         <option value="Unknown">Bilinmiyor</option>
                     </select>
@@ -35,28 +35,28 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Cinsi</label>
-                    <input type="text" name="breed" class="form-control" placeholder="Ornegin: Tekir, Sokar, British, Van...">
+                    <input type="text" name="breed" class="form-control" placeholder="Örneğin: Tekir, Sokar, British, Van...">
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                     <label class="form-label" id="dateLabel">Sahiplenilme Tarihi</label>
-                    <input type="text" name="found_date" class="form-control" id="dateInput" placeholder="Ornegin: 15 Mart 2026">
+                    <input type="text" name="found_date" class="form-control" id="dateInput" placeholder="Örneğin: 15 Mart 2026">
                 </div>
                 <div class="form-group" id="locationGroup">
                     <label class="form-label">Nerede Bulundu?</label>
-                    <input type="text" name="location" class="form-control" placeholder="Ornegin: Kizilay, Ankara">
+                    <input type="text" name="location" class="form-control" placeholder="Örneğin: Kızılay, Ankara">
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Hikaye / Aciklama</label>
-                    <textarea name="description" class="form-control" id="descInput" placeholder="Nasil sahiplendin? Hikayesi ne? 📝" rows="4"></textarea>
+                <label class="form-label">Hikaye / Açıklama</label>
+                    <textarea name="description" class="form-control" id="descInput" placeholder="Nasıl sahiplendin? Hikayesi ne? 📝" rows="4"></textarea>
             </div>
             <div class="form-group">
-                <label class="form-label">Fotograflar</label>
+                <label class="form-label">Fotoğraflar</label>
                 <div class="upload-zone" onclick="this.querySelector('input').click()">
                     <input type="file" name="photos" accept="image/*" multiple onchange="previewPhotos(this)">
-                    <p id="photo-label">📷 Bir veya daha fazla fotograf yukle</p>
+                    <p id="photo-label">📷 Bir veya daha fazla fotoğraf yükle</p>
                     <div id="photo-preview" class="photo-grid"></div>
                 </div>
             </div>
@@ -77,11 +77,11 @@ function updateStatusFields() {
     if (status === 'sokak') {
         dateLabel.textContent = 'Bulma Tarihi';
         locationGroup.style.display = 'block';
-        descInput.placeholder = 'Bu hayvan hakkinda bilinenleri yaz... Nerede buldun? Nasil bir durumdaydi? 📝';
+        descInput.placeholder = 'Bu hayvan hakkında bilinenleri yaz... Nerede buldun? Nasıl bir durumdaydı? 📝';
     } else {
         dateLabel.textContent = 'Sahiplenilme Tarihi';
         locationGroup.style.display = 'none';
-        descInput.placeholder = 'Nasil sahiplendin? Hikayesi ne? 📝';
+        descInput.placeholder = 'Nasıl sahiplendin? Hikayesi ne? 📝';
     }
 }
 
@@ -91,7 +91,7 @@ updateStatusFields();
 function previewPhotos(input) {
     const container = document.getElementById('photo-preview');
     container.innerHTML = '';
-    document.getElementById('photo-label').textContent = `${input.files.length} fotograf secildi`;
+    document.getElementById('photo-label').textContent = `${input.files.length} fotoğraf seçildi`;
     Array.from(input.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = function(e) {

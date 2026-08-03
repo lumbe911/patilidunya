@@ -30,9 +30,9 @@
                 <div style="font-size:0.75rem; color:var(--gray-500); margin-top:0.2rem;">{{ n.created_at.strftime('%d %b %Y, %H:%M') }}</div>
             </div>
             {% if n.notif_type == 'follow' %}
-            <a href="{{ url_for('user_profile', username=n.from_user.username) }}" style="font-size:0.8rem; color:var(--pink-600); font-weight:700; white-space:nowrap;">Gor</a>
+            <a href="{{ url_for('user_profile', username=n.from_user.username) }}" style="font-size:0.8rem; color:var(--pink-600); font-weight:700; white-space:nowrap;">Gör</a>
             {% else %}
-            <a href="{{ url_for('cat_detail', cat_id=n.cat_id) }}" style="font-size:0.8rem; color:var(--pink-600); font-weight:700; white-space:nowrap;">Gor</a>
+            <a href="{{ url_for('cat_detail', cat_id=n.cat_id) }}" style="font-size:0.8rem; color:var(--pink-600); font-weight:700; white-space:nowrap;">Gör</a>
             {% endif %}
         </div>
         {% endfor %}
@@ -40,8 +40,8 @@
     {% else %}
     <div class="empty-state">
         <div class="icon">🔔</div>
-        <h3>Henuz bildirimin yok</h3>
-                    <p>Birisi hayvanlarini begendiginde veya yorum yaptiginda burada gorunecek.</p>
+        <h3>Henüz bildirimin yok</h3>
+                    <p>Birisi hayvanlarını beğendiğinde veya yorum yaptığında burada görünecek.</p>
     </div>
     {% endif %}
 </div>

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon_map %}
-{% block title %}Patilileri Kesfet - PatiliDunya{% endblock %}
+{% block title %}Patilileri Keşfet - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container">
-    <h1 class="page-title">🐱 Patilileri Kesfet</h1>
+    <h1 class="page-title">🐱 Patilileri Keşfet</h1>
 
     <form method="GET" action="{{ url_for('explore') }}" style="max-width:350px; margin-bottom:1.5rem;">
         <div style="display:flex; gap:0.5rem;">
@@ -21,7 +21,7 @@
 
     {% if search_query %}
     <p style="text-align:center; color:var(--gray-500); margin-bottom:1.5rem;">
-        "<strong>{{ search_query }}</strong>" icin {{ cats.total }} sonuc bulundu
+        "<strong>{{ search_query }}</strong>" için {{ cats.total }} sonuç bulundu
     </p>
     {% endif %}
 
@@ -60,7 +60,7 @@
                     <span class="gender-badge sahipli">Sahipli 🏠</span>
                     {% endif %}
                     {% if cat.gender %}
-                    <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
+                    <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kız' if cat.gender == 'Female' else 'Erkek' }}</span>
                     {% endif %}
                 </div>
                 <div style="display:flex; align-items:center; gap:0.5rem;">
@@ -78,7 +78,7 @@
     {% if cats.pages > 1 %}
     <div class="pagination">
         {% if cats.has_prev %}
-        <a href="{{ url_for('explore', page=cats.prev_num, q=search_query) }}">&#8592; Onceki</a>
+        <a href="{{ url_for('explore', page=cats.prev_num, q=search_query) }}">&#8592; Önceki</a>
         {% endif %}
         {% for p in cats.iter_pages() %}
             {% if p %}
@@ -99,12 +99,12 @@
     <div class="empty-state">
         <div class="icon">🐱</div>
         {% if search_query %}
-        <h3>Sonuc bulunamadi</h3>
-        <p>Farkli kelimelerle tekrar dene.</p>
-                    <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Tum Patililer</a>
+        <h3>Sonuç bulunamadı</h3>
+        <p>Farklı kelimelerle tekrar dene.</p>
+                    <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Tüm Patililer</a>
                     {% else %}
-                    <h3>Henuz patili eklenmemis</h3>
-                    <p>Ilk patiliyi sen ekle!</p>
+                    <h3>Henüz patili eklenmemiş</h3>
+                    <p>İlk patiliyi sen ekle!</p>
                     <a href="{{ url_for('new_cat') }}" class="btn btn-primary" style="margin-top:1rem;">+ Patili Ekle</a>
                     {% endif %}
     </div>

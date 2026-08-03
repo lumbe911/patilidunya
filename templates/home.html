@@ -12,12 +12,12 @@
         <div class="home-hero-info">
             <div class="home-hero-name">Merhaba, {{ current_user.display_name or current_user.username }}! 🐱</div>
             <div class="home-hero-stats">
-                <span><b>{{ follower_count }}</b> Takipci</span>
+                <span><b>{{ follower_count }}</b> Takipçi</span>
                 <span><b>{{ following_count }}</b> Takip</span>
                 <span><b>{{ my_cat_count }}</b> Patili</span>
             </div>
         </div>
-        <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary btn-sm">Profili Duzenle</a>
+        <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary btn-sm">Profili Düzenle</a>
     </div>
 
     <h2 class="home-feed-title">🐾 Ana Akis</h2>
@@ -39,7 +39,7 @@
                 <button class="btn btn-sm follow-btn {% if cat.owner_id in followed_ids %}btn-secondary following{% else %}btn-primary{% endif %}"
                         data-username="{{ cat.owner.username }}"
                         onclick="toggleFollow(this.getAttribute('data-username'), this)">
-                    {% if cat.owner_id in followed_ids %}Takibi Birak{% else %}Takip Et{% endif %}
+                    {% if cat.owner_id in followed_ids %}Takibi Bırak{% else %}Takip Et{% endif %}
                 </button>
                 {% endif %}
             </div>
@@ -89,7 +89,7 @@
                 <span class="gender-badge sahipli">Sahipli 🏠</span>
                 {% endif %}
                 {% if cat.gender %}
-                <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
+                <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kız' if cat.gender == 'Female' else 'Erkek' }}</span>
                 {% endif %}
                 {% if cat.description %}
                 <div style="margin-top:0.3rem;">{{ cat.description }}</div>
@@ -103,9 +103,9 @@
     {% else %}
     <div class="empty-state">
         <div class="icon">🐾</div>
-        <h3>Ana akisin henuz bos</h3>
-        <p>Kesfet sayfasinda hayvanlari gez, sevdiklerini takip et ve paylasimlar burada toplansin.</p>
-        <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Kesfete Git</a>
+        <h3>Ana akışın henüz boş</h3>
+        <p>Keşfet sayfasında hayvanları gez, sevdiklerini takip et ve paylaşımlar burada toplansın.</p>
+        <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Keşfete Git</a>
     </div>
     {% endif %}
 </div>
