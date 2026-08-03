@@ -590,6 +590,28 @@ def reset_password(token):
     return render_template('reset_password.html', token=token)
 
 
+@app.context_processor
+def inject_active_nav():
+    active = ''
+    try:
+        ep = request.endpoint or ''
+        if ep == 'home':
+            active = 'home'
+        elif ep == 'explore':
+            active = 'explore'
+        elif ep == 'reels':
+            active = 'reels'
+        elif ep in ('messages', 'conversation'):
+            active = 'messages'
+        elif ep == 'notifications':
+            active = 'notifications'
+        elif ep == 'user_profile':
+            active = 'profile'
+    except Exception:
+        active = ''
+    return dict(active_nav=active)
+
+
 @app.route('/profile/<username>')
 @login_required
 def user_profile(username):

@@ -1,3 +1,4 @@
+{% from "_icons.html" import icon_home, icon_search, icon_reels, icon_messages, icon_bell %}
 <!DOCTYPE html>
 <html lang="tr" data-theme="pembe">
 <head>
@@ -14,36 +15,10 @@
         document.documentElement.setAttribute('data-theme', saved);
     })();
     </script>
-    <nav class="navbar">
-        <div class="container">
-            <a href="{{ url_for('index') }}" class="navbar-brand">
-                <span>🐱</span> PatiliDunya
-            </a>
-            {% if current_user.is_authenticated %}
-            <ul class="navbar-nav">
-                <li><a href="{{ url_for('explore') }}" class="nav-link">Kesfet</a></li>
-                <li><a href="{{ url_for('reels') }}" class="nav-link">Reels</a></li>
-                <li><a href="{{ url_for('following_feed') }}" class="nav-link">Takip</a></li>
-                <li><a href="{{ url_for('cat_map') }}" class="nav-link">Harita</a></li>
-                <li><a href="{{ url_for('favorites') }}" class="nav-link">Favoriler</a></li>
-                <li><a href="{{ url_for('new_cat') }}" class="nav-link">+ Patili Ekle</a></li>
-                <li><a href="{{ url_for('messages') }}" class="nav-link" id="msgLink">💬<span id="msgBadge" class="nav-badge" style="display:none;">0</span></a></li>
-                <li><a href="{{ url_for('notifications') }}" class="nav-link" id="notifLink">🔔</a></li>
-                <li><a href="{{ url_for('user_profile', username=current_user.username) }}" class="nav-link">Profilim</a></li>
-                {% if current_user.username == 'Lumbe' %}
-                <li><a href="{{ url_for('admin_users') }}" class="nav-link">🛡️ Kullanicilar</a></li>
-                <li><a href="{{ url_for('admin_dms') }}" class="nav-link">🛡️ DM Yonetim</a></li>
-                {% endif %}
-                <li><a href="{{ url_for('logout') }}" class="nav-link">Cikis</a></li>
-            </ul>
-            {% else %}
-            <ul class="navbar-nav">
-                <li><a href="{{ url_for('login') }}" class="nav-link">Giris</a></li>
-                <li><a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Kayit Ol</a></li>
-            </ul>
-            {% endif %}
-        </div>
-    </nav>
+
+    <header class="top-brand">
+        <a href="{{ url_for('index') }}" class="brand-link"><span>🐱</span> PatiliDunya</a>
+    </header>
 
     <div class="flash-container">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -64,6 +39,40 @@
     </footer>
 
     {% if current_user.is_authenticated %}
+    <nav class="bottom-nav">
+        <a href="{{ url_for('index') }}" class="bottom-item{% if active_nav == 'home' %} active{% endif %}" title="Ana Sayfa">
+            <span class="bottom-icon">{{ icon_home() }}</span>
+            <span class="bottom-label">Ana Sayfa</span>
+        </a>
+        <a href="{{ url_for('explore') }}" class="bottom-item{% if active_nav == 'explore' %} active{% endif %}" title="Kesfet">
+            <span class="bottom-icon">{{ icon_search() }}</span>
+            <span class="bottom-label">Kesfet</span>
+        </a>
+        <a href="{{ url_for('reels') }}" class="bottom-item{% if active_nav == 'reels' %} active{% endif %}" title="Reels">
+            <span class="bottom-icon">{{ icon_reels() }}</span>
+            <span class="bottom-label">Reels</span>
+        </a>
+        <a href="{{ url_for('messages') }}" class="bottom-item{% if active_nav == 'messages' %} active{% endif %}" id="msgLink" title="Mesajlar">
+            <span class="bottom-icon">{{ icon_messages() }}<span id="msgBadge" class="nav-badge" style="display:none;">0</span></span>
+            <span class="bottom-label">Mesajlar</span>
+        </a>
+        <a href="{{ url_for('notifications') }}" class="bottom-item{% if active_nav == 'notifications' %} active{% endif %}" id="notifLink" title="Bildirimler">
+            <span class="bottom-icon">{{ icon_bell() }}<span id="notifBadge" class="nav-badge" style="display:none;"></span></span>
+            <span class="bottom-label">Bildirimler</span>
+        </a>
+        <a href="{{ url_for('user_profile', username=current_user.username) }}" class="bottom-item{% if active_nav == 'profile' %} active{% endif %}" title="Profilim">
+            <span class="bottom-avatar">
+                {% if current_user.avatar %}
+                <img src="{{ current_user.avatar }}" alt="">
+                {% else %}
+                {{ current_user.username[0]|upper }}
+                {% endif %}
+            </span>
+            <span class="bottom-label">Profil</span>
+        </a>
+    </nav>
+    <div class="bottom-nav-spacer"></div>
+
     <script>
     function setTheme(name) {
         document.documentElement.setAttribute('data-theme', name);
@@ -92,13 +101,12 @@
 
     function checkNotifs() {
         fetch('/api/notifications/unread').then(function(r){return r.json()}).then(function(d){
-            var link = document.getElementById('notifLink');
+            var badge = document.getElementById('notifBadge');
             if (d.count > 0) {
-                link.textContent = '🔔' + d.count;
-                link.style.fontWeight = '800';
+                badge.textContent = d.count > 99 ? '99+' : d.count;
+                badge.style.display = 'inline-flex';
             } else {
-                link.textContent = '🔔';
-                link.style.fontWeight = '';
+                badge.style.display = 'none';
             }
         });
     }

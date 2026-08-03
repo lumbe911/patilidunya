@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon_search, icon_reels, icon_users, icon_map, icon_star, icon_messages, icon_bell, icon_plus, icon_user, icon_shield, icon_panel %}
 {% block title %}Ana Sayfa - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container home-page">
@@ -22,32 +23,40 @@
 
     <div class="home-shortcuts">
         <a href="{{ url_for('explore') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">🔍</span><span class="home-shortcut-label">Kesfet</span>
+            <span class="home-shortcut-icon">{{ icon_search() }}</span><span class="home-shortcut-label">Kesfet</span>
         </a>
         <a href="{{ url_for('reels') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">🎬</span><span class="home-shortcut-label">Reels</span>
+            <span class="home-shortcut-icon">{{ icon_reels() }}</span><span class="home-shortcut-label">Reels</span>
         </a>
         <a href="{{ url_for('following_feed') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">💞</span><span class="home-shortcut-label">Takip</span>
+            <span class="home-shortcut-icon">{{ icon_users() }}</span><span class="home-shortcut-label">Takip</span>
         </a>
         <a href="{{ url_for('cat_map') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">📍</span><span class="home-shortcut-label">Harita</span>
+            <span class="home-shortcut-icon">{{ icon_map() }}</span><span class="home-shortcut-label">Harita</span>
         </a>
         <a href="{{ url_for('favorites') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">⭐</span><span class="home-shortcut-label">Favoriler</span>
+            <span class="home-shortcut-icon">{{ icon_star() }}</span><span class="home-shortcut-label">Favoriler</span>
         </a>
         <a href="{{ url_for('messages') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">✈️{% if unread_msg %}<span class="nav-badge">{{ unread_msg }}</span>{% endif %}</span><span class="home-shortcut-label">Mesajlar</span>
+            <span class="home-shortcut-icon">{{ icon_messages() }}{% if unread_msg %}<span class="nav-badge">{{ unread_msg }}</span>{% endif %}</span><span class="home-shortcut-label">Mesajlar</span>
         </a>
         <a href="{{ url_for('notifications') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">🔔{% if unread_notif %}<span class="nav-badge">{{ unread_notif }}</span>{% endif %}</span><span class="home-shortcut-label">Bildirimler</span>
+            <span class="home-shortcut-icon">{{ icon_bell() }}{% if unread_notif %}<span class="nav-badge">{{ unread_notif }}</span>{% endif %}</span><span class="home-shortcut-label">Bildirimler</span>
         </a>
         <a href="{{ url_for('new_cat') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">➕</span><span class="home-shortcut-label">Patili Ekle</span>
+            <span class="home-shortcut-icon">{{ icon_plus() }}</span><span class="home-shortcut-label">Patili Ekle</span>
         </a>
         <a href="{{ url_for('user_profile', username=current_user.username) }}" class="home-shortcut">
-            <span class="home-shortcut-icon">👤</span><span class="home-shortcut-label">Profilim</span>
+            <span class="home-shortcut-icon">{{ icon_user() }}</span><span class="home-shortcut-label">Profilim</span>
         </a>
+        {% if current_user.username == 'Lumbe' %}
+        <a href="{{ url_for('admin_users') }}" class="home-shortcut">
+            <span class="home-shortcut-icon">{{ icon_shield() }}</span><span class="home-shortcut-label">Kullanicilar</span>
+        </a>
+        <a href="{{ url_for('admin_dms') }}" class="home-shortcut">
+            <span class="home-shortcut-icon">{{ icon_panel() }}</span><span class="home-shortcut-label">DM Yonetim</span>
+        </a>
+        {% endif %}
     </div>
 
     <h2 class="home-feed-title">🐾 Ana Akis</h2>
