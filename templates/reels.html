@@ -151,6 +151,30 @@
             margin-top: 0.3rem;
         }
 
+        .reel-reactions {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-top: 0.6rem;
+        }
+        .reel-reaction-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 9999px;
+            padding: 0.25rem 0.6rem;
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: transform 0.15s, background 0.15s;
+        }
+        .reel-reaction-btn:active { transform: scale(1.2); }
+        .reel-reaction-btn.active { background: rgba(236,72,153,0.5); border-color: #ec4899; }
+        .reel-reaction-btn .rr-count { font-size: 0.68rem; font-weight: 700; opacity: 0.9; }
+
         .reel-actions {
             position: absolute;
             right: 12px;
@@ -320,6 +344,16 @@
                 {% if cat.location %}
                 <div class="reel-location">📍 {{ cat.location }}</div>
                 {% endif %}
+                <div class="reel-reactions" id="reactions-{{ cat.id }}">
+                    {% for emoji in reaction_emojis %}
+                    <button class="reel-reaction-btn {% if my_reactions.get(cat.id) == emoji %}active{% endif %}"
+                            onclick="toggleReaction({{ cat.id }}, this.getAttribute('data-emoji'))"
+                            data-emoji="{{ emoji }}">
+                        <span>{{ emoji }}</span>
+                        <span class="rr-count">{{ reaction_counts_map.get(cat.id, {}).get(emoji, 0) }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
             </div>
 
             <div class="reel-actions">
@@ -377,6 +411,22 @@
         var data = await resp.json();
         btn.innerHTML = '<span class="icon">' + (data.liked ? '❤️' : '🤍') + '</span><span class="count" id="rlc-' + catId + '">' + data.count + '</span>';
         btn.classList.toggle('liked', data.liked);
+    }
+
+    async function toggleReaction(catId, emoji) {
+        var resp = await fetch('/api/react/' + catId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'emoji=' + encodeURIComponent(emoji)
+        });
+        var data = await resp.json();
+        if (!data.counts) return;
+        var bar = document.getElementById('reactions-' + catId);
+        bar.querySelectorAll('.reel-reaction-btn').forEach(function(b) {
+            var e = b.getAttribute('data-emoji');
+            b.classList.toggle('active', data.mine === e);
+            b.querySelector('.rr-count').textContent = data.counts[e] || 0;
+        });
     }
 
     function openComments(catId) {

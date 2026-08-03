@@ -69,6 +69,17 @@
                 </button>
             </div>
 
+            <div class="reaction-bar" id="reaction-bar-{{ cat.id }}">
+                {% for emoji in reaction_emojis %}
+                <button class="reaction-btn {% if my_reaction == emoji %}active{% endif %}"
+                        onclick="toggleReaction({{ cat.id }}, this.getAttribute('data-emoji'))"
+                        data-emoji="{{ emoji }}">
+                    <span class="reaction-emoji">{{ emoji }}</span>
+                    <span class="reaction-count">{{ reaction_counts.get(emoji, 0) }}</span>
+                </button>
+                {% endfor %}
+            </div>
+
             <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:var(--gray-500);">
                 <span>👁 {{ view_count }} kez goruntulendi</span>
             </div>
@@ -192,6 +203,21 @@ async function toggleFav(catId, btn) {
     const data = await resp.json();
     btn.innerHTML = data.favorited ? '⭐' : '☆';
     btn.classList.toggle('liked', data.favorited);
+}
+async function toggleReaction(catId, emoji) {
+    const resp = await fetch(`/api/react/${catId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'emoji=' + encodeURIComponent(emoji)
+    });
+    const data = await resp.json();
+    if (!data.counts) return;
+    const bar = document.getElementById(`reaction-bar-${catId}`);
+    bar.querySelectorAll('.reaction-btn').forEach(function(b) {
+        const e = b.getAttribute('data-emoji');
+        b.classList.toggle('active', data.mine === e);
+        b.querySelector('.reaction-count').textContent = data.counts[e] || 0;
+    });
 }
 function openLightbox(src) {
     document.getElementById('lightboxImg').src = src;

@@ -235,13 +235,30 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     from_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    cat_id = db.Column(db.Integer, db.ForeignKey('cat.id'), nullable=False)
+    cat_id = db.Column(db.Integer, db.ForeignKey('cat.id'), nullable=True)
     notif_type = db.Column(db.String(20), nullable=False)
     text = db.Column(db.Text, default='')
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     from_user = db.relationship('User', foreign_keys=[from_user_id])
     cat = db.relationship('Cat')
+
+
+class Follow(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    followed_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint('follower_id', 'followed_id'),)
+
+
+class Reaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    cat_id = db.Column(db.Integer, db.ForeignKey('cat.id'), nullable=False)
+    emoji = db.Column(db.String(16), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint('user_id', 'cat_id'),)
 
 
 @login_manager.user_loader
@@ -335,7 +352,18 @@ def reels():
     for c in cats_with_photo:
         comment_counts[c.id] = Comment.query.filter_by(cat_id=c.id).count()
 
-    return render_template('reels.html', cats=cats_with_photo, liked_ids=liked_ids, comment_counts=comment_counts)
+    cat_ids = [c.id for c in cats_with_photo]
+    my_reactions = {}
+    reaction_counts_map = {}
+    if cat_ids:
+        for row in db.session.query(Reaction.cat_id, Reaction.emoji, db.func.count()).filter(Reaction.cat_id.in_(cat_ids)).group_by(Reaction.cat_id, Reaction.emoji).all():
+            reaction_counts_map.setdefault(row[0], {})[row[1]] = row[2]
+        my_reactions = {r.cat_id: r.emoji for r in Reaction.query.filter(
+            Reaction.user_id == current_user.id, Reaction.cat_id.in_(cat_ids)).all()}
+
+    return render_template('reels.html', cats=cats_with_photo, liked_ids=liked_ids, comment_counts=comment_counts,
+                           reaction_emojis=REACTION_EMOJIS, reaction_counts_map=reaction_counts_map,
+                           my_reactions=my_reactions)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -476,9 +504,72 @@ def user_profile(username):
     total_comments = Comment.query.filter(Comment.cat_id.in_(cat_ids)).count() if cat_ids else 0
     total_views = View.query.filter(View.cat_id.in_(cat_ids)).count() if cat_ids else 0
     unread = Notification.query.filter_by(user_id=user.id, is_read=False).count()
+    follower_count = Follow.query.filter_by(followed_id=user.id).count()
+    following_count = Follow.query.filter_by(follower_id=user.id).count()
+    is_following = (current_user.is_authenticated and current_user.id != user.id and
+                    Follow.query.filter_by(follower_id=current_user.id, followed_id=user.id).first() is not None)
     return render_template('user_profile.html', profile_user=user, cats=cats,
                            total_likes=total_likes, total_comments=total_comments,
-                           total_views=total_views, unread=unread)
+                           total_views=total_views, unread=unread,
+                           follower_count=follower_count, following_count=following_count,
+                           is_following=is_following)
+
+
+@app.route('/api/follow/<username>', methods=['POST'])
+@login_required
+@limiter.limit("30 per minute")
+def toggle_follow(username):
+    target = User.query.filter_by(username=username).first_or_404()
+    if target.id == current_user.id:
+        return jsonify({'error': 'Kendini takip edemezsin.'}), 400
+    existing = Follow.query.filter_by(follower_id=current_user.id, followed_id=target.id).first()
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        return jsonify({'following': False, 'follower_count': Follow.query.filter_by(followed_id=target.id).count()})
+    db.session.add(Follow(follower_id=current_user.id, followed_id=target.id))
+    existing_notif = Notification.query.filter_by(user_id=target.id, from_user_id=current_user.id,
+                                                  notif_type='follow').first()
+    if not existing_notif:
+        db.session.add(Notification(
+            user_id=target.id, from_user_id=current_user.id, notif_type='follow',
+            text=f'{current_user.display_name or current_user.username} seni takip etmeye basladi!'
+        ))
+    db.session.commit()
+    return jsonify({'following': True, 'follower_count': Follow.query.filter_by(followed_id=target.id).count()})
+
+
+@app.route('/following')
+@login_required
+def following_feed():
+    followed_ids = [f.followed_id for f in Follow.query.filter_by(follower_id=current_user.id).order_by(Follow.created_at.desc()).all()]
+    if not followed_ids:
+        return render_template('following.html', cats=[], following=[])
+    cats = Cat.query.filter(Cat.owner_id.in_(followed_ids)).order_by(Cat.created_at.desc()).all()
+    following = User.query.filter(User.id.in_(followed_ids)).all()
+    return render_template('following.html', cats=cats, following=following)
+
+
+@app.route('/user/<username>/followers')
+@login_required
+def followers_list(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    follows = Follow.query.filter_by(followed_id=user.id).order_by(Follow.created_at.desc()).all()
+    users = [User.query.get(f.follower_id) for f in follows]
+    users = [u for u in users if u]
+    followed_ids = {f.followed_id for f in Follow.query.filter_by(follower_id=current_user.id).all()}
+    return render_template('follow_list.html', page_user=user, users=users, mode='followers', followed_ids=followed_ids)
+
+
+@app.route('/user/<username>/following')
+@login_required
+def following_list(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    follows = Follow.query.filter_by(follower_id=user.id).order_by(Follow.created_at.desc()).all()
+    users = [User.query.get(f.followed_id) for f in follows]
+    users = [u for u in users if u]
+    followed_ids = {f.followed_id for f in Follow.query.filter_by(follower_id=current_user.id).all()}
+    return render_template('follow_list.html', page_user=user, users=users, mode='following', followed_ids=followed_ids)
 
 
 @app.route('/profile/edit', methods=['GET', 'POST'])
@@ -546,7 +637,14 @@ def cat_detail(cat_id):
     is_fav = Favorite.query.filter_by(user_id=current_user.id, cat_id=cat_id).first() is not None
     view_count = View.query.filter_by(cat_id=cat_id).count()
     comments = Comment.query.filter_by(cat_id=cat_id).order_by(Comment.created_at.desc()).all()
-    return render_template('cat_detail.html', cat=cat, liked=liked, comments=comments, is_fav=is_fav, view_count=view_count)
+    reaction_counts = {e: 0 for e in REACTION_EMOJIS}
+    for row in db.session.query(Reaction.emoji, db.func.count()).filter_by(cat_id=cat_id).group_by(Reaction.emoji).all():
+        reaction_counts[row[0]] = row[1]
+    my_reaction = Reaction.query.filter_by(user_id=current_user.id, cat_id=cat_id).first()
+    return render_template('cat_detail.html', cat=cat, liked=liked, comments=comments, is_fav=is_fav,
+                           view_count=view_count, reaction_emojis=REACTION_EMOJIS,
+                           reaction_counts=reaction_counts,
+                           my_reaction=my_reaction.emoji if my_reaction else None)
 
 
 @app.route('/cat/<int:cat_id>/edit', methods=['GET', 'POST'])
@@ -591,6 +689,7 @@ def delete_cat(cat_id):
     name = cat.name
     View.query.filter_by(cat_id=cat_id).delete()
     Favorite.query.filter_by(cat_id=cat_id).delete()
+    Reaction.query.filter_by(cat_id=cat_id).delete()
     Notification.query.filter_by(cat_id=cat_id).delete()
     db.session.delete(cat)
     db.session.commit()
@@ -635,6 +734,43 @@ def toggle_like(cat_id):
             db.session.add(notif)
         db.session.commit()
         return jsonify({'liked': True, 'count': cat.like_count})
+
+
+REACTION_EMOJIS = ['🥺', '😻', '😍', '🔥', '🎉']
+
+
+@app.route('/api/react/<int:cat_id>', methods=['POST'])
+@login_required
+@limiter.limit("60 per minute")
+def toggle_reaction(cat_id):
+    cat = Cat.query.get_or_404(cat_id)
+    emoji = request.form.get('emoji', '').strip()
+    if emoji not in REACTION_EMOJIS:
+        return jsonify({'error': 'Gecersiz tepki.'}), 400
+    existing = Reaction.query.filter_by(user_id=current_user.id, cat_id=cat_id).first()
+    if existing and existing.emoji == emoji:
+        db.session.delete(existing)
+    else:
+        if existing:
+            existing.emoji = emoji
+        else:
+            db.session.add(Reaction(user_id=current_user.id, cat_id=cat_id, emoji=emoji))
+        if cat.owner_id != current_user.id:
+            existing_notif = Notification.query.filter_by(
+                user_id=cat.owner_id, from_user_id=current_user.id,
+                cat_id=cat_id, notif_type='reaction').first()
+            if not existing_notif:
+                db.session.add(Notification(
+                    user_id=cat.owner_id, from_user_id=current_user.id, cat_id=cat_id,
+                    notif_type='reaction',
+                    text=f'{current_user.display_name or current_user.username} "{cat.name}" gonderisine {emoji} tepkisi birakti!'
+                ))
+    db.session.commit()
+    counts = {}
+    for row in db.session.query(Reaction.emoji, db.func.count()).filter_by(cat_id=cat_id).group_by(Reaction.emoji).all():
+        counts[row[0]] = row[1]
+    mine = Reaction.query.filter_by(user_id=current_user.id, cat_id=cat_id).first()
+    return jsonify({'counts': counts, 'mine': mine.emoji if mine else None})
 
 
 @app.route('/cat/<int:cat_id>/comment', methods=['POST'])
@@ -864,6 +1000,7 @@ def seed_cats():
         for cat in Cat.query.filter_by(owner_id=current_user.id).all():
             View.query.filter_by(cat_id=cat.id).delete()
             Favorite.query.filter_by(cat_id=cat.id).delete()
+            Reaction.query.filter_by(cat_id=cat.id).delete()
             Notification.query.filter_by(cat_id=cat.id).delete()
             db.session.delete(cat)
         db.session.commit()
@@ -949,6 +1086,11 @@ with app.app_context():
         db.session.rollback()
     try:
         db.session.execute(db.text('UPDATE cat SET breed = color WHERE (breed IS NULL OR breed = \'\') AND color IS NOT NULL AND color != \'\''))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    try:
+        db.session.execute(db.text('ALTER TABLE notification ALTER COLUMN cat_id DROP NOT NULL'))
         db.session.commit()
     except Exception:
         db.session.rollback()

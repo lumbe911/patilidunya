@@ -10,7 +10,28 @@
         {% endif %}
         <h1 class="profile-name">{{ profile_user.display_name or profile_user.username }}</h1>
         <p class="profile-bio">{{ profile_user.bio or 'Henuz bio eklenmemis...' }}</p>
+        {% if current_user.id != profile_user.id %}
+        <div style="margin-top:1rem;">
+            <button class="btn {% if is_following %}btn-secondary{% else %}btn-primary{% endif %} btn-sm follow-btn"
+                    data-username="{{ profile_user.username }}"
+                    onclick="toggleFollow(this.getAttribute('data-username'), this)">
+                {% if is_following %}Takibi Birak{% else %}Takip Et{% endif %}
+            </button>
+        </div>
+        {% endif %}
         <div class="profile-stats">
+            <div class="stat">
+                <a href="{{ url_for('followers_list', username=profile_user.username) }}" style="text-decoration:none;">
+                    <div class="stat-number follow-count" data-username="{{ profile_user.username }}">{{ follower_count }}</div>
+                    <div class="stat-label">Takipci</div>
+                </a>
+            </div>
+            <div class="stat">
+                <a href="{{ url_for('following_list', username=profile_user.username) }}" style="text-decoration:none;">
+                    <div class="stat-number">{{ following_count }}</div>
+                    <div class="stat-label">Takip</div>
+                </a>
+            </div>
             <div class="stat">
                 <div class="stat-number">{{ cats|length }}</div>
                 <div class="stat-label">Patili</div>

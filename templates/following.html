@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Takip Akisi - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="page-title">🐾 Takip Akisi</h1>
+    <p style="text-align:center; color:var(--gray-500); margin-bottom:1.5rem;">Takip ettigin kisilerin paylasimlari</p>
+
+    {% if following %}
+    <div style="display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.5rem;">
+        {% for u in following %}
+        <a href="{{ url_for('user_profile', username=u.username) }}" style="display:flex; align-items:center; gap:0.4rem; background:white; border:1px solid var(--pink-200); border-radius:var(--radius-full); padding:0.3rem 0.8rem 0.3rem 0.3rem; font-size:0.8rem; font-weight:700; color:var(--gray-700); text-decoration:none;">
+            {% if u.avatar %}
+            <img src="{{ u.avatar }}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
+            {% else %}
+            <span style="width:24px; height:24px; border-radius:50%; background:var(--pink-200); display:flex; align-items:center; justify-content:center; font-size:0.65rem;">{{ u.username[0]|upper }}</span>
+            {% endif %}
+            {{ u.display_name or u.username }}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if cats %}
+    <div class="cat-grid">
+        {% for cat in cats %}
+        <div class="card">
+            <div class="cat-card-header">
+                {% if cat.owner.avatar %}
+                <img src="{{ cat.owner.avatar }}" alt="" class="cat-avatar">
+                {% else %}
+                <div class="cat-avatar" style="background: var(--pink-200); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">{{ cat.owner.username[0]|upper }}</div>
+                {% endif %}
+                <div>
+                    <div style="font-weight:700; font-size:0.95rem;">
+                        <a href="{{ url_for('user_profile', username=cat.owner.username) }}">{{ cat.owner.display_name or cat.owner.username }}</a>
+                    </div>
+                    <div class="cat-meta">{{ cat.created_at.strftime('%d %b %Y') }}</div>
+                </div>
+            </div>
+            <a href="{{ url_for('cat_detail', cat_id=cat.id) }}">
+                <div class="cat-photo-container">
+                    {% if cat.photos %}
+                    <img src="{{ cat.photos[0].filename }}" alt="{{ cat.name }}">
+                    {% else %}
+                    <div style="width:100%; height:100%; background: var(--pink-100); display:flex; align-items:center; justify-content:center; font-size:4rem;">🐱</div>
+                    {% endif %}
+                </div>
+            </a>
+            <div class="cat-card-footer">
+                <div>
+                    <a href="{{ url_for('cat_detail', cat_id=cat.id) }}" class="card-title">{{ cat.name }}</a>
+                    {% if cat.status == 'sokak' %}
+                    <span class="gender-badge sokak">Sokak 🏙️</span>
+                    {% else %}
+                    <span class="gender-badge sahipli">Sahipli 🏠</span>
+                    {% endif %}
+                    {% if cat.gender %}
+                    <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
+                    {% endif %}
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <span class="like-count">💖 {{ cat.like_count }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">👥</div>
+        <h3>Takip akisin henuz bos</h3>
+        <p>Kesfet sayfasindan sevdigin hayvanseverleri takip et, paylasimlari burada gorunecek.</p>
+        <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Kesfete Git</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

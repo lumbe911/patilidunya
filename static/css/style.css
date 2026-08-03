@@ -330,6 +330,43 @@ a:hover { color: var(--pink-700); }
 .like-btn:hover { transform: scale(1.15); }
 .like-btn.liked { color: #ef4444; }
 .like-count { font-size: 0.9rem; color: var(--gray-500); font-weight: 600; }
+
+/* REACTIONS */
+.reaction-bar {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+}
+.reaction-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: white;
+    border: 1.5px solid var(--pink-200);
+    border-radius: var(--radius-full);
+    padding: 0.35rem 0.7rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s, border-color 0.15s;
+}
+.reaction-btn:hover { transform: scale(1.08); }
+.reaction-btn:active { transform: scale(1.15); }
+.reaction-btn .reaction-emoji { font-size: 1.05rem; line-height: 1; }
+.reaction-btn.active {
+    background: var(--pink-100);
+    border-color: var(--pink-500);
+    box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.2);
+}
+
+/* FOLLOW BUTTON */
+.btn.follow-btn.following {
+    background: var(--pink-100);
+    color: var(--pink-700);
+}
 .gender-badge {
     padding: 0.2rem 0.6rem;
     border-radius: var(--radius-full);

@@ -23,6 +23,7 @@
             <ul class="navbar-nav">
                 <li><a href="{{ url_for('explore') }}" class="nav-link">Kesfet</a></li>
                 <li><a href="{{ url_for('reels') }}" class="nav-link">Reels</a></li>
+                <li><a href="{{ url_for('following_feed') }}" class="nav-link">Takip</a></li>
                 <li><a href="{{ url_for('cat_map') }}" class="nav-link">Harita</a></li>
                 <li><a href="{{ url_for('favorites') }}" class="nav-link">Favoriler</a></li>
                 <li><a href="{{ url_for('new_cat') }}" class="nav-link">+ Patili Ekle</a></li>
@@ -64,6 +65,23 @@
         localStorage.setItem('pd-theme', name);
         document.querySelectorAll('.theme-btn').forEach(function(b) {
             b.classList.toggle('active', b.getAttribute('data-theme') === name);
+        });
+    }
+
+    async function toggleFollow(username, btn) {
+        var resp = await fetch('/api/follow/' + username, { method: 'POST' });
+        var data = await resp.json();
+        if (data.error) { alert(data.error); return; }
+        document.querySelectorAll('.follow-btn').forEach(function(b) {
+            if (b.getAttribute('data-username') === username) {
+                b.textContent = data.following ? 'Takibi Birak' : 'Takip Et';
+                b.classList.toggle('following', data.following);
+                b.classList.toggle('btn-primary', !data.following);
+                b.classList.toggle('btn-secondary', data.following);
+            }
+        });
+        document.querySelectorAll('.follow-count').forEach(function(el) {
+            if (el.getAttribute('data-username') === username) el.textContent = data.follower_count;
         });
     }
 

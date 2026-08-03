@@ -15,17 +15,25 @@
             {% endif %}
             <div style="flex:1;">
                 <div style="font-weight:600; font-size:0.9rem;">
-                    {% if n.notif_type == 'like' %}
+                    {% if n.notif_type == 'follow' %}
+                    👥 {{ n.text }}
+                    {% elif n.notif_type == 'like' %}
                     💖 {{ n.text }}
                     {% elif n.notif_type == 'comment' %}
                     💬 {{ n.text }}
+                    {% elif n.notif_type == 'reaction' %}
+                    😻 {{ n.text }}
                     {% else %}
                     {{ n.text }}
                     {% endif %}
                 </div>
                 <div style="font-size:0.75rem; color:var(--gray-500); margin-top:0.2rem;">{{ n.created_at.strftime('%d %b %Y, %H:%M') }}</div>
             </div>
+            {% if n.notif_type == 'follow' %}
+            <a href="{{ url_for('user_profile', username=n.from_user.username) }}" style="font-size:0.8rem; color:var(--pink-600); font-weight:700; white-space:nowrap;">Gor</a>
+            {% else %}
             <a href="{{ url_for('cat_detail', cat_id=n.cat_id) }}" style="font-size:0.8rem; color:var(--pink-600); font-weight:700; white-space:nowrap;">Gor</a>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
