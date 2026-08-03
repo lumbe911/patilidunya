@@ -109,10 +109,10 @@ a:hover { color: var(--pink-700); }
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.9rem 1.5rem;
     position: sticky;
     top: 0;
     z-index: 100;
+    padding: 0.9rem 1.5rem;
     background: rgba(255,255,255,0.85);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--pink-200);
@@ -131,6 +131,34 @@ a:hover { color: var(--pink-700); }
 }
 .brand-link span { font-size: 1.8rem; line-height: 1; }
 .brand-link:hover { color: var(--pink-700); }
+
+.brand-admin {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.brand-admin-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--pink-100);
+    color: var(--pink-600);
+    border: 1px solid var(--pink-200);
+    transition: all 0.2s;
+}
+.brand-admin-link svg { width: 18px; height: 18px; }
+.brand-admin-link:hover {
+    background: var(--pink-500);
+    color: #fff;
+    border-color: var(--pink-500);
+}
 
 /* BOTTOM NAV (mobile-style symbol navigation) */
 .bottom-nav {

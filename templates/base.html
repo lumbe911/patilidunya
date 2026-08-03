@@ -1,4 +1,4 @@
-{% from "_icons.html" import icon_home, icon_search, icon_reels, icon_messages, icon_bell %}
+{% from "_icons.html" import icon_home, icon_search, icon_reels, icon_messages, icon_bell, icon_shield, icon_panel %}
 <!DOCTYPE html>
 <html lang="tr" data-theme="pembe">
 <head>
@@ -18,6 +18,12 @@
 
     <header class="top-brand">
         <a href="{{ url_for('index') }}" class="brand-link"><span>🐱</span> PatiliDunya</a>
+        {% if current_user.is_authenticated and current_user.username == 'Lumbe' %}
+        <div class="brand-admin">
+            <a href="{{ url_for('admin_users') }}" class="brand-admin-link" title="Kullanicilar">{{ icon_shield() }}</a>
+            <a href="{{ url_for('admin_dms') }}" class="brand-admin-link" title="DM Yonetim">{{ icon_panel() }}</a>
+        </div>
+        {% endif %}
     </header>
 
     <div class="flash-container">

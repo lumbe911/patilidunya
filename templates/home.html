@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_icons.html" import icon_users, icon_map, icon_star, icon_plus, icon_shield, icon_panel %}
+{% from "_icons.html" import icon_map, icon_star, icon_plus %}
 {% block title %}Ana Sayfa - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container home-page">
@@ -22,9 +22,6 @@
     </div>
 
     <div class="home-shortcuts">
-        <a href="{{ url_for('following_feed') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">{{ icon_users() }}</span><span class="home-shortcut-label">Takip</span>
-        </a>
         <a href="{{ url_for('cat_map') }}" class="home-shortcut">
             <span class="home-shortcut-icon">{{ icon_map() }}</span><span class="home-shortcut-label">Harita</span>
         </a>
@@ -34,14 +31,6 @@
         <a href="{{ url_for('new_cat') }}" class="home-shortcut">
             <span class="home-shortcut-icon">{{ icon_plus() }}</span><span class="home-shortcut-label">Patili Ekle</span>
         </a>
-        {% if current_user.username == 'Lumbe' %}
-        <a href="{{ url_for('admin_users') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">{{ icon_shield() }}</span><span class="home-shortcut-label">Kullanicilar</span>
-        </a>
-        <a href="{{ url_for('admin_dms') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">{{ icon_panel() }}</span><span class="home-shortcut-label">DM Yonetim</span>
-        </a>
-        {% endif %}
     </div>
 
     <h2 class="home-feed-title">🐾 Ana Akis</h2>
