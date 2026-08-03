@@ -376,8 +376,41 @@ def save_upload(file):
 @app.route('/')
 def index():
     if current_user.is_authenticated:
-        return redirect(url_for('explore'))
+        return redirect(url_for('home'))
     return render_template('landing.html')
+
+
+@app.route('/home')
+@login_required
+def home():
+    followed_ids = [f.followed_id for f in Follow.query.filter_by(follower_id=current_user.id).order_by(Follow.created_at.desc()).all()]
+    if followed_ids:
+        cats = Cat.query.filter(Cat.owner_id.in_(followed_ids)).order_by(Cat.created_at.desc()).all()
+    else:
+        cats = Cat.query.order_by(Cat.created_at.desc()).limit(12).all()
+    cat_ids = [c.id for c in cats]
+    liked_ids = {l.cat_id for l in Like.query.filter_by(user_id=current_user.id).all()}
+    my_reactions = {}
+    reaction_counts_map = {}
+    comment_counts = {}
+    if cat_ids:
+        for row in db.session.query(Reaction.cat_id, Reaction.emoji, db.func.count()).filter(Reaction.cat_id.in_(cat_ids)).group_by(Reaction.cat_id, Reaction.emoji).all():
+            reaction_counts_map.setdefault(row[0], {})[row[1]] = row[2]
+        my_reactions = {r.cat_id: r.emoji for r in Reaction.query.filter(
+            Reaction.user_id == current_user.id, Reaction.cat_id.in_(cat_ids)).all()}
+        for cid in cat_ids:
+            comment_counts[cid] = Comment.query.filter_by(cat_id=cid).count()
+    unread_notif = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+    unread_msg = unread_msg_count(current_user.id)
+    follower_count = Follow.query.filter_by(followed_id=current_user.id).count()
+    following_count = Follow.query.filter_by(follower_id=current_user.id).count()
+    my_cat_count = Cat.query.filter_by(owner_id=current_user.id).count()
+    return render_template('home.html', cats=cats, followed_ids=set(followed_ids), liked_ids=liked_ids,
+                           comment_counts=comment_counts, my_reactions=my_reactions,
+                           reaction_counts_map=reaction_counts_map, reaction_emojis=REACTION_EMOJIS,
+                           unread_notif=unread_notif, unread_msg=unread_msg,
+                           follower_count=follower_count, following_count=following_count,
+                           my_cat_count=my_cat_count)
 
 
 @app.route('/explore')
@@ -442,7 +475,7 @@ def login():
             login_user(user, remember=request.form.get('remember') is not None)
             flash('Hosgeldiniz!', 'success')
             next_page = request.args.get('next')
-            return redirect(next_page or url_for('explore'))
+            return redirect(next_page or url_for('home'))
         flash('Kullanici adi veya sifre hatali!', 'danger')
     return render_template('login.html')
 

@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Ana Sayfa - PatiliDunya{% endblock %}
+{% block content %}
+<div class="container home-page">
+
+    <div class="home-hero">
+        {% if current_user.avatar %}
+        <img src="{{ current_user.avatar }}" alt="" class="home-hero-avatar">
+        {% else %}
+        <div class="home-hero-avatar">{{ current_user.username[0]|upper }}</div>
+        {% endif %}
+        <div class="home-hero-info">
+            <div class="home-hero-name">Merhaba, {{ current_user.display_name or current_user.username }}! 🐱</div>
+            <div class="home-hero-stats">
+                <span><b>{{ follower_count }}</b> Takipci</span>
+                <span><b>{{ following_count }}</b> Takip</span>
+                <span><b>{{ my_cat_count }}</b> Patili</span>
+            </div>
+        </div>
+        <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary btn-sm">Profili Duzenle</a>
+    </div>
+
+    <div class="home-shortcuts">
+        <a href="{{ url_for('explore') }}" class="home-shortcut">
+            <span class="home-shortcut-icon">🔍</span><span class="home-shortcut-label">Kesfet</span>
+        </a>
+        <a href="{{ url_for('reels') }}" class="home-shortcut">
+            <span class="home-shortcut-icon">🎬</span><span class="home-shortcut-label">Reels</span>
+        </a>
+        <a href="{{ url_for('following_feed') }}" class="home-shortcut">
+            <span class="home-shortcut-icon">💞</span><span class="home-shortcut-label">Takip</span>
+        </a>
+        <a href="{{ url_for('cat_map') }}" class="home-shortcut">
+            <span class="home-shortcut-icon">📍</span><span class="home-shortcut-label">Harita</span>
+        </a>
+        <a href="{{ url_for('favorites') }}" class="home-shortcut">
+            <span class="home-shortcut-icon">⭐</span><span class="home-shortcut-label">Favoriler</span>
+        </a>
+        <a href="{{ url_for('messages') }}" class="home-shortcut">
+            <span class="home-shortcut-icon">✈️{% if unread_msg %}<span class="nav-badge">{{ unread_msg }}</span>{% endif %}</span><span class="home-shortcut-label">Mesajlar</span>
+        </a>
+        <a href="{{ url_for('notifications') }}" class="home-shortcut">
+            <span class="home-shortcut-icon">🔔{% if unread_notif %}<span class="nav-badge">{{ unread_notif }}</span>{% endif %}</span><span class="home-shortcut-label">Bildirimler</span>
+        </a>
+        <a href="{{ url_for('new_cat') }}" class="home-shortcut">
+            <span class="home-shortcut-icon">➕</span><span class="home-shortcut-label">Patili Ekle</span>
+        </a>
+        <a href="{{ url_for('user_profile', username=current_user.username) }}" class="home-shortcut">
+            <span class="home-shortcut-icon">👤</span><span class="home-shortcut-label">Profilim</span>
+        </a>
+    </div>
+
+    <h2 class="home-feed-title">🐾 Ana Akis</h2>
+
+    {% if cats %}
+        {% for cat in cats %}
+        <div class="feed-card">
+            <div class="feed-head">
+                {% if cat.owner.avatar %}
+                <img src="{{ cat.owner.avatar }}" alt="" class="feed-avatar">
+                {% else %}
+                <div class="feed-avatar">{{ cat.owner.username[0]|upper }}</div>
+                {% endif %}
+                <div class="feed-head-info">
+                    <a href="{{ url_for('user_profile', username=cat.owner.username) }}" class="feed-head-name">{{ cat.owner.display_name or cat.owner.username }}</a>
+                    <div class="feed-head-time">{{ cat.created_at.strftime('%d %b %Y') }}</div>
+                </div>
+                {% if cat.owner_id != current_user.id %}
+                <button class="btn btn-sm follow-btn {% if cat.owner_id in followed_ids %}btn-secondary following{% else %}btn-primary{% endif %}"
+                        data-username="{{ cat.owner.username }}"
+                        onclick="toggleFollow(this.getAttribute('data-username'), this)">
+                    {% if cat.owner_id in followed_ids %}Takibi Birak{% else %}Takip Et{% endif %}
+                </button>
+                {% endif %}
+            </div>
+
+            <a href="{{ url_for('cat_detail', cat_id=cat.id) }}" class="feed-photo">
+                {% if cat.photos %}
+                <img src="{{ cat.photos[0].filename }}" alt="{{ cat.name }}" loading="lazy">
+                {% else %}
+                <div style="width:100%; height:260px; background: var(--pink-100); display:flex; align-items:center; justify-content:center; font-size:5rem;">🐱</div>
+                {% endif %}
+            </a>
+
+            <div class="feed-actions">
+                <button class="feed-like-btn {% if cat.id in liked_ids %}liked{% endif %}" onclick="toggleLike({{ cat.id }}, this)">
+                    <span>{% if cat.id in liked_ids %}❤️{% else %}🤍{% endif %}</span>
+                    <span class="count">{{ cat.like_count }}</span>
+                </button>
+                <a href="{{ url_for('cat_detail', cat_id=cat.id) }}" class="feed-like-btn" style="text-decoration:none;">
+                    <span>💬</span>
+                    <span class="count">{{ comment_counts.get(cat.id, 0) }}</span>
+                </a>
+                <a href="{{ url_for('cat_detail', cat_id=cat.id) }}" class="feed-like-btn" style="text-decoration:none; margin-left:auto;">
+                    <span>📝</span>
+                    <span class="count">Detay</span>
+                </a>
+            </div>
+
+            <div class="feed-reactions">
+                <div class="reaction-bar" id="reaction-bar-{{ cat.id }}">
+                    {% for emoji in reaction_emojis %}
+                    <button class="reaction-btn {% if my_reactions.get(cat.id) == emoji %}active{% endif %}"
+                            onclick="toggleReaction({{ cat.id }}, this.getAttribute('data-emoji'))"
+                            data-emoji="{{ emoji }}">
+                        <span class="reaction-emoji">{{ emoji }}</span>
+                        <span class="reaction-count">{{ reaction_counts_map.get(cat.id, {}).get(emoji, 0) }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="feed-caption">
+                <a href="{{ url_for('user_profile', username=cat.owner.username) }}" style="font-weight:800;">{{ cat.owner.display_name or cat.owner.username }}</a>
+                <span class="card-title" style="font-size:0.95rem;"> {{ cat.name }}</span>
+                {% if cat.status == 'sokak' %}
+                <span class="gender-badge sokak">Sokak 🏙️</span>
+                {% else %}
+                <span class="gender-badge sahipli">Sahipli 🏠</span>
+                {% endif %}
+                {% if cat.gender %}
+                <span class="gender-badge {{ cat.gender|lower }}">{{ 'Kiz' if cat.gender == 'Female' else 'Erkek' }}</span>
+                {% endif %}
+                {% if cat.description %}
+                <div style="margin-top:0.3rem;">{{ cat.description }}</div>
+                {% endif %}
+                {% if cat.location %}
+                <div style="font-size:0.8rem; color:var(--gray-500); margin-top:0.3rem;">📍 {{ cat.location }}</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">🐾</div>
+        <h3>Ana akisin henuz bos</h3>
+        <p>Kesfet sayfasinda hayvanlari gez, sevdiklerini takip et ve paylasimlar burada toplansin.</p>
+        <a href="{{ url_for('explore') }}" class="btn btn-primary" style="margin-top:1rem;">Kesfete Git</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function toggleLike(catId, btn) {
+    var resp = await fetch('/api/like/' + catId, { method: 'POST' });
+    var data = await resp.json();
+    var icon = btn.querySelector('span');
+    var count = btn.querySelector('.count');
+    icon.textContent = data.liked ? '❤️' : '🤍';
+    count.textContent = data.count;
+    btn.classList.toggle('liked', data.liked);
+}
+
+async function toggleReaction(catId, emoji) {
+    var resp = await fetch('/api/react/' + catId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'emoji=' + encodeURIComponent(emoji)
+    });
+    var data = await resp.json();
+    if (!data.counts) return;
+    var bar = document.getElementById('reaction-bar-' + catId);
+    bar.querySelectorAll('.reaction-btn').forEach(function(b) {
+        var e = b.getAttribute('data-emoji');
+        b.classList.toggle('active', data.mine === e);
+        b.querySelector('.reaction-count').textContent = data.counts[e] || 0;
+    });
+}
+</script>
+{% endblock %}
