@@ -47,6 +47,12 @@
             transform: scale(1.15);
             z-index: 9999 !important;
         }
+        .cat-card-marker.focused {
+            border: 3px solid #db2777;
+            box-shadow: 0 0 0 4px rgba(219,39,119,0.25), 0 4px 14px rgba(0,0,0,0.3);
+            transform: scale(1.2);
+            z-index: 9999 !important;
+        }
         .cat-card-marker img {
             width: 100%;
             height: 50px;
@@ -112,6 +118,7 @@
     }).addTo(map);
 
     var cats = {{ cat_data | tojson }};
+    var focus = {{ focus | tojson }};
 
     if (cats.length === 0) {
         var loader = document.createElement('div');
@@ -123,7 +130,8 @@
 
     var bounds = [];
     cats.forEach(function(cat) {
-        var cardHtml = '<div class="cat-card-marker" onclick="window.open(\'/cat/' + cat.id + '\', \'_self\')">';
+        var isFocus = focus && cat.id === focus.id;
+        var cardHtml = '<div class="cat-card-marker' + (isFocus ? ' focused' : '') + '" onclick="window.open(\'/cat/' + cat.id + '\', \'_self\')">';
         if (cat.photo) {
             cardHtml += '<img src="' + cat.photo + '" alt="' + cat.name + '">';
         } else {
@@ -144,9 +152,15 @@
 
         var marker = L.marker([cat.lat, cat.lng], {icon: icon}).addTo(map);
         bounds.push([cat.lat, cat.lng]);
+
+        if (isFocus) {
+            marker.bindPopup('<b>' + cat.name + '</b><br>' + cat.location).openPopup();
+        }
     });
 
-    if (bounds.length > 0) {
+    if (focus) {
+        map.setView([focus.lat, focus.lng], 15);
+    } else if (bounds.length > 0) {
         map.fitBounds(bounds, {padding: [40, 40], maxZoom: 13});
     }
 

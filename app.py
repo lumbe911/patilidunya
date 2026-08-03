@@ -1212,6 +1212,8 @@ def resolve_coords(location):
 @login_required
 def cat_map():
     cats = Cat.query.filter(Cat.location != '').all()
+    focus_id = request.args.get('cat', type=int)
+    focus = None
     cat_data = []
     for cat in cats:
         loc = cat.location.strip()
@@ -1232,7 +1234,9 @@ def cat_map():
             'lat': coords[0],
             'lng': coords[1]
         })
-    return render_template('cat_map.html', cat_data=cat_data)
+        if focus_id and cat.id == focus_id:
+            focus = {'id': cat.id, 'lat': coords[0], 'lng': coords[1]}
+    return render_template('cat_map.html', cat_data=cat_data, focus=focus)
 
 
 @app.route('/admin/users')
