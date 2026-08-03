@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_icons.html" import icon_map, icon_star %}
+{% from "_icons.html" import icon_map %}
 {% block title %}Ana Sayfa - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container home-page">
@@ -24,9 +24,6 @@
     <div class="home-shortcuts">
         <a href="{{ url_for('cat_map') }}" class="home-shortcut">
             <span class="home-shortcut-icon">{{ icon_map() }}</span><span class="home-shortcut-label">Harita</span>
-        </a>
-        <a href="{{ url_for('favorites') }}" class="home-shortcut">
-            <span class="home-shortcut-icon">{{ icon_star() }}</span><span class="home-shortcut-label">Favoriler</span>
         </a>
     </div>
 
