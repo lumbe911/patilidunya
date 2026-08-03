@@ -232,6 +232,25 @@ a:hover { color: var(--pink-700); }
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.bottom-add {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 42px;
+    height: 42px;
+    margin: 0 0.25rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink-500), #a855f7);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(236,72,153,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.bottom-add svg { width: 26px; height: 26px; stroke-width: 2.4; }
+.bottom-add:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(236,72,153,0.45); }
+.bottom-add:active { transform: scale(0.95); }
 .bottom-avatar {
     display: inline-flex;
     align-items: center;

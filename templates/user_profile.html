@@ -53,6 +53,7 @@
         {% if current_user.id == profile_user.id %}
         <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
             <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary btn-sm">Profili Duzenle</a>
+            <a href="{{ url_for('favorites') }}" class="btn btn-secondary btn-sm">⭐ Favoriler</a>
             <a href="{{ url_for('new_cat') }}" class="btn btn-primary btn-sm">+ Patili Ekle</a>
             {% if unread > 0 %}
             <a href="{{ url_for('notifications') }}" class="btn btn-sm" style="background:#ef4444; color:white; position:relative;">Bildirimler <span style="background:white; color:#ef4444; border-radius:50%; padding:0 6px; font-size:0.7rem; font-weight:800; margin-left:4px;">{{ unread }}</span></a>
