@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon_map %}
 {% block title %}Patilileri Kesfet - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container">
@@ -9,6 +10,9 @@
             <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Patili ara..."
                 style="flex:1; padding:0.5rem 0.85rem; border:1.5px solid var(--pink-200); border-radius:var(--radius-full); font-family:'Nunito',sans-serif; font-size:0.88rem; background:white;">
             <button type="submit" class="btn btn-primary btn-sm" style="padding:0.45rem 0.9rem;">Ara</button>
+            <a href="{{ url_for('cat_map') }}" class="btn btn-secondary btn-sm" style="padding:0.45rem 0.7rem;" title="Harita">
+                <span style="width:18px; height:18px; display:inline-flex;">{{ icon_map() }}</span>
+            </a>
             {% if search_query %}
             <a href="{{ url_for('explore') }}" class="btn btn-secondary btn-sm" style="padding:0.45rem 0.9rem;">X</a>
             {% endif %}

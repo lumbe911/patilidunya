@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from "_icons.html" import icon_map %}
 {% block title %}{{ cat.name }} - PatiliDunya{% endblock %}
 {% block content %}
 <div class="container" style="max-width: 900px;">
@@ -44,9 +43,6 @@
             {% endif %}
             {% if cat.location %}
             <div class="info-row"><span class="info-label">📍 Konum</span><span class="info-value">{{ cat.location }}</span></div>
-            <a href="{{ url_for('cat_map', cat=cat.id) }}" class="btn btn-secondary btn-sm" style="align-self:flex-start;">
-                <span style="width:16px; height:16px; display:inline-flex;">{{ icon_map() }}</span> Haritada Gor
-            </a>
             {% endif %}
             {% if cat.found_date %}
             <div class="info-row"><span class="info-label">{% if cat.status == 'sokak' %}📅 Bulma Tarihi{% else %}📅 Sahiplenilme Tarihi{% endif %}</span><span class="info-value">{{ cat.found_date }}</span></div>
