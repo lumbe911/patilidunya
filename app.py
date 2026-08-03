@@ -621,6 +621,7 @@ def user_profile(username):
     total_likes = Like.query.filter(Like.cat_id.in_(cat_ids)).count() if cat_ids else 0
     total_comments = Comment.query.filter(Comment.cat_id.in_(cat_ids)).count() if cat_ids else 0
     total_views = View.query.filter(View.cat_id.in_(cat_ids)).count() if cat_ids else 0
+    favorite_count = Favorite.query.filter_by(user_id=user.id).count()
     unread = Notification.query.filter_by(user_id=user.id, is_read=False).count()
     follower_count = Follow.query.filter_by(followed_id=user.id).count()
     following_count = Follow.query.filter_by(follower_id=user.id).count()
@@ -629,6 +630,7 @@ def user_profile(username):
     return render_template('user_profile.html', profile_user=user, cats=cats,
                            total_likes=total_likes, total_comments=total_comments,
                            total_views=total_views, unread=unread,
+                           favorite_count=favorite_count,
                            follower_count=follower_count, following_count=following_count,
                            is_following=is_following)
 
