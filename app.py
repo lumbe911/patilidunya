@@ -81,6 +81,11 @@ def _not_static():
 
 
 _ALLOWED_ORIGINS = {SITE_URL.rstrip('/')}
+_site_host = (urlparse(SITE_URL).hostname or '').lower()
+if _site_host.startswith('www.'):
+    _ALLOWED_ORIGINS.add(SITE_URL.replace('www.', '', 1))
+else:
+    _ALLOWED_ORIGINS.add('https://' + 'www.' + _site_host)
 for _u in ('http://localhost:5000', 'http://127.0.0.1:5000'):
     _ALLOWED_ORIGINS.add(_u)
 
