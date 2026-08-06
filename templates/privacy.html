@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Gizlilik Politikası - Patili Dünya{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="auth-card" style="max-width:720px; text-align:left;">
+        <h2 style="text-align:center;">🔒 Gizlilik Politikası</h2>
+        <p class="subtitle" style="text-align:center;">Son güncelleme: 6 Ağustos 2026</p>
+        <div class="form-group" style="font-size:0.95rem; line-height:1.7; color:var(--text);">
+            <h3>1. Genel</h3>
+            <p>Patili Dünya (pawspati.com) olarak gizliliğinize saygı duyuyoruz. Bu politika, sitemizi kullandığınızda hangi bilgilerin toplandığını, nasıl kullanıldığını ve hangi koşullarda paylaşıldığını açıklar.</p>
+            <h3>2. Topladığımız Bilgiler</h3>
+            <ul>
+                <li>Hesap bilgileri: kullanıcı adı, şifre (şifrelenmiş olarak saklanır) ve isteğe bağlı olarak e-posta adresi.</li>
+                <li>Paylaştığınız içerikler: yüklediğiniz fotoğraflar, yorumlar, beğeniler ve mesajlar.</li>
+                <li>Teknik bilgiler: IP adresi, tarayıcı türü ve ziyaret zamanı (güvenlik ve kötüye kullanımın önlenmesi amacıyla).</li>
+            </ul>
+            <h3>3. Bilgilerin Kullanımı</h3>
+            <ul>
+                <li>Hizmeti sunmak ve hesapları yönetmek için.</li>
+                <li>Siteyi geliştirmek ve güvenliğini sağlamak için.</li>
+                <li>Yasal zorunluluklara uymak için.</li>
+            </ul>
+            <h3>4. Çerezler ve Reklamcılık</h3>
+            <p>Oturumunuzun çalışması için çerezler kullanırız. Ayrıca sitemiz, Google AdSense gibi üçüncü taraf reklam sağlayıcıları aracılığıyla reklam gösterebilir.</p>
+            <p>Google ve iş ortakları, ziyaretlerinize ve ilgi alanlarınıza göre reklam sunmak için çerezler (ör. DoubleClick çerezleri) kullanabilir. Kişiselleştirilmiş reklamları görmek istemezseniz <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google Reklam Ayarları</a> sayfasından veya <a href="https://www.aboutads.info" target="_blank" rel="noopener">www.aboutads.info</a> üzerinden vazgeçebilirsiniz. AB kullanıcıları için: <a href="https://www.youronlinechoices.eu" target="_blank" rel="noopener">www.youronlinechoices.eu</a>.</p>
+            <h3>5. Üçüncü Taraf Hizmetler</h3>
+            <p>Siteyi çalıştırmak için üçüncü taraf sağlayıcıları kullanırız: sunucu barındırma (Render), görsel depolama (Cloudinary) ve reklam gösterimi (Google AdSense). Bu sağlayıcıların kendi gizlilik politikaları geçerlidir.</p>
+            <h3>6. Veri Paylaşımı</h3>
+            <p>Bilgilerinizi satmıyoruz. Kişisel verileriniz yalnızca hizmeti sunmak için gerekli sağlayıcılarla veya yasal zorunluluk halinde yetkili makamlarla paylaşılır.</p>
+            <h3>7. Verilerinizin Korunması</h3>
+            <p>Bağlantılar HTTPS ile şifrelenir, şifreler hashlenerek saklanır ve yetkisiz erişime karşı önlemler alınır.</p>
+            <h3>8. Haklarınız</h3>
+            <p>Hesabınız ve verileriniz hakkında bilgi alma, düzeltme veya silme talebinde bulunabilirsiniz. Taleplerinizi aşağıdaki iletişim adresine iletebilirsiniz.</p>
+            <h3>9. Değişiklikler</h3>
+            <p>Bu politika gerekli görüldüğünde güncellenebilir. Güncellemeler bu sayfada yayımlanır.</p>
+            <h3>10. İletişim</h3>
+            <p>Sorularınız için: <a href="mailto:lumbe@pawspati.com">lumbe@pawspati.com</a></p>
+        </div>
+        <p style="text-align:center; margin-top:1.5rem; font-size:0.9rem;">
+            <a href="{{ url_for('index') }}">← Ana Sayfa</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

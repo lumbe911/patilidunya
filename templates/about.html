@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Hakkında - Patili Dünya{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="auth-card" style="max-width:720px; text-align:left;">
+        <h2 style="text-align:center;">🐱 Patili Dünya Hakkında</h2>
+        <p class="subtitle" style="text-align:center;">Her patinin bir hikayesi var</p>
+        <div class="form-group" style="font-size:0.95rem; line-height:1.7; color:var(--text);">
+            <p>Patili Dünya, sokakta karşılaştığınız hayvanları paylaşmak ve onlara sahip çıkmak için kurulmuş bir topluluk platformudur.</p>
+            <p>Yolda, parkta veya bahçede bulduğunuz bir hayvanın fotoğrafını yükleyebilir, ona profil oluşturabilir, hikayesini anlatabilir ve diğer hayvanseverlerle paylaşabilirsiniz. Beğeni, yorum ve mesajlaşma özellikleriyle topluluk birbiriyle iletişim kurar.</p>
+            <h3>Ne Sunuyoruz?</h3>
+            <ul>
+                <li>📸 Sokak hayvanları için profil oluşturma</li>
+                <li>💖 Beğeni, yorum ve mesajlaşma</li>
+                <li>🌍 Keşfet ve harita özellikleriyle hayvanları bulma</li>
+                <li>🎬 Reels ile kısa video paylaşımı</li>
+            </ul>
+            <h3>İletişim</h3>
+            <p>Öneri ve sorularınız için: <a href="mailto:lumbe@pawspati.com">lumbe@pawspati.com</a></p>
+        </div>
+        <p style="text-align:center; margin-top:1.5rem; font-size:0.9rem;">
+            <a href="{{ url_for('index') }}">← Ana Sayfa</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

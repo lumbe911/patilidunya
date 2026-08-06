@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Kullanım Şartları - Patili Dünya{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="auth-card" style="max-width:720px; text-align:left;">
+        <h2 style="text-align:center;">📜 Kullanım Şartları</h2>
+        <p class="subtitle" style="text-align:center;">Son güncelleme: 6 Ağustos 2026</p>
+        <div class="form-group" style="font-size:0.95rem; line-height:1.7; color:var(--text);">
+            <h3>1. Kabul</h3>
+            <p>Patili Dünya (pawspati.com) sitesini kullanarak bu şartları kabul etmiş olursunuz. Şartları kabul etmiyorsanız lütfen siteyi kullanmayın.</p>
+            <h3>2. Hesap</h3>
+            <p>Bazı özellikler için üyelik gerekir. Hesabınızın güvenliğinden siz sorumlusunuz. 18 yaşından küçükler siteyi bir yetişkinin gözetiminde kullanmalıdır.</p>
+            <h3>3. Kullanıcı Sorumlulukları</h3>
+            <ul>
+                <li>Yanıltıcı bilgi veya sahte hesap oluşturmamak.</li>
+                <li>Başkalarını taciz etmemek, hakaret etmemek.</li>
+                <li>Yasadışı veya zararlı içerik paylaşmamak.</li>
+                <li>Başkalarının telif haklarına saygı göstermek.</li>
+            </ul>
+            <h3>4. İçerik Kuralları</h3>
+            <p>Paylaşılan fotoğraf ve metinlerde şiddet, nefret söylemi, çıplaklık veya rahatsız edici içerik bulunamaz. Sokak hayvanlarına ait içeriklerde bile bu kurallar geçerlidir.</p>
+            <h3>5. İçerik Sahipliği</h3>
+            <p>Yüklediğiniz içeriklerin sahibi sizsiniz. Siteye içerik yükleyerek, bu içerikleri sitede göstermemiz için bize sınırlı bir kullanım izni vermiş olursunuz.</p>
+            <h3>6. Yönetim ve Kaldırma</h3>
+            <p>Yöneticiler, kurallara aykırı içerikleri önceden haber vermeden kaldırma ve kuralları ihlal eden hesapları askıya alma veya sonlandırma hakkını saklı tutar.</p>
+            <h3>7. Sorumluluğun Sınırlandırılması</h3>
+            <p>Site, kullanıcıların paylaştığı içeriklerden ve üçüncü tarafların eylemlerinden sorumlu değildir. Site "olduğu gibi" sunulur.</p>
+            <h3>8. Değişiklikler</h3>
+            <p>Bu şartlar gerekli görüldüğünde güncellenebilir. Güncellemeler bu sayfada yayımlanır.</p>
+            <h3>9. İletişim</h3>
+            <p>Sorularınız için: <a href="mailto:lumbe@pawspati.com">lumbe@pawspati.com</a></p>
+        </div>
+        <p style="text-align:center; margin-top:1.5rem; font-size:0.9rem;">
+            <a href="{{ url_for('index') }}">← Ana Sayfa</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

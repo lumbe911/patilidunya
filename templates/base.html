@@ -42,6 +42,11 @@
 
     <footer class="footer">
         <p>Patili Dünya 2026 - Her patinin bir hikayesi var</p>
+        <p style="margin-top:0.3rem; font-size:0.8rem;">
+            <a href="{{ url_for('privacy') }}" style="color:var(--gray-500);">Gizlilik Politikası</a> ·
+            <a href="{{ url_for('terms') }}" style="color:var(--gray-500);">Kullanım Şartları</a> ·
+            <a href="{{ url_for('about') }}" style="color:var(--gray-500);">Hakkında</a>
+        </p>
     </footer>
 
     {% if current_user.is_authenticated %}
