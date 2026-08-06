@@ -86,7 +86,7 @@ if _site_host.startswith('www.'):
     _ALLOWED_ORIGINS.add(SITE_URL.replace('www.', '', 1))
 else:
     _ALLOWED_ORIGINS.add('https://' + 'www.' + _site_host)
-for _u in ('http://localhost:5000', 'http://127.0.0.1:5000'):
+for _u in ('http://localhost:5000', 'http://127.0.0.1:5000', 'https://patilidunya.onrender.com'):
     _ALLOWED_ORIGINS.add(_u)
 
 
