@@ -21,6 +21,12 @@
             <label class="form-label">Şifre Tekrar</label>
             <input type="password" name="password2" class="form-control" placeholder="Şifreni tekrar gir" required minlength="6">
         </div>
+        <div class="form-group" style="font-size:0.85rem;">
+            <label style="display:flex; align-items:flex-start; gap:0.5rem; cursor:pointer;">
+                <input type="checkbox" name="kvkk" required style="margin-top:0.2rem; flex-shrink:0;">
+                <span><a href="{{ url_for('terms') }}" target="_blank">Kullanım Şartları</a>'nı ve <a href="{{ url_for('privacy') }}#kvkk" target="_blank">KVKK Aydınlatma Metni</a>'ni okudum, kabul ediyorum.</span>
+            </label>
+        </div>
         <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Kayıt Ol</button>
     </form>
     <p style="text-align:center; margin-top:1.5rem; color: var(--gray-500);">

@@ -515,6 +515,7 @@ def register():
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '')
         password2 = request.form.get('password2', '')
+        kvkk = request.form.get('kvkk')
 
         errors = []
         if len(username) < 3:
@@ -523,6 +524,8 @@ def register():
             errors.append('Şifre en az 6 karakter olmalı.')
         if password != password2:
             errors.append('Şifreler eşleşmiyor.')
+        if not kvkk:
+            errors.append('Devam etmek için Kullanım Şartları ve KVKK Aydınlatma Metni\'ni kabul etmelisiniz.')
         if User.query.filter_by(username=username).first():
             errors.append('Bu kullanıcı adı zaten alınmış.')
         if User.query.filter_by(email=email).first():
