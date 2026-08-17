@@ -1106,3 +1106,18 @@ select.form-control { appearance: none; cursor: pointer; }
 @media (max-width: 768px) {
     .chat-card { height: calc(100vh - 150px); }
 }
+
+.ad-slot {
+    max-width: 728px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+.ad-slot .adsbygoogle {
+    max-height: 100px;
+}
+.ad-top {
+    margin-bottom: 0.5rem;
+}
+.ad-bottom {
+    margin-top: 0.5rem;
+}
