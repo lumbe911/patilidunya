@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon_logout %}
 {% block title %}{{ profile_user.display_name or profile_user.username }} - Patili Dünya{% endblock %}
+{% block ad_top %}{% include '_ads_reklam1.html' %}{% endblock %}
+{% block ad_bottom %}{% include '_ads_reklam1.html' %}{% endblock %}
 {% block content %}
 <div class="container">
     <div class="profile-header">
