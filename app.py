@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 import cloudinary
 import cloudinary.uploader
 from flask import (Flask, render_template, redirect, url_for, request,
-                   flash, jsonify, abort)
+                   flash, jsonify, abort, send_file)
 from flask_limiter import Limiter
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (LoginManager, UserMixin, login_user, logout_user,
@@ -127,12 +127,13 @@ def security_headers(resp):
     resp.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=(), payment=()'
     resp.headers['Content-Security-Policy'] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://unpkg.com; "
-        "style-src 'self' 'unsafe-inline' https://unpkg.com; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://pagead2.googlesyndication.com https://adservice.google.com https://adservice.google.com.tr; "
+        "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; "
         "img-src 'self' data: blob: https:; "
-        "font-src 'self' data: https:; "
+        "font-src 'self' data: https: https://fonts.gstatic.com; "
         "connect-src 'self' https:; "
-        "frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+        "frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://www.google.com.tr; "
+        "object-src 'none'; base-uri 'self'; form-action 'self'"
     )
     if request.is_secure:
         resp.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
@@ -1389,6 +1390,35 @@ with app.app_context():
         db.session.commit()
     except Exception:
         db.session.rollback()
+
+@app.route('/ads.txt')
+def ads_txt():
+    return send_file('static/ads.txt', mimetype='text/plain')
+
+@app.route('/robots.txt')
+def robots_txt():
+    return send_file('static/robots.txt', mimetype='text/plain')
+
+@app.route('/sitemap.xml')
+def sitemap():
+    from flask import Response
+    cats = Cat.query.all()
+    urls = [
+        SITE_URL + '/',
+        SITE_URL + '/about',
+        SITE_URL + '/privacy',
+        SITE_URL + '/terms',
+        SITE_URL + '/contact',
+    ]
+    for cat in cats:
+        urls.append(f'{SITE_URL}/cat/{cat.id}')
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    for url in urls:
+        xml += f'  <url><loc>{url}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
+    xml += '</urlset>'
+    return Response(xml, mimetype='application/xml')
+
 
 @app.errorhandler(500)
 def internal_error(e):
