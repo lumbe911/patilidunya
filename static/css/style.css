@@ -1111,13 +1111,33 @@ select.form-control { appearance: none; cursor: pointer; }
     max-width: 728px;
     margin: 0 auto;
     overflow: hidden;
+    text-align: center;
+    line-height: 0;
 }
 .ad-slot .adsbygoogle {
-    max-height: 100px;
+    max-height: 90px !important;
+    height: 90px !important;
+    display: inline-block;
+}
+.ad-slot iframe {
+    max-height: 90px !important;
+    height: 90px !important;
 }
 .ad-top {
     margin-bottom: 0.5rem;
+    padding: 0.4rem 0;
 }
 .ad-bottom {
     margin-top: 0.5rem;
+    padding: 0.4rem 0;
+}
+@media (max-width: 480px) {
+    .ad-slot {
+        max-width: 100%;
+    }
+    .ad-slot .adsbygoogle,
+    .ad-slot iframe {
+        max-height: 66px !important;
+        height: 66px !important;
+    }
 }
