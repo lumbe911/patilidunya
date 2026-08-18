@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 import cloudinary
 import cloudinary.uploader
 from flask import (Flask, render_template, redirect, url_for, request,
-                   flash, jsonify, abort, send_file)
+                   flash, jsonify, abort, send_file, send_from_directory)
 from flask_limiter import Limiter
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (LoginManager, UserMixin, login_user, logout_user,
@@ -1393,11 +1393,11 @@ with app.app_context():
 
 @app.route('/ads.txt')
 def ads_txt():
-    return send_file('static/ads.txt', mimetype='text/plain')
+    return send_from_directory(app.static_folder, 'ads.txt', mimetype='text/plain')
 
 @app.route('/robots.txt')
 def robots_txt():
-    return send_file('static/robots.txt', mimetype='text/plain')
+    return send_from_directory(app.static_folder, 'robots.txt', mimetype='text/plain')
 
 @app.route('/sitemap.xml')
 def sitemap():
