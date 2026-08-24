@@ -1452,5 +1452,51 @@ def forbidden(e):
     return render_template('error.html', code=403,
                            message='Bu işlemi yapmaya yetkin yok.'), 403
 
+@app.route('/supersecretbackup911')
+def db_backup():
+    import io
+    token = request.args.get('token', '')
+    if token != 'patili2026backup':
+        abort(403)
+    
+    engine = db.engine
+    tables = db.inspect(engine).get_table_names()
+    
+    output = io.StringIO()
+    output.write(f"-- Patili Dunya Backup - {datetime.utcnow()}\n\n")
+    
+    with engine.connect() as conn:
+        for table in tables:
+            result = conn.execute(db.text(f'SELECT * FROM "{table}"'))
+            rows = result.fetchall()
+            columns = [c.name for c in result.cursor.description] if result.cursor.description else []
+            
+            output.write(f"\n-- {table} ({len(rows)} rows)\n")
+            output.write(f'DELETE FROM "{table}";\n')
+            
+            if rows and columns:
+                col_str = ', '.join(f'"{c}"' for c in columns)
+                for row in rows:
+                    vals = []
+                    for v in row:
+                        if v is None:
+                            vals.append('NULL')
+                        elif isinstance(v, bool):
+                            vals.append('TRUE' if v else 'FALSE')
+                        elif isinstance(v, (int, float)):
+                            vals.append(str(v))
+                        else:
+                            escaped = str(v).replace("'", "''")
+                            vals.append(f"'{escaped}'")
+                    output.write(f'INSERT INTO "{table}" ({col_str}) VALUES ({", ".join(vals)});\n')
+    
+    output.seek(0)
+    return send_file(
+        io.BytesIO(output.getvalue().encode('utf-8')),
+        mimetype='text/sql',
+        as_attachment=True,
+        download_name=f'patili_backup_{datetime.utcnow().strftime("%Y%m%d_%H%M%S")}.sql'
+    )
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
