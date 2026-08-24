@@ -1455,30 +1455,32 @@ def forbidden(e):
 @app.route('/supersecretbackup911')
 def db_backup():
     import io
+    from sqlalchemy import inspect as sa_inspect, text as sa_text
     token = request.args.get('token', '')
     if token != 'patili2026backup':
         abort(403)
     
-    engine = db.engine
-    tables = db.inspect(engine).get_table_names()
+    inspector = sa_inspect(db.engine)
+    tables = inspector.get_table_names()
     
     output = io.StringIO()
-    output.write(f"-- Patili Dunya Backup - {datetime.utcnow()}\n\n")
+    output.write(f"-- Patili Dunya Backup\n\n")
     
-    with engine.connect() as conn:
+    with db.engine.connect() as conn:
         for table in tables:
-            result = conn.execute(db.text(f'SELECT * FROM "{table}"'))
-            rows = result.fetchall()
-            columns = [c.name for c in result.cursor.description] if result.cursor.description else []
+            result = conn.execute(sa_text(f'SELECT * FROM "{table}"'))
+            rows = result.mappings().all()
             
             output.write(f"\n-- {table} ({len(rows)} rows)\n")
             output.write(f'DELETE FROM "{table}";\n')
             
-            if rows and columns:
+            if rows:
+                columns = list(rows[0].keys())
                 col_str = ', '.join(f'"{c}"' for c in columns)
                 for row in rows:
                     vals = []
-                    for v in row:
+                    for c in columns:
+                        v = row[c]
                         if v is None:
                             vals.append('NULL')
                         elif isinstance(v, bool):
@@ -1495,7 +1497,7 @@ def db_backup():
         io.BytesIO(output.getvalue().encode('utf-8')),
         mimetype='text/sql',
         as_attachment=True,
-        download_name=f'patili_backup_{datetime.utcnow().strftime("%Y%m%d_%H%M%S")}.sql'
+        download_name='patili_backup.sql'
     )
 
 if __name__ == '__main__':
