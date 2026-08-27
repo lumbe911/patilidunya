@@ -45,7 +45,7 @@
                 <option value="reaction">😻 Emoji / Tepki</option>
                 <option value="view">👁 Görüntülenme</option>
             </select>
-            <input type="number" name="count" value="1" min="1" max="1000" style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);" title="Kaç adet">
+            <input type="hidden" name="count" value="1">
             <select name="emoji" id="emojiSelect" style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
                 <option value="">Emoji Seç (tepki için)</option>
                 {% for e in REACTION_EMOJIS %}

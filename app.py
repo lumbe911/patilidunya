@@ -297,6 +297,7 @@ class FakeEngagement(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     profile = db.relationship('FakeProfile')
     cat = db.relationship('Cat')
+    __table_args__ = (db.UniqueConstraint('fake_profile_id', 'cat_id', 'kind'),)
 
 
 class Conversation(db.Model):
@@ -1413,24 +1414,29 @@ def admin_fakeeng_engage():
         return redirect(url_for('admin_fakeeng'))
     if kind not in ('like', 'reaction', 'view'):
         kind = 'like'
+    if kind == 'reaction' and emoji not in REACTION_EMOJIS:
+        flash('Geçersiz emoji. Tepki türü için bir emoji seç.', 'error')
+        return redirect(url_for('admin_fakeeng'))
+
+    existing = FakeEngagement.query.filter_by(fake_profile_id=p.id, cat_id=cat.id, kind=kind).first()
+    if existing:
+        flash('Bu profil bu gönderiye bu etkileşimi zaten yapmış. Farklı bir profil veya tür seç.', 'warning')
+        return redirect(url_for('admin_fakeeng'))
 
     owner = db.session.get(User, cat.owner_id)
-    for _ in range(count):
-        db.session.add(FakeEngagement(fake_profile_id=p.id, cat_id=cat.id, kind=kind,
-                                      emoji=emoji if kind == 'reaction' else None))
-    if kind == 'like' and owner and owner.id != p.id:
+    db.session.add(FakeEngagement(fake_profile_id=p.id, cat_id=cat.id, kind=kind,
+                                  emoji=emoji if kind == 'reaction' else None))
+    added = 1
+    if kind == 'like' and owner and owner.id != p.id and request.form.get('want_notif'):
         db.session.add(FakeNotification(user_id=owner.id, fake_profile_id=p.id, cat_id=cat.id,
                                         notif_type='like',
                                         text=f'{p.display_name or p.username} "{cat.name}" beğendi!'))
-        db.session.commit()
-        if request.form.get('want_notif'):
-            pass
-    elif kind == 'reaction' and owner and owner.id != p.id and emoji:
+    elif kind == 'reaction' and owner and owner.id != p.id and emoji and request.form.get('want_notif'):
         db.session.add(FakeNotification(user_id=owner.id, fake_profile_id=p.id, cat_id=cat.id,
                                         notif_type='reaction',
                                         text=f'{p.display_name or p.username} "{cat.name}" gönderisine {emoji} tepkisi bıraktı!'))
     db.session.commit()
-    flash(f'{count} {kind} eklendi.', 'success')
+    flash(f'{kind} eklendi.', 'success')
     return redirect(url_for('admin_fakeeng'))
 
 
@@ -1565,6 +1571,22 @@ with app.app_context():
         db.session.commit()
     except Exception:
         db.session.rollback()
+    try:
+        db.session.execute(db.text("DELETE FROM fake_engagement WHERE id NOT IN (SELECT MIN(id) FROM fake_engagement GROUP BY fake_profile_id, cat_id, kind)"))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    try:
+        db.session.execute(db.text('CREATE UNIQUE INDEX IF NOT EXISTS uq_fake_eng ON fake_engagement (fake_profile_id, cat_id, kind)'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    try:
+        db.session.execute(db.text('ALTER TABLE fake_engagement ADD CONSTRAINT uq_fake_eng UNIQUE (fake_profile_id, cat_id, kind)'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
 
 @app.route('/ads.txt')
 def ads_txt():
