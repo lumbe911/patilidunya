@@ -193,17 +193,18 @@ class Cat(db.Model):
     def like_count(self):
         real = len(self.likes)
         fake = db.session.query(db.func.count(FakeEngagement.id)).filter(
-            FakeEngagement.cat_id == self.id, FakeEngagement.kind == 'like').scalar() or 0
+            FakeEngagement.cat_id == self.id, FakeEngagement.kind == 'like',
+            FakeEngagement.is_pending == False).scalar() or 0
         return real + fake
 
     @property
     def fake_likes(self):
-        objs = FakeEngagement.query.filter_by(cat_id=self.id, kind='like').all()
+        objs = FakeEngagement.query.filter_by(cat_id=self.id, kind='like', is_pending=False).all()
         return [{'profile': o.profile, 'created_at': o.created_at} for o in objs]
 
     @property
     def fake_reactions(self):
-        objs = FakeEngagement.query.filter_by(cat_id=self.id, kind='reaction').all()
+        objs = FakeEngagement.query.filter_by(cat_id=self.id, kind='reaction', is_pending=False).all()
         return [{'profile': o.profile, 'emoji': o.emoji, 'created_at': o.created_at} for o in objs]
 
 
@@ -294,6 +295,8 @@ class FakeEngagement(db.Model):
     cat_id = db.Column(db.Integer, db.ForeignKey('cat.id'), nullable=False)
     kind = db.Column(db.String(16), nullable=False)  # like | reaction | view
     emoji = db.Column(db.String(16), nullable=True)
+    is_pending = db.Column(db.Boolean, default=True)
+    scheduled_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     profile = db.relationship('FakeProfile')
     cat = db.relationship('Cat')
@@ -456,7 +459,8 @@ def home():
         for row in db.session.query(Reaction.cat_id, Reaction.emoji, db.func.count()).filter(Reaction.cat_id.in_(cat_ids)).group_by(Reaction.cat_id, Reaction.emoji).all():
             reaction_counts_map.setdefault(row[0], {})[row[1]] = row[2]
         for row in db.session.query(FakeEngagement.cat_id, FakeEngagement.emoji, db.func.count()).filter(
-                FakeEngagement.cat_id.in_(cat_ids), FakeEngagement.kind == 'reaction').group_by(
+                FakeEngagement.cat_id.in_(cat_ids), FakeEngagement.kind == 'reaction',
+                FakeEngagement.is_pending == False).group_by(
                 FakeEngagement.cat_id, FakeEngagement.emoji).all():
             if row[1]:
                 reaction_counts_map.setdefault(row[0], {})[row[1]] = reaction_counts_map.get(row[0], {}).get(row[1], 0) + row[2]
@@ -519,7 +523,8 @@ def reels():
         for row in db.session.query(Reaction.cat_id, Reaction.emoji, db.func.count()).filter(Reaction.cat_id.in_(cat_ids)).group_by(Reaction.cat_id, Reaction.emoji).all():
             reaction_counts_map.setdefault(row[0], {})[row[1]] = row[2]
         for row in db.session.query(FakeEngagement.cat_id, FakeEngagement.emoji, db.func.count()).filter(
-                FakeEngagement.cat_id.in_(cat_ids), FakeEngagement.kind == 'reaction').group_by(
+                FakeEngagement.cat_id.in_(cat_ids), FakeEngagement.kind == 'reaction',
+                FakeEngagement.is_pending == False).group_by(
                 FakeEngagement.cat_id, FakeEngagement.emoji).all():
             if row[1]:
                 reaction_counts_map.setdefault(row[0], {})[row[1]] = reaction_counts_map.get(row[0], {}).get(row[1], 0) + row[2]
@@ -692,11 +697,11 @@ def user_profile(username):
     cat_ids = [c.id for c in cats]
     total_likes = Like.query.filter(Like.cat_id.in_(cat_ids)).count() if cat_ids else 0
     if cat_ids:
-        total_likes += FakeEngagement.query.filter(FakeEngagement.cat_id.in_(cat_ids), FakeEngagement.kind == 'like').count()
+        total_likes += FakeEngagement.query.filter(FakeEngagement.cat_id.in_(cat_ids), FakeEngagement.kind == 'like', FakeEngagement.is_pending == False).count()
     total_comments = Comment.query.filter(Comment.cat_id.in_(cat_ids)).count() if cat_ids else 0
     total_views = View.query.filter(View.cat_id.in_(cat_ids)).count() if cat_ids else 0
     if cat_ids:
-        total_views += FakeEngagement.query.filter(FakeEngagement.cat_id.in_(cat_ids), FakeEngagement.kind == 'view').count()
+        total_views += FakeEngagement.query.filter(FakeEngagement.cat_id.in_(cat_ids), FakeEngagement.kind == 'view', FakeEngagement.is_pending == False).count()
     favorite_count = Favorite.query.filter_by(user_id=user.id).count()
     unread = Notification.query.filter_by(user_id=user.id, is_read=False).count()
     follower_count = Follow.query.filter_by(followed_id=user.id).count()
@@ -832,20 +837,28 @@ def cat_detail(cat_id):
     liked = Like.query.filter_by(user_id=current_user.id, cat_id=cat_id).first() is not None
     is_fav = Favorite.query.filter_by(user_id=current_user.id, cat_id=cat_id).first() is not None
     view_count = View.query.filter_by(cat_id=cat_id).count()
-    view_count += FakeEngagement.query.filter_by(cat_id=cat_id, kind='view').count()
+    view_count += FakeEngagement.query.filter_by(cat_id=cat_id, kind='view', is_pending=False).count()
     comments = Comment.query.filter_by(cat_id=cat_id).order_by(Comment.created_at.desc()).all()
     reaction_counts = {e: 0 for e in REACTION_EMOJIS}
     for row in db.session.query(Reaction.emoji, db.func.count()).filter_by(cat_id=cat_id).group_by(Reaction.emoji).all():
         reaction_counts[row[0]] = row[1]
     for row in db.session.query(FakeEngagement.emoji, db.func.count()).filter(
-            FakeEngagement.cat_id == cat_id, FakeEngagement.kind == 'reaction').group_by(FakeEngagement.emoji).all():
+            FakeEngagement.cat_id == cat_id, FakeEngagement.kind == 'reaction',
+            FakeEngagement.is_pending == False).group_by(FakeEngagement.emoji).all():
         if row[0]:
             reaction_counts[row[0]] = reaction_counts.get(row[0], 0) + row[1]
     my_reaction = Reaction.query.filter_by(user_id=current_user.id, cat_id=cat_id).first()
+    real_liked_by = []
+    likes_q = Like.query.filter_by(cat_id=cat_id).order_by(Like.created_at.desc()).limit(20).all()
+    for l in likes_q:
+        u = db.session.get(User, l.user_id)
+        if u:
+            real_liked_by.append(u)
     return render_template('cat_detail.html', cat=cat, liked=liked, comments=comments, is_fav=is_fav,
                            view_count=view_count, reaction_emojis=REACTION_EMOJIS,
                            reaction_counts=reaction_counts,
                            fake_liked_by=cat.fake_likes,
+                           real_liked_by=real_liked_by,
                            my_reaction=my_reaction.emoji if my_reaction else None)
 
 
@@ -972,7 +985,8 @@ def toggle_reaction(cat_id):
     for row in db.session.query(Reaction.emoji, db.func.count()).filter_by(cat_id=cat_id).group_by(Reaction.emoji).all():
         counts[row[0]] = row[1]
     for row in db.session.query(FakeEngagement.emoji, db.func.count()).filter(
-            FakeEngagement.cat_id == cat_id, FakeEngagement.kind == 'reaction').group_by(FakeEngagement.emoji).all():
+            FakeEngagement.cat_id == cat_id, FakeEngagement.kind == 'reaction',
+            FakeEngagement.is_pending == False).group_by(FakeEngagement.emoji).all():
         if row[0]:
             counts[row[0]] = counts.get(row[0], 0) + row[1]
     mine = Reaction.query.filter_by(user_id=current_user.id, cat_id=cat_id).first()
@@ -1357,8 +1371,12 @@ def admin_fakeeng():
         abort(403)
     fake_profiles = FakeProfile.query.order_by(FakeProfile.id).all()
     cats = Cat.query.order_by(Cat.id).all()
+    pending_count = FakeEngagement.query.filter_by(is_pending=True).count()
+    active_count = FakeEngagement.query.filter_by(is_pending=False).count()
+    cooldown_min = FAKE_COOLDOWN_SECONDS // 60
     return render_template('admin_fakeeng.html', fake_profiles=fake_profiles, cats=cats,
-                           REACTION_EMOJIS=REACTION_EMOJIS)
+                           REACTION_EMOJIS=REACTION_EMOJIS, pending_count=pending_count,
+                           active_count=active_count, cooldown_min=cooldown_min)
 
 
 @app.route('/admin/fakeeng/profile/new', methods=['POST'])
@@ -1420,23 +1438,15 @@ def admin_fakeeng_engage():
 
     existing = FakeEngagement.query.filter_by(fake_profile_id=p.id, cat_id=cat.id, kind=kind).first()
     if existing:
-        flash('Bu profil bu gönderiye bu etkileşimi zaten yapmış. Farklı bir profil veya tür seç.', 'warning')
+        flash('Bu profil bu gönderiye bu etkileşimi zaten atanmış. Farklı bir profil veya tür seç.', 'warning')
         return redirect(url_for('admin_fakeeng'))
 
     owner = db.session.get(User, cat.owner_id)
     db.session.add(FakeEngagement(fake_profile_id=p.id, cat_id=cat.id, kind=kind,
-                                  emoji=emoji if kind == 'reaction' else None))
-    added = 1
-    if kind == 'like' and owner and owner.id != p.id and request.form.get('want_notif'):
-        db.session.add(FakeNotification(user_id=owner.id, fake_profile_id=p.id, cat_id=cat.id,
-                                        notif_type='like',
-                                        text=f'{p.display_name or p.username} "{cat.name}" beğendi!'))
-    elif kind == 'reaction' and owner and owner.id != p.id and emoji and request.form.get('want_notif'):
-        db.session.add(FakeNotification(user_id=owner.id, fake_profile_id=p.id, cat_id=cat.id,
-                                        notif_type='reaction',
-                                        text=f'{p.display_name or p.username} "{cat.name}" gönderisine {emoji} tepkisi bıraktı!'))
+                                  emoji=emoji if kind == 'reaction' else None,
+                                  is_pending=True))
     db.session.commit()
-    flash(f'{kind} eklendi.', 'success')
+    flash(f'{kind} kuyruğa eklendi, zamanla görünecek.', 'success')
     return redirect(url_for('admin_fakeeng'))
 
 
@@ -1450,6 +1460,54 @@ class FakeNotification(db.Model):
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     profile = db.relationship('FakeProfile')
+
+
+import threading as _threading
+import time as _time
+
+FAKE_COOLDOWN_SECONDS = max(int(os.environ.get('FAKE_COOLDOWN_MINUTES', '60')) * 60, 15)
+
+
+def process_fake_engagements():
+    with app.app_context():
+        pending = FakeEngagement.query.filter_by(is_pending=True).order_by(FakeEngagement.id).first()
+        if not pending:
+            return
+        last_done = db.session.query(db.func.max(FakeEngagement.created_at)).filter(FakeEngagement.is_pending == False).scalar()
+        if last_done:
+            elapsed = (datetime.utcnow() - last_done).total_seconds()
+            if elapsed < FAKE_COOLDOWN_SECONDS:
+                return
+        pending.is_pending = False
+        pending.scheduled_at = datetime.utcnow()
+        owner = db.session.get(User, pending.cat.owner_id)
+        p = pending.profile
+        if owner and p:
+            if pending.kind == 'like':
+                db.session.add(FakeNotification(
+                    user_id=owner.id, fake_profile_id=p.id, cat_id=pending.cat_id, notif_type='like',
+                    text=f'{p.display_name or p.username} "{pending.cat.name}" beğendi!'))
+            elif pending.kind == 'reaction' and pending.emoji:
+                db.session.add(FakeNotification(
+                    user_id=owner.id, fake_profile_id=p.id, cat_id=pending.cat_id, notif_type='reaction',
+                    text=f'{p.display_name or p.username} "{pending.cat.name}" gönderisine {pending.emoji} tepkisi bıraktı!'))
+        db.session.commit()
+
+
+def _fake_engine_loop():
+    while True:
+        try:
+            process_fake_engagements()
+        except Exception as e:
+            import traceback, sys
+            traceback.print_exc()
+            print('FAKE ENGINE ERROR:', repr(e), file=sys.stderr, flush=True)
+        _time.sleep(FAKE_COOLDOWN_SECONDS)
+
+
+def start_fake_engine():
+    t = _threading.Thread(target=_fake_engine_loop, daemon=True)
+    t.start()
 
 
 @app.route('/fake/<username>')
@@ -1586,6 +1644,17 @@ with app.app_context():
         db.session.commit()
     except Exception:
         db.session.rollback()
+    try:
+        db.session.execute(db.text('ALTER TABLE fake_engagement ADD COLUMN is_pending BOOLEAN DEFAULT TRUE'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    try:
+        db.session.execute(db.text('ALTER TABLE fake_engagement ADD COLUMN scheduled_at TIMESTAMP'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+    start_fake_engine()
 
 
 @app.route('/ads.txt')

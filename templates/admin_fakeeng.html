@@ -7,6 +7,21 @@
     <h1 class="page-title">🤖 Fake Etkileşim Yönetimi</h1>
     <a href="{{ url_for('admin_users') }}" style="font-size:0.9rem; color:var(--pink-600); font-weight:700;">← Admin Paneli</a>
 
+    <div style="display:flex; gap:1rem; flex-wrap:wrap; margin:1rem 0;">
+        <div style="background:white; border:1px solid var(--pink-100); border-radius:var(--radius); padding:0.75rem 1.25rem;">
+            <div style="font-weight:800; font-size:1.4rem; color:var(--pink-600);">{{ pending_count }}</div>
+            <div style="font-size:0.75rem; color:var(--gray-500);">⏳ Kuyrukta bekleyen</div>
+        </div>
+        <div style="background:white; border:1px solid var(--pink-100); border-radius:var(--radius); padding:0.75rem 1.25rem;">
+            <div style="font-weight:800; font-size:1.4rem; color:var(--pink-600);">{{ active_count }}</div>
+            <div style="font-size:0.75rem; color:var(--gray-500);">✅ Yayında</div>
+        </div>
+        <div style="background:white; border:1px solid var(--pink-100); border-radius:var(--radius); padding:0.75rem 1.25rem;">
+            <div style="font-weight:800; font-size:1.4rem; color:var(--pink-600);">{{ cooldown_min }} dk</div>
+            <div style="font-size:0.75rem; color:var(--gray-500);">⏱ Her beğeni arası</div>
+        </div>
+    </div>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for cat, m in messages %}
@@ -55,8 +70,9 @@
             <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem;">
                 <input type="checkbox" name="want_notif" checked> Bildirim gönder
             </label>
-            <button class="btn btn-primary" type="submit" style="grid-column:span 2;">Ekle</button>
+            <button class="btn btn-primary" type="submit" style="grid-column:span 2;">Kuyruğa Ekle</button>
         </form>
+        <p style="font-size:0.8rem; color:var(--gray-500); margin-top:0.5rem;">ℹ️ Eklenen etkileşimler kuyruğa alınır ve her {{ cooldown_min }} dakikada bir sırayla yayınlanır. Aynı profil aynı gönderiye bir kez beğeni/tepki atabilir.</p>
     </div>
 
     <h2 style="font-weight:800; margin:2rem 0 1rem;">📋 Sahte profiller</h2>
