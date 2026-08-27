@@ -1419,16 +1419,18 @@ def admin_fakeeng_profile_delete(pid):
 def admin_fakeeng_engage():
     if not admin_only():
         abort(403)
-    pid = int(request.form.get('profile_id', 0))
+    profile_ids = request.form.getlist('profile_id')
     cat_id = int(request.form.get('cat_id', 0))
     kind = request.form.get('kind', 'like').strip()
     count = min(int(request.form.get('count', 1) or 1), 1000)
     emoji = request.form.get('emoji', '').strip()
 
-    p = db.session.get(FakeProfile, pid)
+    if not profile_ids:
+        flash('En az bir sahte profil seç.', 'error')
+        return redirect(url_for('admin_fakeeng'))
     cat = db.session.get(Cat, cat_id)
-    if not p or not cat:
-        flash('Geçersiz profil veya gönderi.', 'error')
+    if not cat:
+        flash('Geçersiz gönderi.', 'error')
         return redirect(url_for('admin_fakeeng'))
     if kind not in ('like', 'reaction', 'view'):
         kind = 'like'
@@ -1436,17 +1438,31 @@ def admin_fakeeng_engage():
         flash('Geçersiz emoji. Tepki türü için bir emoji seç.', 'error')
         return redirect(url_for('admin_fakeeng'))
 
-    existing = FakeEngagement.query.filter_by(fake_profile_id=p.id, cat_id=cat.id, kind=kind).first()
-    if existing:
-        flash('Bu profil bu gönderiye bu etkileşimi zaten atanmış. Farklı bir profil veya tür seç.', 'warning')
-        return redirect(url_for('admin_fakeeng'))
-
-    owner = db.session.get(User, cat.owner_id)
-    db.session.add(FakeEngagement(fake_profile_id=p.id, cat_id=cat.id, kind=kind,
-                                  emoji=emoji if kind == 'reaction' else None,
-                                  is_pending=True))
+    added = 0
+    skipped = 0
+    for pid_str in profile_ids:
+        try:
+            pid = int(pid_str)
+        except (TypeError, ValueError):
+            continue
+        p = db.session.get(FakeProfile, pid)
+        if not p:
+            continue
+        existing = FakeEngagement.query.filter_by(fake_profile_id=p.id, cat_id=cat.id, kind=kind).first()
+        if existing:
+            skipped += 1
+            continue
+        db.session.add(FakeEngagement(fake_profile_id=p.id, cat_id=cat.id, kind=kind,
+                                      emoji=emoji if kind == 'reaction' else None,
+                                      is_pending=True))
+        added += 1
     db.session.commit()
-    flash(f'{kind} kuyruğa eklendi, zamanla görünecek.', 'success')
+    if added:
+        flash(f'{added} profil kuyruğa eklendi, zamanla beğenecek.', 'success')
+    if skipped:
+        flash(f'{skipped} profil zaten bu gönderiye atanmış, atlandı.', 'warning')
+    if not added and not skipped:
+        flash('Hiçbir profil eklenemedi.', 'error')
     return redirect(url_for('admin_fakeeng'))
 
 

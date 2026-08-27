@@ -43,12 +43,22 @@
     <div style="background:white; border:1px solid var(--pink-100); border-radius:var(--radius); padding:1.5rem; margin:1.5rem 0;">
         <h2 style="font-weight:800; margin-bottom:1rem;">🎯 Etkileşim ekle</h2>
         <form method="POST" action="{{ url_for('admin_fakeeng_engage') }}" style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
-            <select name="profile_id" required style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
-                <option value="">Sahte Profil Seç</option>
-                {% for p in fake_profiles %}
-                <option value="{{ p.id }}">{{ p.display_name or p.username }} (@{{ p.username }})</option>
-                {% endfor %}
-            </select>
+            <div style="grid-column:span 2; display:flex; flex-direction:column; gap:0.5rem;">
+                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                    <label style="font-weight:700; font-size:0.9rem;">📌 Profilleri seç (birden çok seçebilirsin)</label>
+                    <button type="button" id="selectAllBtn" style="font-size:0.8rem; color:var(--pink-600); font-weight:700; background:none; border:none; cursor:pointer;">Tümünü seç</button>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:0.4rem; max-height:180px; overflow-y:auto; border:1px solid var(--pink-100); border-radius:var(--radius-sm); padding:0.6rem; background:#fff;">
+                    {% for p in fake_profiles %}
+                    <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.85rem; cursor:pointer;">
+                        <input type="checkbox" name="profile_id" value="{{ p.id }}" class="fake-prof-cb">
+                        <span>{{ p.display_name or p.username }} <span style="color:var(--gray-500);">(@{{ p.username }})</span></span>
+                    </label>
+                    {% else %}
+                    <span style="font-size:0.8rem; color:var(--gray-500);">Henüz profil yok.</span>
+                    {% endfor %}
+                </div>
+            </div>
             <select name="cat_id" required style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
                 <option value="">Gönderi Seç</option>
                 {% for c in cats %}
@@ -70,7 +80,7 @@
             <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem;">
                 <input type="checkbox" name="want_notif" checked> Bildirim gönder
             </label>
-            <button class="btn btn-primary" type="submit" style="grid-column:span 2;">Kuyruğa Ekle</button>
+            <button class="btn btn-primary" type="submit" style="grid-column:span 2;">Seçilenleri Kuyruğa Ekle</button>
         </form>
         <p style="font-size:0.8rem; color:var(--gray-500); margin-top:0.5rem;">ℹ️ Eklenen etkileşimler kuyruğa alınır ve her {{ cooldown_min }} dakikada bir sırayla yayınlanır. Aynı profil aynı gönderiye bir kez beğeni/tepki atabilir.</p>
     </div>
@@ -101,6 +111,13 @@
 document.getElementById('kindSelect').addEventListener('change', function(){
     var e = document.getElementById('emojiSelect');
     e.style.display = (this.value === 'reaction') ? 'block' : 'none';
+});
+document.getElementById('selectAllBtn').addEventListener('click', function(){
+    var boxes = document.querySelectorAll('.fake-prof-cb');
+    var allChecked = true;
+    boxes.forEach(function(b){ if(!b.checked) allChecked = false; });
+    boxes.forEach(function(b){ b.checked = !allChecked; });
+    this.textContent = allChecked ? 'Tümünü seç' : 'Seçimi temizle';
 });
 </script>
 {% endblock %}
