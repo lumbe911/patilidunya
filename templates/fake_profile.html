@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.display_name or profile.username }} - Patili Dünya{% endblock %}
+{% block ad_top %}{% include '_ads_reklam1.html' %}{% endblock %}
+{% block ad_bottom %}{% include '_ads_reklam1.html' %}{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="profile-header">
+        <div class="profile-avatar-large" style="background: linear-gradient(135deg, var(--pink-300), var(--purple-400)); display:flex; align-items:center; justify-content:center; font-size:3rem; color:white; margin: 0 auto 1rem;">{{ profile.username[0]|upper }}</div>
+        <h1 class="profile-name">{{ profile.display_name or profile.username }}</h1>
+        <p class="profile-bio">{{ profile.bio or 'Henüz bio eklenmemiş...' }}</p>
+        <div class="profile-stats">
+            <div class="stat">
+                <div class="stat-number">{{ total_actions }}</div>
+                <div class="stat-label">Etkileşim</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">{{ total_likes }}</div>
+                <div class="stat-label">Beğeni</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">{{ total_views }}</div>
+                <div class="stat-label">Görüntülenme</div>
+            </div>
+        </div>
+        <p style="color:var(--gray-500); font-size:0.85rem; margin-top:1rem;">Bu profilin fotoğrafı yoktur ve yalnızca başkalarının paylaşımlarını destekler.</p>
+    </div>
+
+    {% if cats %}
+    <h2 style="text-align:center; font-weight:800; margin-bottom:1.5rem;">Beğendiği Patililer</h2>
+    <div class="cat-grid">
+        {% for cat in cats %}
+        <div class="card">
+            <a href="{{ url_for('cat_detail', cat_id=cat.id) }}">
+                <div class="cat-photo-container">
+                    {% if cat.photos %}
+                    <img src="{{ cat.photos[0].filename }}" alt="{{ cat.name }}">
+                    {% else %}
+                    <div style="width:100%; height:100%; background: var(--pink-100); display:flex; align-items:center; justify-content:center; font-size:4rem;">🐱</div>
+                    {% endif %}
+                </div>
+            </a>
+            <div class="cat-card-footer">
+                <div>
+                    <a href="{{ url_for('cat_detail', cat_id=cat.id) }}" class="card-title">{{ cat.name }}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">🐾</div>
+        <h3>Henüz beğenisi yok</h3>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Fake Etkileşim Yönetimi - Admin{% endblock %}
+{% block ad_top %}{% endblock %}
+{% block ad_bottom %}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:900px;">
+    <h1 class="page-title">🤖 Fake Etkileşim Yönetimi</h1>
+    <a href="{{ url_for('admin_users') }}" style="font-size:0.9rem; color:var(--pink-600); font-weight:700;">← Admin Paneli</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, m in messages %}
+        <div style="background:{% if cat=='error' %}#fee2e2{% else %}#dcfce7{% endif %}; padding:0.75rem 1rem; border-radius:var(--radius-sm); margin:1rem 0; font-weight:600;">{{ m }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div style="background:white; border:1px solid var(--pink-100); border-radius:var(--radius); padding:1.5rem; margin:1.5rem 0;">
+        <h2 style="font-weight:800; margin-bottom:1rem;">➕ Yeni sahte profil oluştur</h2>
+        <form method="POST" action="{{ url_for('admin_fakeeng_profile_new') }}" style="display:flex; flex-direction:column; gap:0.75rem;">
+            <input type="text" name="username" placeholder="Kullanıcı adı (benzersiz)" required style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
+            <input type="text" name="display_name" placeholder="Görünen isim" style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
+            <textarea name="bio" placeholder="Bio (opsiyonel)" rows="2" style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);"></textarea>
+            <button class="btn btn-primary" type="submit">Profil Oluştur</button>
+        </form>
+    </div>
+
+    <div style="background:white; border:1px solid var(--pink-100); border-radius:var(--radius); padding:1.5rem; margin:1.5rem 0;">
+        <h2 style="font-weight:800; margin-bottom:1rem;">🎯 Etkileşim ekle</h2>
+        <form method="POST" action="{{ url_for('admin_fakeeng_engage') }}" style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+            <select name="profile_id" required style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
+                <option value="">Sahte Profil Seç</option>
+                {% for p in fake_profiles %}
+                <option value="{{ p.id }}">{{ p.display_name or p.username }} (@{{ p.username }})</option>
+                {% endfor %}
+            </select>
+            <select name="cat_id" required style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
+                <option value="">Gönderi Seç</option>
+                {% for c in cats %}
+                <option value="{{ c.id }}">#{{ c.id }} {{ c.name }} (owner: {{ c.owner_id }})</option>
+                {% endfor %}
+            </select>
+            <select name="kind" id="kindSelect" required style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
+                <option value="like">❤️ Beğeni</option>
+                <option value="reaction">😻 Emoji / Tepki</option>
+                <option value="view">👁 Görüntülenme</option>
+            </select>
+            <input type="number" name="count" value="1" min="1" max="1000" style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);" title="Kaç adet">
+            <select name="emoji" id="emojiSelect" style="padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
+                <option value="">Emoji Seç (tepki için)</option>
+                {% for e in REACTION_EMOJIS %}
+                <option value="{{ e }}">{{ e }}</option>
+                {% endfor %}
+            </select>
+            <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem;">
+                <input type="checkbox" name="want_notif" checked> Bildirim gönder
+            </label>
+            <button class="btn btn-primary" type="submit" style="grid-column:span 2;">Ekle</button>
+        </form>
+    </div>
+
+    <h2 style="font-weight:800; margin:2rem 0 1rem;">📋 Sahte profiller</h2>
+    {% if fake_profiles %}
+    <div style="display:grid; gap:0.75rem;">
+        {% for p in fake_profiles %}
+        {% set eng = p.id %}
+        <div style="display:flex; align-items:center; gap:0.75rem; background:white; border:1px solid var(--pink-100); border-radius:var(--radius-sm); padding:0.75rem 1rem;">
+            <div style="width:38px; height:38px; border-radius:50%; background:var(--pink-200); display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0;">{{ p.username[0]|upper }}</div>
+            <div style="flex:1;">
+                <div style="font-weight:700;">{{ p.display_name or p.username }}</div>
+                <div style="font-size:0.75rem; color:var(--gray-500);">@{{ p.username }}</div>
+            </div>
+            <a href="{{ url_for('fake_profile', username=p.username) }}" style="font-size:0.8rem; color:var(--pink-600); font-weight:700;">Profil</a>
+            <form method="POST" action="{{ url_for('admin_fakeeng_profile_delete', pid=p.id) }}" onsubmit="return confirm('Bu profili sil?');" style="margin:0;">
+                <button type="submit" style="background:none; border:none; color:#ef4444; font-weight:800; cursor:pointer;">✕</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--gray-500);">Henüz sahte profil yok. Yukarıdan oluşturabilirsin.</p>
+    {% endif %}
+</div>
+<script>
+document.getElementById('kindSelect').addEventListener('change', function(){
+    var e = document.getElementById('emojiSelect');
+    e.style.display = (this.value === 'reaction') ? 'block' : 'none';
+});
+</script>
+{% endblock %}

@@ -7,6 +7,10 @@
         <p style="color:var(--gray-500); margin-top:0.5rem;">Toplam <strong>{{ total }}</strong> kayıtlı kullanıcı</p>
     </div>
 
+    <div style="text-align:center; margin-bottom:1.5rem;">
+        <a href="{{ url_for('admin_fakeeng') }}" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:0.5rem;">🤖 Fake Etkileşim Yönetimi</a>
+    </div>
+
     <div style="display:flex; flex-direction:column; gap:1rem;">
         {% for item in user_data %}
         <div style="background:white; border-radius:var(--radius); padding:1.25rem; border:1px solid var(--pink-100); box-shadow:var(--shadow-sm); display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
