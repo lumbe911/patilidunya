@@ -1,3 +1,4 @@
+import ipaddress
 import os
 import secrets
 import smtplib
@@ -63,7 +64,17 @@ login_manager.login_message_category = 'warning'
 def _client_ip():
     xff = request.headers.get('X-Forwarded-For', '')
     if xff:
-        return xff.split(',')[-1].strip()
+        parts = [p.strip() for p in xff.split(',') if p.strip()]
+        for p in reversed(parts):
+            try:
+                ip = ipaddress.ip_address(p)
+            except ValueError:
+                continue
+            if ip.is_global:
+                return p
+            if not (ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast):
+                return p
+        return parts[0]
     return request.remote_addr or 'unknown'
 
 
