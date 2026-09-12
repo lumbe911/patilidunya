@@ -110,6 +110,17 @@ def _client_ip():
     return request.remote_addr or 'unknown'
 
 
+def _log_auth(event, username=None):
+    try:
+        db.session.add(VisitLog(ip=_client_ip()[:64],
+                               username=(username or (current_user.username if current_user.is_authenticated else None)),
+                               path=event,
+                               user_agent=(request.headers.get('User-Agent', '') or '')[:256]))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+
 limiter = Limiter(
     key_func=_client_ip,
     app=app,
@@ -159,23 +170,6 @@ def csrf_protect():
                         break
                 if not ok:
                     abort(403)
-
-
-@app.before_request
-def log_visit():
-    if request.endpoint in ('static', 'ads_txt', 'robots_txt', 'sitemap', 'unread_count'):
-        return
-    if request.path.startswith('/admin/fakeeng/engage'):
-        return
-    try:
-        ip = _client_ip()
-        username = current_user.username if current_user.is_authenticated else None
-        db.session.add(VisitLog(ip=ip[:64], username=username,
-                               path=(request.path or '')[:256],
-                               user_agent=(request.headers.get('User-Agent', '') or '')[:256]))
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
 
 
 @app.after_request
@@ -606,6 +600,7 @@ def login():
         password = request.form.get('password', '')
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
+            _log_auth('GİRİŞ', user.username)
             login_user(user, remember=request.form.get('remember') is not None)
             flash('Hoş geldiniz!', 'success')
             next_page = request.args.get('next')
@@ -663,6 +658,7 @@ def register():
 @app.route('/logout')
 @login_required
 def logout():
+    _log_auth('ÇIKIŞ')
     logout_user()
     return redirect(url_for('index'))
 

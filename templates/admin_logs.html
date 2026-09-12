@@ -7,7 +7,7 @@
     <p style="color:var(--gray-500); font-size:0.85rem; margin-top:0.5rem;">Toplam <strong>{{ total }}</strong> kayıt</p>
 
     <form method="GET" style="display:flex; gap:0.5rem; margin:1rem 0;">
-        <input type="text" name="q" value="{{ q }}" placeholder="IP, kullanıcı adı veya sayfa ara" style="flex:1; padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
+        <input type="text" name="q" value="{{ q }}" placeholder="IP veya kullanıcı adı ara" style="flex:1; padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
         <button class="btn btn-secondary" type="submit">Ara</button>
     </form>
 
@@ -18,7 +18,7 @@
                     <th style="padding:0.75rem;">Zaman</th>
                     <th style="padding:0.75rem;">IP</th>
                     <th style="padding:0.75rem;">Kullanıcı</th>
-                    <th style="padding:0.75rem;">Sayfa</th>
+                    <th style="padding:0.75rem;">İşlem</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,7 +27,9 @@
                     <td style="padding:0.6rem 0.75rem; white-space:nowrap;">{{ log.created_at.strftime('%d %b %Y %H:%M:%S') }}</td>
                     <td style="padding:0.6rem 0.75rem;"><strong>{{ log.ip }}</strong></td>
                     <td style="padding:0.6rem 0.75rem;">{{ log.username or '-' }}</td>
-                    <td style="padding:0.6rem 0.75rem; max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ log.path }}">{{ log.path }}</td>
+                    <td style="padding:0.6rem 0.75rem;">
+                        <span style="padding:0.15rem 0.6rem; border-radius:999px; font-size:0.75rem; font-weight:700; {% if log.path == 'GİRİŞ' %}background:#e8f5e9; color:#2e7d32;{% elif log.path == 'ÇIKIŞ' %}background:#fce4ec; color:#c62828;{% else %}background:#f1f1f1; color:#555;{% endif %}">{{ log.path }}</span>
+                    </td>
                 </tr>
                 {% else %}
                 <tr><td colspan="4" style="padding:2rem; text-align:center; color:var(--gray-500);">Kayıt yok.</td></tr>
