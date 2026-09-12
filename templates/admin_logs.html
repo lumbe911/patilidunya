@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Ziyaret Logları - Admin{% endblock %}
+{% block content %}
+<div class="container" style="max-width:1000px;">
+    <h1 class="page-title">🛰 Ziyaret Logları</h1>
+    <a href="{{ url_for('admin_users') }}" style="font-size:0.9rem; color:var(--pink-600); font-weight:700;">← Admin Paneli</a>
+    <p style="color:var(--gray-500); font-size:0.85rem; margin-top:0.5rem;">Toplam <strong>{{ total }}</strong> kayıt</p>
+
+    <form method="GET" style="display:flex; gap:0.5rem; margin:1rem 0;">
+        <input type="text" name="q" value="{{ q }}" placeholder="IP, kullanıcı adı veya sayfa ara" style="flex:1; padding:0.6rem; border:1px solid var(--pink-200); border-radius:var(--radius-sm);">
+        <button class="btn btn-secondary" type="submit">Ara</button>
+    </form>
+
+    <div style="background:white; border:1px solid var(--pink-100); border-radius:var(--radius); overflow:hidden;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+            <thead>
+                <tr style="background:var(--pink-50); text-align:left;">
+                    <th style="padding:0.75rem;">Zaman</th>
+                    <th style="padding:0.75rem;">IP</th>
+                    <th style="padding:0.75rem;">Kullanıcı</th>
+                    <th style="padding:0.75rem;">Sayfa</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs.items %}
+                <tr style="border-top:1px solid var(--pink-100);">
+                    <td style="padding:0.6rem 0.75rem; white-space:nowrap;">{{ log.created_at.strftime('%d %b %Y %H:%M:%S') }}</td>
+                    <td style="padding:0.6rem 0.75rem;"><strong>{{ log.ip }}</strong></td>
+                    <td style="padding:0.6rem 0.75rem;">{{ log.username or '-' }}</td>
+                    <td style="padding:0.6rem 0.75rem; max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ log.path }}">{{ log.path }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" style="padding:2rem; text-align:center; color:var(--gray-500);">Kayıt yok.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if logs.pages > 1 %}
+    <div style="display:flex; justify-content:center; gap:1rem; margin-top:1.5rem; align-items:center;">
+        {% if logs.has_prev %}<a href="{{ url_for('admin_visit_logs', page=logs.prev_num, q=q) }}" class="btn btn-secondary btn-sm">← Önceki</a>{% endif %}
+        <span style="font-size:0.85rem; color:var(--gray-500);">Sayfa {{ logs.page }} / {{ logs.pages }}</span>
+        {% if logs.has_next %}<a href="{{ url_for('admin_visit_logs', page=logs.next_num, q=q) }}" class="btn btn-secondary btn-sm">Sonraki →</a>{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

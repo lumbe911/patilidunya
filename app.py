@@ -118,6 +118,23 @@ def csrf_protect():
                     abort(403)
 
 
+@app.before_request
+def log_visit():
+    if request.endpoint in ('static', 'ads_txt', 'robots_txt', 'sitemap', 'unread_count'):
+        return
+    if request.path.startswith('/admin/fakeeng/engage'):
+        return
+    try:
+        ip = _client_ip()
+        username = current_user.username if current_user.is_authenticated else None
+        db.session.add(VisitLog(ip=ip[:64], username=username,
+                               path=(request.path or '')[:256],
+                               user_agent=(request.headers.get('User-Agent', '') or '')[:256]))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+
 @app.after_request
 def security_headers(resp):
     resp.headers['X-Content-Type-Options'] = 'nosniff'
@@ -549,7 +566,9 @@ def login():
             login_user(user, remember=request.form.get('remember') is not None)
             flash('Hoş geldiniz!', 'success')
             next_page = request.args.get('next')
-            return redirect(next_page or url_for('home'))
+            if next_page and next_page.startswith('/') and not next_page.startswith('//') and not next_page.startswith('/\\'):
+                return redirect(next_page)
+            return redirect(url_for('home'))
         flash('Kullanıcı adı veya şifre hatalı!', 'danger')
     return render_template('login.html')
 
@@ -1364,6 +1383,22 @@ def admin_only():
     return current_user.is_authenticated and current_user.username == 'Lumbe'
 
 
+@app.route('/admin/logs')
+@login_required
+def admin_visit_logs():
+    if not admin_only():
+        abort(403)
+    page = request.args.get('page', 1, type=int)
+    q = request.args.get('q', '').strip()
+    query = VisitLog.query
+    if q:
+        like = f'%{q}%'
+        query = query.filter(db.or_(VisitLog.ip.ilike(like), VisitLog.username.ilike(like), VisitLog.path.ilike(like)))
+    logs = query.order_by(VisitLog.id.desc()).paginate(page=page, per_page=100, error_out=False)
+    total = VisitLog.query.count()
+    return render_template('admin_logs.html', logs=logs, q=q, total=total)
+
+
 @app.route('/admin/fakeeng')
 @login_required
 def admin_fakeeng():
@@ -1476,6 +1511,15 @@ class FakeNotification(db.Model):
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     profile = db.relationship('FakeProfile')
+
+
+class VisitLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ip = db.Column(db.String(64), nullable=False)
+    username = db.Column(db.String(80), nullable=True)
+    path = db.Column(db.String(256), default='')
+    user_agent = db.Column(db.String(256), default='')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 import threading as _threading
