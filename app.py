@@ -61,20 +61,52 @@ login_manager.login_message = 'Lütfen giriş yapın.'
 login_manager.login_message_category = 'warning'
 
 
+CLOUDFLARE_NETS = [
+    ipaddress.ip_network('173.245.48.0/20'), ipaddress.ip_network('103.21.244.0/22'),
+    ipaddress.ip_network('103.22.200.0/22'), ipaddress.ip_network('103.31.4.0/22'),
+    ipaddress.ip_network('141.101.64.0/18'), ipaddress.ip_network('108.162.192.0/18'),
+    ipaddress.ip_network('190.93.240.0/20'), ipaddress.ip_network('188.114.96.0/20'),
+    ipaddress.ip_network('197.234.240.0/22'), ipaddress.ip_network('198.41.128.0/17'),
+    ipaddress.ip_network('162.158.0.0/15'), ipaddress.ip_network('104.16.0.0/13'),
+    ipaddress.ip_network('104.24.0.0/14'), ipaddress.ip_network('172.64.0.0/13'),
+    ipaddress.ip_network('131.0.72.0/22'), ipaddress.ip_network('133.35.0.0/16'),
+]
+
+
+def _is_cloudflare(ip_str):
+    try:
+        ip = ipaddress.ip_address(ip_str)
+    except ValueError:
+        return False
+    return any(ip in net for net in CLOUDFLARE_NETS)
+
+
 def _client_ip():
-    xff = request.headers.get('X-Forwarded-For', '')
-    if xff:
-        parts = [p.strip() for p in xff.split(',') if p.strip()]
-        for p in reversed(parts):
-            try:
-                ip = ipaddress.ip_address(p)
-            except ValueError:
-                continue
-            if ip.is_global:
-                return p
-            if not (ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast):
-                return p
-        return parts[0]
+    xff_parts = [p.strip() for p in request.headers.get('X-Forwarded-For', '').split(',') if p.strip()]
+    cf = request.headers.get('CF-Connecting-IP', '').strip()
+    if cf:
+        try:
+            ipaddress.ip_address(cf)
+        except ValueError:
+            cf = ''
+    if cf:
+        edge = request.remote_addr
+        for p in reversed(xff_parts):
+            if _is_cloudflare(p):
+                edge = p
+                break
+        if _is_cloudflare(edge):
+            return cf
+    for p in reversed(xff_parts):
+        try:
+            ip = ipaddress.ip_address(p)
+        except ValueError:
+            continue
+        if _is_cloudflare(p) or ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
+            continue
+        return p
+    if xff_parts:
+        return xff_parts[0]
     return request.remote_addr or 'unknown'
 
 
